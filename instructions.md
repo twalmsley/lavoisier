@@ -126,6 +126,7 @@ No stable mechanism or combination makes "nothing is silently lost" a compile-ti
   | Volume           | cubic millimetres   | default |
   | Temperature      | millikelvin         | default |
   | Electric current | milliamperes        | default |
+  | Energy           | joules              | default |
 
   "Default" units are sensible starting choices for the experiment and can be reworked later if they cause problems.
   - Units made from other units follow from the agreed base units, e.g. area is length × length, so it's in mm². This keeps calculations consistent without conversion factors. A litre is therefore 1,000,000 mm³.
@@ -220,12 +221,29 @@ No stable mechanism or combination makes "nothing is silently lost" a compile-ti
 ### R13. Discrete items are separate objects
 - Each countable item, such as a bolt, is its own object with its own type. It is never an amount with a "count" unit.
 - A number of items is held as a collection of those objects. Collections have a **fixed size known at compile time** wherever possible, e.g. an array `[B; N]` or a struct of named items. A variable-size collection such as `Vec<B>` is used only where a fixed size is impossible. Each use needs a comment explaining why, and it counts as a limitation to record (R14).
-- Continuous material (mass, length, time) is still modelled as quantity types (R7), and split or combined by processes (R3).
+- Continuous material (mass, length, time, energy) is still modelled as quantity types (R7), split or combined by processes (R3), and held at the boundary in quantity containers (R15) — never as Peano-list suppliers.
 
 ### R14. Record findings and limitations
 - Because this is an experiment, the project keeps a findings log in `FINDINGS.md` at the root of the repository. It records each place where the type system couldn't express something, or could express it only with significant complications, along with any workaround used.
 - Examples of things to log: runtime checks used instead of compile-time ones, `Vec` used instead of a fixed-size collection, confusing compiler error messages, long compile times, and gaps in conservation checking (such as values being dropped silently).
 - Findings entries carry stable IDs (`F-NNN`) and cite the evidencing experiment(s) and file(s), so instruction amendments and code comments can reference them.
+
+### R15. Continuous resources, time, and boundary sinks
+- **The model conserves amounts, not rates.** "Electric power" (watts) and flow rates are rates, and rates stay outside the model with time and ordering (R9). What is modelled and conserved is the **amount**: energy in joules, gas in grams, labour in person-milliseconds. Rates would only enter the model if R9 is ever revisited.
+- **Continuous resources are quantity containers, not item suppliers.** The R12 Peano-list design is for discrete items (R13); magnitudes are unusable as unary types (FINDINGS.md F-011 — 5 kg would be a 5000-deep type). A continuous resource is a **sealed container type wrapping a quantity** (R7 const-generic form): `GasBottle<const REMAINING: u64>` in grams, `Battery<const E: u64>` in joules, `WaterTank<…>`, and so on. Drawing from one is an R3-style split process with the caller-stated remainder:
+  ```rust
+  // draw 300 g from a 5000 g bottle; const { assert!(TAKE + LEFT == FULL) }
+  fn draw<const TAKE: u64, const LEFT: u64, const FULL: u64>(
+      b: GasBottle<FULL>,
+  ) -> (Gas<TAKE>, GasBottle<LEFT>)
+  ```
+- **Finite capacity comes free from conservation.** Overdrawing is a conservation violation — no `LEFT` exists with `TAKE + LEFT == FULL` when `TAKE > FULL` — so it is a compile error (the R4 post-monomorphization caveat applies). `GasBottle<0>` is the empty state: a distinct resource type that must still be accounted for, exactly like `EmptyBoltBox` (R12).
+- **Time budgets.** Wall-clock and scheduling time stay out of the model (R9). Time as a **costed input** — a person's labour, machine-hours — is a quantity budget carried by the reusable resource (e.g. a `Person` with a `Qty<V, Milliseconds>` budget), drawn down like the gas bottle; a resource with no budget left cannot be drawn from, by the same overdraw error. Model a time budget only where that time is genuinely being accounted for, not on every resource by default.
+- **Waste is an ordinary conserved output.** Exhaust gas, waste heat, swarf and the like are sealed quantity-bearing outputs (`ExhaustGas<Qty<M, Grams>>`, `WasteHeat<Qty<E, Joules>>`) returned by every process that produces them (R1 already forces this). Conservation asserts balance each dimension per process: fuel + air in = exhaust out (mass); energy in = useful work + waste heat (energy). Every waste output must eventually reach a consumer.
+- **Unbounded boundary sources and sinks.** Some environments are practically unbounded — the atmosphere, mains water, the electricity grid as a first approximation. These are suppliers/consumers whose next state is themselves (`type Next = Self`). Rules:
+  - They are legal **only at the system boundary** (R12). `Next = Self` mints resources (supplier) or swallows them without bound (consumer) — exactly what R1 forbids inside the model; that is why it is confined to the boundary.
+  - They are **always placeholders** (R12), e.g. `/// Placeholder: atmosphere — assumed unbounded sink for exhaust and heat.` The unbounded assumption thereby becomes a named, greppable artifact of the model, and refining it later — a scrubber, a radiator, a finite heat store — is the normal placeholder-refinement path.
+  - One boundary object may be both supplier and consumer: the atmosphere supplies air *and* accepts exhaust, and the mass balance across combustion needs both.
 
 ## Experiment plan
 
