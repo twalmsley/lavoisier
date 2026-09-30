@@ -1,0 +1,10 @@
+# Using a Statically-Typed programming language for Model-Based Systems Engineering
+# Instructions
+## Purpose
+- To use the language type system to model real-world artifacts such as: resources, processes, inputs and outputs, requirements, structure, process flows, waste products, etc. and link them together using functions that represent suppliers, consumers, and processors.
+- The functions representing processes must be able to transform the inputs into the outputs without side effects such as creating new resources or consuming inputs without transforming them into something else and returning them from the function.
+- Unit tests will be used to demonstrate and confirm that functions can indeed transform their inputs into the outputs.
+- All of the required resources must be passed in as (possibly aggregated) objects of the correct types, and all products and reusable resources must be returned (possibly aggregated) from the function.
+- Compilation errors will represent mismatches between components of the model, such as missing or incorrect resources.
+- There will be a libary of common reusable resource types, such as Person, Organisation, Location, etc.
+- Each type should have its characteristics defined by interfaces that it implements or classes that it is a member of, depending on the target language. For example, if the language is Java, then a class such as M8SteelBolt15mm might implement marker interfaces such as: M8, Bolt, Length15mm, Steel. The M8SteelBolt15mm class is then the intersection of the sets represented by the interfaces, such that the requirement is encoded in the type. Functions can then have generic parameters, such as: `void f<T extends M8, Bolt, Length15mm, Steel>(T bolt) {...}`, so that any class that implements those interfaces will satisfy the requirement.
