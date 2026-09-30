@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/compile_fail/n42_where_n41.rs:10:18
+   |
+10 |     requires_n41(wrong);
+   |     ------------ ^^^^^ expected `exp01_type_level_numbers::peano::Zero`, found `Succ<Zero>`
+   |     |
+   |     arguments to this function are incorrect
+   |
+   = note: expected struct `Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<exp01_type_level_numbers::peano::Zero>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`
+              found struct `Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<exp01_type_level_numbers::peano::Zero>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`
+note: function defined here
+  --> tests/compile_fail/n42_where_n41.rs:6:4
+   |
+ 6 | fn requires_n41(_count: N41) {}
+   |    ^^^^^^^^^^^^ -----------

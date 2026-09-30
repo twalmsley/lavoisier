@@ -1,0 +1,5 @@
+error[E0451]: field `_seal` of struct `Plate` is private
+ --> tests/ui/create_plate_literal.rs:5:26
+  |
+5 |     let _plate = Plate { _seal: () };
+  |                          ^^^^^ private field

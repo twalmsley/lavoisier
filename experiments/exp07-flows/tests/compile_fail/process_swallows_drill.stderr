@@ -1,0 +1,17 @@
+error[E0382]: use of moved value: `drill`
+  --> tests/compile_fail/process_swallows_drill.rs:27:78
+   |
+21 |     let drill = boundary::supply_drill();
+   |         ----- move occurs because `drill` has type `Drill`, which does not implement the `Copy` trait
+...
+25 |     let (person, _d1) = bad_drill_holes(person, drill, p1);
+   |                                                 ----- value moved here
+26 |     // The drill is gone: the next process in the flow cannot have it.
+27 |     let (_person, _drill, _d2) = exp07_flows::processes::drill_holes(person, drill, p2);
+   |                                                                              ^^^^^ value used here after move
+   |
+note: consider changing this parameter type in function `bad_drill_holes` to borrow instead if owning the value isn't necessary
+  --> tests/compile_fail/process_swallows_drill.rs:12:43
+   |
+12 | fn bad_drill_holes(person: Person, drill: Drill, plate: Plate) -> (Person, DrilledPlate) {
+   |    --------------- in this function       ^^^^^ this parameter takes ownership of the value

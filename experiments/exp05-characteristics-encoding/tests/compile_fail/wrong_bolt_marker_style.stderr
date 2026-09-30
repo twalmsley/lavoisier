@@ -1,0 +1,50 @@
+error[E0277]: the trait bound `exp05_characteristics_encoding::marker::M6BrassBolt15mm: Req001FasteningBolt` is not satisfied
+ --> tests/compile_fail/wrong_bolt_marker_style.rs:7:27
+  |
+7 |     let _ = fasten_marker(M6BrassBolt15mm);
+  |             ------------- ^^^^^^^^^^^^^^^ the trait `M8` is not implemented for `exp05_characteristics_encoding::marker::M6BrassBolt15mm`
+  |             |
+  |             required by a bound introduced by this call
+  |
+  = help: the following other types implement trait `M8`:
+            Bolt<SizeM8, M, L>
+            M8SteelBolt15mmCoarse
+            M8SteelBolt15mmFine
+            exp05_characteristics_encoding::marker::M8BrassBolt10mm
+            exp05_characteristics_encoding::marker::M8BrassBolt15mm
+            exp05_characteristics_encoding::marker::M8BrassBolt20mm
+            exp05_characteristics_encoding::marker::M8SteelBolt10mm
+            exp05_characteristics_encoding::marker::M8SteelBolt15mm
+          and $N others
+  = note: required for `exp05_characteristics_encoding::marker::M6BrassBolt15mm` to implement `Req001FasteningBolt`
+note: required by a bound in `fasten_marker`
+ --> src/requirements.rs
+  |
+  | pub fn fasten_marker<B: Req001FasteningBolt>(bolt: B) -> B {
+  |                         ^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten_marker`
+
+error[E0277]: the trait bound `exp05_characteristics_encoding::marker::M6BrassBolt15mm: Req001FasteningBolt` is not satisfied
+ --> tests/compile_fail/wrong_bolt_marker_style.rs:7:27
+  |
+7 |     let _ = fasten_marker(M6BrassBolt15mm);
+  |             ------------- ^^^^^^^^^^^^^^^ unsatisfied trait bound
+  |             |
+  |             required by a bound introduced by this call
+  |
+  = help: the trait `exp05_characteristics_encoding::characteristics::Steel` is not implemented for `exp05_characteristics_encoding::marker::M6BrassBolt15mm`
+  = help: the following other types implement trait `exp05_characteristics_encoding::characteristics::Steel`:
+            Bolt<S, exp05_characteristics_encoding::param::Steel, L>
+            M8SteelBolt15mmCoarse
+            M8SteelBolt15mmFine
+            exp05_characteristics_encoding::marker::M10SteelBolt10mm
+            exp05_characteristics_encoding::marker::M10SteelBolt15mm
+            exp05_characteristics_encoding::marker::M10SteelBolt20mm
+            exp05_characteristics_encoding::marker::M12SteelBolt10mm
+            exp05_characteristics_encoding::marker::M12SteelBolt15mm
+          and $N others
+  = note: required for `exp05_characteristics_encoding::marker::M6BrassBolt15mm` to implement `Req001FasteningBolt`
+note: required by a bound in `fasten_marker`
+ --> src/requirements.rs
+  |
+  | pub fn fasten_marker<B: Req001FasteningBolt>(bolt: B) -> B {
+  |                         ^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten_marker`

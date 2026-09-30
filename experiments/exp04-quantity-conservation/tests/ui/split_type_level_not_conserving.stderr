@@ -1,0 +1,13 @@
+error[E0271]: type mismatch resolving `<Succ<Succ<Succ<Zero>>> as Add<Succ<Succ<Succ<Zero>>>>>::Sum == Succ<Succ<Succ<Succ<Succ<Zero>>>>>`
+ --> tests/ui/split_type_level_not_conserving.rs:8:42
+  |
+8 |     let (a, b): (MassG<N3>, MassG<N3>) = split(five);
+  |                                          ^^^^^^^^^^^ expected `Succ<Succ<Succ<Succ<Succ<Zero>>>>>`, found `Succ<Succ<Succ<Succ<Succ<Succ<Zero>>>>>>`
+  |
+  = note: expected struct `Succ<Succ<Succ<Succ<Succ<exp04_quantity_conservation::type_level_style::Zero>>>>>`
+             found struct `Succ<Succ<Succ<Succ<Succ<Succ<exp04_quantity_conservation::type_level_style::Zero>>>>>>`
+note: required by a bound in `exp04_quantity_conservation::type_level_style::split`
+ --> src/lib.rs
+  |
+  |     pub fn split<In: Nat, A: Add<B, Sum = In>, B: Nat>(m: MassG<In>) -> (MassG<A>, MassG<B>) {
+  |                                     ^^^^^^^^ required by this bound in `split`

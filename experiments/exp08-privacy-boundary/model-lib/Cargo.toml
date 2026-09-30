@@ -1,0 +1,12 @@
+[package]
+name = "model-lib"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+# Downstream crates enable this (normally as a dev-dependency feature) to get
+# fixture constructors for their own tests. Off by default, so a production
+# build of a downstream crate cannot construct resources from nothing.
+test-support = []
+
+[dependencies]

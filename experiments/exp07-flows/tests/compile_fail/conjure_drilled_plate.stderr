@@ -1,0 +1,11 @@
+error[E0451]: field `grams` of struct `DrilledPlate` is private
+  --> tests/compile_fail/conjure_drilled_plate.rs:13:29
+   |
+13 |     let d1 = DrilledPlate { grams: 800 };
+   |                             ^^^^^ private field
+
+error[E0451]: field `grams` of struct `DrilledPlate` is private
+  --> tests/compile_fail/conjure_drilled_plate.rs:14:29
+   |
+14 |     let d2 = DrilledPlate { grams: 800 };
+   |                             ^^^^^ private field

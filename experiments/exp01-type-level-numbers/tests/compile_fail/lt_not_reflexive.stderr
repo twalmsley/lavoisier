@@ -1,0 +1,21 @@
+error[E0277]: the trait bound `exp01_type_level_numbers::peano::Zero: Lt<exp01_type_level_numbers::peano::Zero>` is not satisfied
+ --> tests/compile_fail/lt_not_reflexive.rs:8:19
+  |
+8 |     requires_lt::<N42, N42>();
+  |                   ^^^ the trait `Lt<exp01_type_level_numbers::peano::Zero>` is not implemented for `exp01_type_level_numbers::peano::Zero`
+  |
+help: the trait `Lt<exp01_type_level_numbers::peano::Zero>` is not implemented for `exp01_type_level_numbers::peano::Zero`
+      but trait `Lt<Succ<_>>` is implemented for it
+ --> src/peano.rs
+  |
+  | impl<B: Nat> Lt<Succ<B>> for Zero {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = help: for that trait implementation, expected `Succ<_>`, found `exp01_type_level_numbers::peano::Zero`
+  = note: required for `Succ<exp01_type_level_numbers::peano::Zero>` to implement `Lt<Succ<exp01_type_level_numbers::peano::Zero>>`
+  = note: 41 redundant requirements hidden
+  = note: required for `Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<exp01_type_level_numbers::peano::Zero>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>` to implement `Lt<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<Succ<exp01_type_level_numbers::peano::Zero>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`
+note: required by a bound in `requires_lt`
+ --> tests/compile_fail/lt_not_reflexive.rs:5:19
+  |
+5 | fn requires_lt<A: Lt<B>, B: Nat>() {}
+  |                   ^^^^^ required by this bound in `requires_lt`

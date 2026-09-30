@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/ui/unit_mismatch_const.rs:7:44
+  |
+7 |     let total: Grams<2000> = combine(mass, length);
+  |                              -------       ^^^^^^ expected `Grams<_>`, found `Millimetres<500>`
+  |                              |
+  |                              arguments to this function are incorrect
+  |
+  = note: expected struct `exp04_quantity_conservation::const_style::Grams<_>`
+             found struct `exp04_quantity_conservation::const_style::Millimetres<500>`
+note: function defined here
+ --> src/lib.rs
+  |
+  |     pub fn combine<const A: u64, const B: u64, const OUT: u64>(
+  |            ^^^^^^^

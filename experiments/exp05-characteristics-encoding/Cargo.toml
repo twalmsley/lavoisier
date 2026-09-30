@@ -1,0 +1,9 @@
+[package]
+name = "exp05-characteristics-encoding"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[dev-dependencies]
+trybuild = "1.0.121"

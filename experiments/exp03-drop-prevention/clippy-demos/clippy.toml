@@ -1,0 +1,4 @@
+disallowed-methods = [
+    { path = "std::mem::drop", reason = "resources are conserved: hand them to a Consumer or call consume(), never drop them" },
+    { path = "core::mem::drop", reason = "resources are conserved: hand them to a Consumer or call consume(), never drop them" },
+]

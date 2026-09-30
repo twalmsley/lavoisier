@@ -1,0 +1,5 @@
+error[E0599]: no associated function or constant named `default` found for struct `Bolt` in the current scope
+ --> tests/ui/bolt_has_no_default.rs:6:23
+  |
+6 |     let _bolt = Bolt::default();
+  |                       ^^^^^^^ associated function or constant not found in `Bolt`

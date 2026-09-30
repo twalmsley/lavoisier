@@ -1,0 +1,13 @@
+error[E0433]: cannot find `test_helpers` in `resources`
+ --> tests/ui/cfg_test_helper_invisible.rs:5:39
+  |
+5 |     let _bolt = model_lib::resources::test_helpers::bolt();
+  |                                       ^^^^^^^^^^^^ could not find `test_helpers` in `resources`
+  |
+note: found an item that was configured out
+ --> $WORKSPACE/model-lib/src/resources.rs
+  |
+  | #[cfg(test)]
+  |       ---- the item is gated here
+  | pub mod test_helpers {
+  |         ^^^^^^^^^^^^

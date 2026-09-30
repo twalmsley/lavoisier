@@ -1,0 +1,14 @@
+error[E0277]: the trait bound `UInt<UTerm, B0>: SameAs<UTerm>` is not satisfied
+  --> tests/compile_fail/dec_raw_not_canonical.rs:10:12
+   |
+10 |     same::<<BN1 as DecRaw>::Out, BN0>();
+   |            ^^^^^^^^^^^^^^^^^^^^ the trait `SameAs<UTerm>` is not implemented for `UInt<UTerm, B0>`
+   |
+note: required by a bound in `same`
+  --> src/lib.rs
+   |
+   | pub fn same<A, B>()
+   |        ---- required by a bound in this function
+   | where
+   |     A: SameAs<B>,
+   |        ^^^^^^^^^ required by this bound in `same`

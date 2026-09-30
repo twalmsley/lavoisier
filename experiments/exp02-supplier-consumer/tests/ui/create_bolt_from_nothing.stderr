@@ -1,0 +1,5 @@
+error[E0451]: field `_private` of struct `exp02_supplier_consumer::Bolt` is private
+ --> tests/ui/create_bolt_from_nothing.rs:7:24
+  |
+7 |     let _bolt = Bolt { _private: () };
+  |                        ^^^^^^^^ private field

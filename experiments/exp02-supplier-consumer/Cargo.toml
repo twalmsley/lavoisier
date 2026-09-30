@@ -1,0 +1,9 @@
+[package]
+name = "exp02-supplier-consumer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[dev-dependencies]
+trybuild = "1"

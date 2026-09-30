@@ -1,0 +1,5 @@
+error[E0639]: cannot create non-exhaustive variant using struct expression
+ --> tests/ui/non_exhaustive_variant.rs:6:19
+  |
+6 |     let _minted = SealedEnumMitigation::Pristine {};
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

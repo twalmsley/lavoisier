@@ -1,0 +1,11 @@
+error[E0423]: cannot initialize a tuple struct which contains private fields
+ --> tests/ui/create_bolt_tuple_ctor.rs:6:17
+  |
+6 |     let _bolt = Bolt(());
+  |                 ^^^^
+  |
+note: constructor is not visible here due to private fields
+ --> $WORKSPACE/model-lib/src/resources.rs
+  |
+  | pub struct Bolt(());
+  |                 ^^ private field

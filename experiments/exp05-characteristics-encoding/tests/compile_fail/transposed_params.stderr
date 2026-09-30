@@ -1,0 +1,59 @@
+error[E0277]: the trait bound `exp05_characteristics_encoding::param::Steel: Size` is not satisfied
+ --> tests/compile_fail/transposed_params.rs:7:13
+  |
+7 |     let _ = Bolt::<Steel, SizeM8, L15>::new();
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Size` is not implemented for `exp05_characteristics_encoding::param::Steel`
+  |
+help: the following other types implement trait `Size`
+ --> src/param.rs
+  |
+  | impl Size for SizeM6 {}
+  | ^^^^^^^^^^^^^^^^^^^^ `SizeM6`
+  | impl Size for SizeM8 {}
+  | ^^^^^^^^^^^^^^^^^^^^ `SizeM8`
+  | impl Size for SizeM10 {}
+  | ^^^^^^^^^^^^^^^^^^^^^ `SizeM10`
+  | impl Size for SizeM12 {}
+  | ^^^^^^^^^^^^^^^^^^^^^ `SizeM12`
+note: required by a bound in `Bolt`
+ --> src/param.rs
+  |
+  | pub struct Bolt<S: Size, M: Material, L: Length>(PhantomData<(S, M, L)>);
+  |                    ^^^^ required by this bound in `Bolt`
+
+error[E0277]: the trait bound `SizeM8: Material` is not satisfied
+ --> tests/compile_fail/transposed_params.rs:7:13
+  |
+7 |     let _ = Bolt::<Steel, SizeM8, L15>::new();
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Material` is not implemented for `SizeM8`
+  |
+help: the following other types implement trait `Material`
+ --> src/param.rs
+  |
+  | impl Material for Steel {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^ `exp05_characteristics_encoding::param::Steel`
+  | impl Material for Brass {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^ `exp05_characteristics_encoding::param::Brass`
+note: required by a bound in `Bolt`
+ --> src/param.rs
+  |
+  | pub struct Bolt<S: Size, M: Material, L: Length>(PhantomData<(S, M, L)>);
+  |                             ^^^^^^^^ required by this bound in `Bolt`
+
+error[E0599]: the associated function or constant `new` exists for struct `Bolt<exp05_characteristics_encoding::param::Steel, SizeM8, L15>`, but its trait bounds were not satisfied
+ --> tests/compile_fail/transposed_params.rs:7:41
+  |
+7 |     let _ = Bolt::<Steel, SizeM8, L15>::new();
+  |                                         ^^^ associated function or constant cannot be called due to unsatisfied trait bounds
+  |
+ ::: src/param.rs
+  |
+  | pub struct SizeM8;
+  | ----------------- doesn't satisfy `SizeM8: Material`
+...
+  | pub struct Steel;
+  | ---------------- doesn't satisfy `exp05_characteristics_encoding::param::Steel: Size`
+  |
+  = note: the following trait bounds were not satisfied:
+          `exp05_characteristics_encoding::param::Steel: Size`
+          `SizeM8: Material`

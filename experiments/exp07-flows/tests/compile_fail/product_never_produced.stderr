@@ -1,0 +1,13 @@
+error[E0308]: arguments to this function are incorrect
+  --> tests/compile_fail/product_never_produced.rs:16:32
+   |
+16 |     let (_person, _assembly) = fasten(person, p1, p2, bolts);
+   |                                ^^^^^^         --  -- expected `DrilledPlate`, found `Plate`
+   |                                               |
+   |                                               expected `DrilledPlate`, found `Plate`
+   |
+note: function defined here
+  --> src/lib.rs
+   |
+   |     pub fn fasten(
+   |            ^^^^^^

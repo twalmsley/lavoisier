@@ -1,0 +1,28 @@
+error: unused `TrackedBolt` that must be used
+ --> tests/compile_fail/unused_must_use.rs:9:5
+  |
+9 |     boundary::new_tracked_bolt(); // result dropped on the spot
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: a TrackedBolt is a conserved resource: pass it on or consume it explicitly
+note: the lint level is defined here
+ --> tests/compile_fail/unused_must_use.rs:4:9
+  |
+4 | #![deny(unused_must_use)]
+  |         ^^^^^^^^^^^^^^^
+help: use `let _ = ...` to ignore the resulting value
+  |
+9 |     let _ = boundary::new_tracked_bolt(); // result dropped on the spot
+  |     +++++++
+
+error: unused `Bolt` that must be used
+  --> tests/compile_fail/unused_must_use.rs:10:5
+   |
+10 |     boundary::new_bolt(); // same for the plain (no-Drop) resource
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: a Bolt is a conserved resource: pass it on or consume it explicitly
+help: use `let _ = ...` to ignore the resulting value
+   |
+10 |     let _ = boundary::new_bolt(); // same for the plain (no-Drop) resource
+   |     +++++++

@@ -1,0 +1,7 @@
+error[E0080]: evaluation panicked: conservation violated: splitting 2000 g into 1500 g + 600 g does not conserve mass
+  --> tests/ui/split_macro_not_conserving.rs:10:26
+   |
+10 |     let (part, offcut) = split_grams!(stock, 2000 => 1500 + 600);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `main::_` failed here
+   |
+   = note: this error originates in the macro `$crate::panic::panic_2021` which comes from the expansion of the macro `split_grams` (in Nightly builds, run with -Z macro-backtrace for more info)

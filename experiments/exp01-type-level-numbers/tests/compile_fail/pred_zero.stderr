@@ -1,0 +1,11 @@
+error[E0277]: the trait bound `exp01_type_level_numbers::peano::Zero: Pred` is not satisfied
+ --> tests/compile_fail/pred_zero.rs:7:24
+  |
+7 |     let _decremented: <N0 as Pred>::Out = Default::default();
+  |                        ^^ the trait `Pred` is not implemented for `exp01_type_level_numbers::peano::Zero`
+  |
+help: the trait `Pred` is implemented for `Succ<N>`
+ --> src/peano.rs
+  |
+  | impl<N: Nat> Pred for Succ<N> {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

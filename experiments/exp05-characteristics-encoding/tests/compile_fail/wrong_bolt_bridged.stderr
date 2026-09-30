@@ -1,0 +1,40 @@
+error[E0277]: the trait bound `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>: Req001FasteningBolt` is not satisfied
+ --> tests/compile_fail/wrong_bolt_bridged.rs:8:27
+  |
+8 |     let _ = fasten_marker(Bolt::<SizeM6, Brass, L15>::new());
+  |             ------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `M8` is not implemented for `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>`
+  |             |
+  |             required by a bound introduced by this call
+  |
+help: the trait `M8` is implemented for `Bolt<SizeM8, M, L>`
+ --> src/bridge.rs
+  |
+  | impl<M: Material, L: Length> characteristics::M8 for Bolt<SizeM8, M, L> {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: required for `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>` to implement `Req001FasteningBolt`
+note: required by a bound in `fasten_marker`
+ --> src/requirements.rs
+  |
+  | pub fn fasten_marker<B: Req001FasteningBolt>(bolt: B) -> B {
+  |                         ^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten_marker`
+
+error[E0277]: the trait bound `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>: Req001FasteningBolt` is not satisfied
+ --> tests/compile_fail/wrong_bolt_bridged.rs:8:27
+  |
+8 |     let _ = fasten_marker(Bolt::<SizeM6, Brass, L15>::new());
+  |             ------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+  |             |
+  |             required by a bound introduced by this call
+  |
+  = help: the trait `exp05_characteristics_encoding::characteristics::Steel` is not implemented for `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>`
+help: the trait `exp05_characteristics_encoding::characteristics::Steel` is implemented for `Bolt<S, exp05_characteristics_encoding::param::Steel, L>`
+ --> src/bridge.rs
+  |
+  | impl<S: Size, L: Length> characteristics::Steel for Bolt<S, Steel, L> {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: required for `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>` to implement `Req001FasteningBolt`
+note: required by a bound in `fasten_marker`
+ --> src/requirements.rs
+  |
+  | pub fn fasten_marker<B: Req001FasteningBolt>(bolt: B) -> B {
+  |                         ^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten_marker`

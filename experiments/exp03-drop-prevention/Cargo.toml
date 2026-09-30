@@ -1,0 +1,14 @@
+[package]
+name = "exp03-drop-prevention"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[dev-dependencies]
+trybuild = "1"
+
+# `clippy-demos/` is a deliberately-lint-failing crate used to capture verbatim
+# clippy output for the matrix. It must not be part of this crate's build.
+[workspace]
+exclude = ["clippy-demos"]

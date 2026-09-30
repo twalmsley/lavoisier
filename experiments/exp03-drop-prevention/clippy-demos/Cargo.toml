@@ -1,0 +1,11 @@
+# A deliberately-failing crate: each function trips exactly one of the clippy
+# lints proposed for the real project, so `cargo clippy -- -D warnings` output
+# can be captured verbatim for the matrix. It is excluded from the parent
+# crate's workspace and is NOT expected to pass lints (it does compile).
+[package]
+name = "clippy-demos"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+exp03-drop-prevention = { path = ".." }

@@ -1,0 +1,14 @@
+error[E0277]: `BoltBox<Nil>` cannot supply anything: it is empty (or not a supplier at all)
+ --> tests/ui/take_five_from_four.rs:8:27
+  |
+8 |     let (_taken, _rest) = supply_n::<N5, _>(bx);
+  |                           ^^^^^^^^^^^^^^^^^^^^^ this supplier has nothing left to supply
+  |
+  = help: the trait `Supplier` is not implemented for `BoltBox<Nil>`
+  = note: a `BoltBox<Cons<..>>` still contains bolts and can supply; `EmptyBoltBox` (= `BoltBox<Nil>`) is empty and cannot
+help: the trait `Supplier` is implemented for `BoltBox<Cons<H, T>>`
+ --> src/lib.rs
+  |
+  |     impl<H, T> Supplier for BoltBox<Cons<H, T>> {
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: required for `BoltBox<Nil>` to implement `SupplyN<Succ<exp02_supplier_consumer::Zero>>`

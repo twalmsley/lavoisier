@@ -1,0 +1,10 @@
+error[E0382]: use of moved value: `person`
+  --> tests/compile_fail/person_used_twice.rs:19:50
+   |
+10 |     let person = boundary::supply_person("Alice");
+   |         ------ move occurs because `person` has type `Person`, which does not implement the `Copy` trait
+...
+18 |     let (_person_a, _drill_1, _d1) = drill_holes(person, drill_1, p1);
+   |                                                  ------ value moved here
+19 |     let (_person_b, _drill_2, _d2) = drill_holes(person, drill_2, p2);
+   |                                                  ^^^^^^ value used here after move

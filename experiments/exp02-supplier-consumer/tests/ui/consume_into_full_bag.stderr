@@ -1,0 +1,18 @@
+error[E0599]: no method named `consume` found for struct `WasteBag<Space, Contents>` in the current scope
+  --> tests/ui/consume_into_full_bag.rs:11:20
+   |
+11 |     let _bag = bag.consume(bolt); // no space left
+   |                    ^^^^^^^
+   |
+note: there's an earlier shadowed binding `bag` of type `WasteBag<Succ<exp02_supplier_consumer::Zero>>` that has method `consume` available
+  --> tests/ui/consume_into_full_bag.rs:7:9
+   |
+ 7 |     let bag = new_waste_bag::<N1>(); // space for one item only
+   |         ^^^ `bag` of type `WasteBag<Succ<exp02_supplier_consumer::Zero>>` that has method `consume` defined earlier here
+ 8 |     let (bolt, bx) = bx.supply();
+ 9 |     let bag = bag.consume(bolt); // fills the bag
+   |         --- earlier `bag` shadowed here with type `WasteBag<exp02_supplier_consumer::Zero, Cons<Bolt, Nil>>`
+help: there is a method `consume_list` with a similar name
+   |
+11 |     let _bag = bag.consume_list(bolt); // no space left
+   |                           +++++

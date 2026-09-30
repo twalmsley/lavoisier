@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/compile_fail/wrong_bolt_param_style.rs:7:26
+  |
+7 |     let _ = fasten_param(Bolt::<SizeM6, Brass, L15>::new());
+  |             ------------ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Bolt<SizeM8, Steel, L15>`, found `Bolt<SizeM6, Brass, L15>`
+  |             |
+  |             arguments to this function are incorrect
+  |
+  = note: expected struct `Bolt<SizeM8, exp05_characteristics_encoding::param::Steel, L15>`
+             found struct `Bolt<SizeM6, exp05_characteristics_encoding::param::Brass, L15>`
+note: function defined here
+ --> src/requirements.rs
+  |
+  | pub fn fasten_param(bolt: Bolt<SizeM8, crate::param::Steel, L15>) -> Bolt<SizeM8, crate::param::Steel, L15> {
+  |        ^^^^^^^^^^^^

@@ -1,0 +1,15 @@
+error[E0277]: the trait bound `UTerm: DecRaw` is not satisfied
+ --> tests/compile_fail/dec_zero.rs:6:23
+  |
+6 |     let _decremented: <BN0 as Dec>::Out = Default::default();
+  |                       ^^^^^^^^^^^^^^^^^ the trait `DecRaw` is not implemented for `UTerm`
+  |
+help: the following other types implement trait `DecRaw`
+ --> src/binary.rs
+  |
+  | impl<U: Nat> DecRaw for UInt<U, B1> {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `UInt<U, B1>`
+...
+  | impl<U: DecRaw> DecRaw for UInt<U, B0> {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `UInt<U, B0>`
+  = note: required for `UTerm` to implement `Dec`

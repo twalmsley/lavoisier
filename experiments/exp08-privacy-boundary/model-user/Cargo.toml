@@ -1,0 +1,16 @@
+[package]
+name = "model-user"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Production dependency: NO test-support feature. The library and binary
+# targets of this crate cannot construct resources.
+model-lib = { path = "../model-lib" }
+
+[dev-dependencies]
+# Tests (and examples/benches) get the fixture constructors. Cargo unifies
+# features per build, so `cargo test` compiles model-lib once *with* the
+# feature, while `cargo build` compiles it without.
+model-lib = { path = "../model-lib", features = ["test-support"] }
+trybuild = "1"
