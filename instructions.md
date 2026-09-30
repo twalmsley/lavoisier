@@ -1,7 +1,7 @@
 # Using a Statically-Typed Programming Language for Model-Based Systems Engineering
 
 ## Status
-Requirements are being agreed. **Do not write code yet.** Wait until the user says they are happy with these instructions.
+The requirements below are agreed as a baseline. The experiment plan at the end is defined but **has not been run**: do not run the experiments or write any library code until the user gives the go-ahead. When experiment code is written, it is exploratory — it lives under `experiments/` and is not the start of the real library.
 
 ## Summary
 This is an **experiment**. The aim is to find out how far a type system can be pushed for model-based systems engineering, and to record the limitations and complications that turn up along the way. When there is a choice, prefer the approach that puts more checking into the compiler, even if the types get complicated. Finding where that breaks down is part of the point.
@@ -170,6 +170,123 @@ Model a real-world system in Rust:
 ### R14. Record findings and limitations
 - Because this is an experiment, the project keeps a findings log in `FINDINGS.md` at the root of the repository. It records each place where the type system couldn't express something, or could express it only with significant complications, along with any workaround used.
 - Examples of things to log: runtime checks used instead of compile-time ones, `Vec` used instead of a fixed-size collection, confusing compiler error messages, long compile times, and gaps in conservation checking (such as values being dropped silently).
+
+## Experiment plan
+
+The requirements above make claims that stable Rust may or may not support well. Each experiment below tests one claim in isolation. They are written so that independent sub-agents can run and evaluate them **in parallel**: no experiment depends on another's code or results, and each one works entirely inside its own directory.
+
+### Common protocol (applies to every experiment)
+- **Read `instructions.md` in full before starting.** The R-numbers referenced below are its requirements.
+- **Location:** each experiment is its own cargo crate (or workspace) in `experiments/expNN-<slug>/`, created with `cargo new --lib`. Work only inside your own experiment directory. In particular, do **not** edit `instructions.md` and do **not** create or edit `FINDINGS.md` — consolidation happens later, in one place, to avoid conflicts between parallel agents.
+- **Toolchain:** stable Rust only. Record the exact `rustc --version` in your RESULTS.md. If something turns out to need nightly, that is a finding to record, not a licence to use nightly.
+- **Dependencies:** none, with one exception: `trybuild` is allowed as a dev-dependency for compile-fail tests (R4). Crates like `typenum` and `uom` are forbidden (R8).
+- **Duplication over sharing:** if you need a helper that another experiment also builds (e.g. type-level numbers), write your own minimal copy inside your crate. Sharing code would serialize the experiments.
+- **Compile-time measurements:** run `cargo clean && time cargo build` three times and report the median. We care about orders of magnitude ("2 s vs 2 min"), not precise benchmarks.
+- **Timebox:** if one sub-task resists three genuinely different approaches, stop; record the blocker and the best error message verbatim, and move to the next sub-task.
+- **Deliverable:** a `RESULTS.md` in your experiment directory containing:
+  1. A verdict for each evaluation criterion: **pass** / **pass with complications** / **fail**, each backed by evidence (a code reference, verbatim compiler output, or a measurement).
+  2. Representative compiler error messages, verbatim, each with a one-line judgement of how understandable it would be to a modeller.
+  3. Candidate findings, each written as a ready-to-paste `FINDINGS.md` entry: what couldn't be expressed (or only with complications), what it cost, and the workaround used (R14).
+  4. A recommendation: **adopt** / **adapt** (say how) / **reject** (say why) for the technique tested.
+- Unless a criterion is marked fail, all experiment code must compile and `cargo test` must pass, including trybuild compile-fail tests. A fail is demonstrated by a minimal example left in the crate plus the verbatim error.
+
+### EXP-01: Type-level natural numbers — `experiments/exp01-type-level-numbers/`
+**Tests:** R12's assumption that stable Rust can express naturals in types, with decrement and constant values, at useful sizes.
+**Build:**
+1. Peano naturals: `Zero`, `Succ<N>`, and `trait Nat { const VALUE: u64; }`.
+2. A `macro_rules!` macro generating aliases `N0`…`N1000`.
+3. Type-level addition (`trait Add<B: Nat>: Nat { type Sum: Nat; }`); comparison (less-than) as a stretch goal.
+4. The same again with a **binary encoding** (types for bits), for comparison.
+**Evaluate:**
+- Compile time and the `#![recursion_limit]` needed at N = 10, 100, 500, 1000, for both encodings.
+- The error message when `N42` is supplied where `N41` is required — quote it and judge its readability.
+- Ergonomics: how bad is it to write and read these numbers with and without the aliases?
+
+### EXP-02: Suppliers and consumers as type-level lists — `experiments/exp02-supplier-consumer/`
+**Tests:** the R12 design end to end, including the hardest part — using a supplier several times from inside one generic process.
+**Build:**
+1. A minimal copy of Peano numbers (do not share with EXP-01).
+2. `Cons<H, T>` / `Nil`; `struct Bolt` with a private constructor; `struct BoltBox<Items>` with a private field; alias `type EmptyBoltBox = BoltBox<Nil>;`.
+3. `trait Supplier { type Item; type Next; fn supply(self) -> (Self::Item, Self::Next); }`, implemented only for `BoltBox<Cons<H, T>>`.
+4. `WasteBag<Space>` with type-level remaining space, and `trait Consumer<In> { type Next; fn consume(self, item: In) -> Self::Next; }`, implemented only while space remains.
+5. A fill function or macro (inside the privacy boundary) that builds a full `BoltBox` of N bolts.
+6. **Key test:** a generic process that takes four bolts from one supplier, e.g. `fasten_four<S>(s: S, …)`. This needs `S::Next` to also be a supplier, recursively. Try at least: (a) hand-written chained bounds (`S: Supplier, S::Next: Supplier, …`), and (b) a recursive `SupplyN<N>` trait that returns the bolts as a Cons-list plus the depleted supplier. Record exactly how far each gets.
+7. trybuild compile-fail tests: supplying from `EmptyBoltBox`; consuming into a full `WasteBag`.
+**Evaluate:**
+- Does step 6 work at all on stable Rust, and how many where-clauses does a 4-bolt process need?
+- Error messages for the two compile-fail cases — would a modeller understand "the box is empty" from them?
+- Compile time with capacity 100.
+
+### EXP-03: How close to "nothing is silently lost"? — `experiments/exp03-drop-prevention/`
+**Tests:** the known gap in R1/target-language: Rust types are affine, so values can be dropped silently.
+**Build:**
+1. A catalogue of leak paths as small examples: silent drop at end of scope; `let _ = …`; rebinding/shadowing; `mem::forget`; `mem::drop`; struct-pattern fields dropped with `..`; early `return`; panic unwinding.
+2. Counter-mechanisms, each applied to a sample resource type: `#[must_use]` with `#![deny(unused_must_use)]`; a `Drop` impl that panics unless the value was explicitly consumed (a runtime tripwire, defused by a `fn consume(self)` that `mem::forget`s internally); relevant clippy lints (`clippy::mem_forget` and friends) under `-D warnings`.
+3. A matrix: leak path × mechanism → caught at compile time / caught at test time / not caught, with a minimal demo for every "not caught" cell.
+**Evaluate:**
+- The completed matrix is the main result.
+- A recommended set of conventions for the real project (which lints, which attributes, whether the panicking-Drop tripwire is worth its noise), with the residual gaps stated plainly.
+
+### EXP-04: Compile-time conservation of quantities — `experiments/exp04-quantity-conservation/`
+**Tests:** R3 and R7 — can "mass in = mass out" be a compile error on stable Rust?
+**Build:**
+1. Quantity types in both styles from R7: `struct Grams<const V: u64>;` (const generics) and the trait-based form; each exposing `VALUE`.
+2. `fn split<const IN: u64, const A: u64, const B: u64>(m: Grams<IN>) -> (Grams<A>, Grams<B>)` with a compile-time check that `A + B == IN`. Stable techniques to try, in order: an associated-const assert forced by use (`struct AssertSum<const IN: u64, const A: u64, const B: u64>; impl … { const OK: () = assert!(A + B == IN); }` referenced with `let _ = AssertSum::<IN, A, B>::OK;`); an inline `const { … }` block; anything else found. Record which work inside a generic function on stable, and whether the error fires at definition or at instantiation.
+3. `combine` in the same style, and a unit-safety check: adding `Grams` to `Millimetres` must not compile.
+4. trybuild compile-fail: splitting 2000 g into 1500 g + 600 g.
+**Evaluate:**
+- Is a conservation violation a genuine compile error? At what point does it fire, and what does the message look like?
+- Caller ergonomics: what does calling `split` correctly look like — do the const parameters infer, or must they all be spelled out?
+
+### EXP-05: Marker traits vs type parameters — `experiments/exp05-characteristics-encoding/`
+**Tests:** R6's claim that both encodings work and can be mixed.
+**Build:**
+1. A catalogue — sizes {M6, M8, M10}, materials {Steel, Brass}, lengths {10 mm, 15 mm, 20 mm} — encoded both ways: (a) marker traits with one struct per combination (macro-generate the 18 structs and impls); (b) a single `Bolt<Size, Material, Length>` with the characteristics as type parameters.
+2. The same requirement in both styles: a bound `M8 + Steel + Length15mm` vs accepting `Bolt<M8, Steel, L15>` (and a generic-over-length version of the latter).
+3. Bridging: blanket impls such as `impl<M, L> M8 for Bolt<SizeM8, M, L> {}` so parameterized types satisfy marker bounds — do the two styles compose?
+4. Add one new size (M12) to each encoding and record everything that had to change.
+**Evaluate:**
+- Lines of code per encoding (with and without macros); cost of adding a characteristic value and of adding a whole new dimension (e.g. thread pitch).
+- Error messages when the wrong bolt is passed, in both styles.
+- Whether bridging works cleanly; a recommendation for when to use which style.
+
+### EXP-06: Requirements traceability report — `experiments/exp06-traceability/`
+**Tests:** R10 — that requirement links can be extracted mechanically.
+**Build:**
+1. Three sample requirement traits (`REQ-001`…`REQ-003`) in the R10 pattern, several types and processes satisfying them, and tests tagged `/// Verifies: REQ-…` — including one requirement deliberately left with no verifying test.
+2. `trace.sh` — plain grep/awk/sh, no dependencies — producing a table: requirement ID → where defined, satisfied by, verified by; plus a warning list of requirements with no verifying test.
+3. Edge cases: several IDs in one `Verifies:` line; an ID mentioned in an ordinary comment (should not count); formatting variations.
+**Evaluate:**
+- Does the report come out correct — no false positives or negatives on the edge cases?
+- What discipline does the code need for grep to stay reliable (exact tag format, one convention for placement)? Write that discipline down as the proposed convention.
+
+### EXP-07: Flows, exclusive resources, reusable resources — `experiments/exp07-flows/`
+**Tests:** R2 and R9 — sequencing freedom, compiler-enforced exclusivity, and the ergonomics of threading reusable resources.
+**Build:**
+1. A mini-model with private constructors: a steel sheet quantity, `Person`, `Drill`, plates, and a fixed handful of bolts (keep it simple — e.g. `[Bolt; 4]` — so this experiment does not depend on EXP-02's hard parts).
+2. Processes `cut`, `drill_holes(person, drill, plate) -> (person, drill, drilled_plate)`, `fasten`. Compose the full flow in two different valid orders and show both type-check.
+3. trybuild compile-fail tests: the same `Person` moved into two processes at once; a flow using a product that is never produced; a process that swallows the drill (doesn't return it) — show what the caller's error looks like.
+4. Aggregation: a `Workshop { person, drill }` struct threaded through instead of loose values; compare.
+**Evaluate:**
+- Boilerplate per process call when threading reusable resources, loose vs aggregated.
+- Do the compile-fail errors point at the right place, and would a modeller understand them as "this person is already busy"?
+
+### EXP-08: The privacy boundary in practice — `experiments/exp08-privacy-boundary/`
+**Tests:** R1's private-constructor rule across real crate boundaries.
+**Build:**
+1. A cargo workspace with two crates: `model-lib` (resource types with private constructors, a boundary module that may create them, test helpers) and `model-user` (depends on `model-lib`, runs processes).
+2. Demonstrate that `model-user` can run a process end to end but cannot create a `Bolt` from nothing: trybuild compile-fail from the user crate's side.
+3. Test-helper mechanics: show that `#[cfg(test)]` helpers in `model-lib` are **not** visible to `model-user`'s tests, and evaluate a `test-support` cargo feature as the alternative. Which pattern keeps the boundary tight while letting downstream tests construct fixtures?
+**Evaluate:**
+- The recommended crate/module layout and helper pattern, stated precisely enough to adopt in the real project.
+- Any hole found in the boundary (e.g. a way to obtain a resource without the boundary module), with a demo.
+
+### Consolidation (later — not part of the parallel runs)
+After all experiments have RESULTS.md files, a single follow-up pass (one agent, not parallel) will:
+1. Read every RESULTS.md and create the real `FINDINGS.md` (R14) from the candidate entries.
+2. Propose updates to this document: techniques to adopt, defaults to rework, requirements that need weakening (e.g. if compile-time conservation fails) or strengthening.
+3. Propose what to build first for the real library.
+This pass waits for the user's go-ahead, and its instruction changes are agreed with the user before being committed.
 
 ## Open questions
 None at present.
