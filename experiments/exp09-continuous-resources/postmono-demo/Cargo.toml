@@ -1,0 +1,14 @@
+# Standalone demo crate (NOT part of the experiment's `cargo test` run).
+# Each bin reproduces one compile_fail doc-test snippet so the real error can
+# be captured verbatim, and so the `cargo check` (blind) vs `cargo build`
+# (fails) contrast for post-monomorphization errors can be demonstrated
+# directly (F-001). Detached from any workspace via the empty [workspace].
+[package]
+name = "postmono-demo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+exp09-continuous-resources = { path = ".." }
+
+[workspace]

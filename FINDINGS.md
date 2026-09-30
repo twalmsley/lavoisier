@@ -1,7 +1,8 @@
 # FINDINGS
 
-Findings log required by R14 of `instructions.md`. Consolidated on 2026-09-30 from the
-`RESULTS.md` files of experiments EXP-01 through EXP-08 (`experiments/exp0N-*/RESULTS.md`).
+Findings log required by R14 of `instructions.md`. F-001…F-026 consolidated on 2026-09-30
+from the `RESULTS.md` files of experiments EXP-01 through EXP-08; F-027…F-033 added the same
+day from EXP-09 (`experiments/exp0N-*/RESULTS.md`).
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -646,3 +647,134 @@ sealed::Sealed`, with `Sealed` in a private module implemented only for bolt lis
 found: constructing a `Bolt` outside the boundary fails with E0451 (trybuild-verified).
 
 **Evidence:** EXP-02 (`experiments/exp02-supplier-consumer/RESULTS.md`, F6).
+
+## F-027 — R15's continuous-resource pattern composes end to end on stable; overdraw diagnostics print real decimal magnitudes
+
+**What couldn't be expressed:** nothing new — the combination R15 describes (sealed
+const-generic container + caller-stated-remainder draw + budget draw-down + two-dimension
+balancing + unbounded `Next = Self` sinks) composes with no new blockers. Overdraw — drawing
+6000 g from a 5000 g bottle — is a genuine compile error via the conservation assert, and
+inherits F-001 unchanged (`cargo check`/rust-analyzer/trybuild blind; rustdoc `compile_fail`
+doc-tests are the regression vehicle; CI gates on build/test).
+
+**What it cost:** nothing beyond F-001; clean build 1.06 s.
+
+**Workaround adopted:** none needed. Notably, unlike Peano capacities (F-009), every
+diagnostic prints magnitudes as decimals (`draw_gas::<6000, 0, 5000>`, `GasBottle<0>`) with
+the caller's line in the instantiation note — the worst aspect of F-009 is absent for
+continuous resources.
+
+**Evidence:** EXP-09 (`experiments/exp09-continuous-resources/RESULTS.md` §1–2;
+`src/lib.rs` doc-tests; `postmono-demo/` check-vs-build transcript).
+
+---
+
+## F-028 — `Supplier` is discrete-only: a finite continuous container cannot implement any supplier-shaped trait on stable
+
+**What couldn't be expressed:** `impl SupplierOf<Gas<TAKE>> for GasBottle<FULL>` — the next
+state needs the caller-stated remainder, but a trait impl has nowhere to receive it (E0207:
+unconstrained const parameter), and computing it (`GasBottle<{FULL - TAKE}>`) needs
+`generic_const_exprs` (nightly).
+
+**What it cost:** fixed-packet supply through the discrete `Supplier` works for an
+*unbounded* source but forces one packet size per boundary object, `combine` chains with
+restated totals (F-022), and non-multiple amounts are unreachable.
+
+**Workaround adopted:** continuous boundary sources are draw-style boundary processes
+(`draw_air<const TAKE>(atm) -> (Air<TAKE>, Atmosphere)`); `Supplier` is documented as
+discrete-only. `Consumer<In>` impls remain legal and useful on unbounded sinks — the consumed
+amount travels in `In`, so there is no remainder problem.
+
+**Evidence:** EXP-09 (`tests/ui/finite_container_*.rs` with pinned `.stderr`;
+`tests/integration.rs` probes (a)–(c)).
+
+---
+
+## F-029 — `Next = Self` boundary objects coexist with all R12 machinery; an unbounded consumer necessarily discards its intake
+
+**What couldn't be expressed:** nothing — multiple `Consumer<In>` impls on one boundary
+object (exhaust + heat on `Atmosphere`), `on_unimplemented` messages, and the recursive
+repeated-use traits all work: `SupplyN`/`ConsumeList` recurse on the count/list, not the
+state, so a self-renewing `Next` causes no non-termination or coherence issue. rustc's E0277
+help even lists the impls that do exist, documenting the boundary object's interface in the
+error.
+
+**What it cost:** an unbounded consumer necessarily *discards* what it consumes — the licence
+R15 confines to the boundary — deviating from R12's "a consumer keeps the objects it has
+consumed".
+
+**Workaround adopted:** record the deviation as the one sanctioned exception, in R12.
+
+**Evidence:** EXP-09 (`tests/integration.rs`;
+`tests/ui/atmosphere_cannot_consume_labour.stderr`).
+
+---
+
+## F-030 — A budget parameter infects every signature its resource passes through, and the modeller maintains the running balance by hand
+
+**What couldn't be expressed:** automatic remainder computation for a budgeted reusable
+resource. Every process threading `Person<BUDGET_MS>` is generic over the budget even if it
+spends nothing; each spending call restates three numbers (`draw_time::<3000, 5000, 8000>`),
+with the previous remainder re-derived by the modeller as the next budget.
+
+**What it cost:** verbosity and hand re-derivation — not correctness: a wrong balance is the
+E0080 of F-027, so the arithmetic is compiler-checked.
+
+**Workaround adopted:** none available on stable (computing remainders needs
+`generic_const_exprs`). R15's "model a time budget only where that time is genuinely being
+accounted for" is the right mitigation and is reaffirmed.
+
+**Evidence:** EXP-09 (`src/lib.rs::walk_to_station`;
+`tests/integration.rs::time_budget_draws_down_across_a_flow`).
+
+---
+
+## F-031 — Continuous-resource processes must live inside the privacy boundary
+
+**What couldn't be expressed:** continuous processes as ordinary outside-the-module
+processes. Unlike discrete processes (which only move sealed objects and can live outside
+the resource module tree, F-006), R15 processes (`draw`, `combine`, `burn`-style balancers)
+mint new quantity-bearing values (`Gas<TAKE>` from a bottle), which the privacy boundary
+forbids to outside code.
+
+**What it cost:** the F-006 layout rule needs a carve-out.
+
+**Workaround adopted:** each resource family's module contains the sealed types plus
+`boundary`, `test_support`, and its conserving *continuous* processes (a `processes` child
+module) — or outside processes are handed sealed mint combinators.
+
+**Evidence:** EXP-09 (`src/lib.rs::model::processes` and its module-level comment).
+
+---
+
+## F-032 — The tripwire `Drop` is the only layer that catches an abandoned empty container, and Drop types can't be destructured
+
+**What couldn't be expressed:** compile-time detection of a silently abandoned
+used-then-dropped container (`GasBottle<0>` left to fall out of scope). The layered regime
+lands exactly as F-002/F-008 predict for continuous resources: whole-result discard →
+`must_use` (compile time, sees through tuples); named-but-never-used waste →
+`unused_variables` (an error only under CI `-D warnings`); used-then-dropped → tripwire
+panic at test time only (`resource leak: GasBottle<0> dropped without being consumed`).
+
+**What it cost:** because a type with `Drop` cannot be moved out of by destructuring,
+F-008's "single allowed `mem::forget` site" per resource becomes a sealed `defuse(self)`
+helper that every conserving transform and consumer inside the boundary must call.
+
+**Workaround adopted:** macro-generate `mint`/`defuse`/tripwire together with each resource
+type.
+
+**Evidence:** EXP-09 (`tests/integration.rs` `should_panic` cases;
+`postmono-demo/src/bin/{result_discarded,heat_unused}.rs`).
+
+---
+
+## F-033 — Multiple conservation dimensions per process compose cleanly
+
+**What couldn't be expressed:** nothing — `burn` carries independent mass and energy `const`
+asserts; each violation reports its own custom message, and when both are violated both
+E0080s are emitted. Nothing in the pattern limits the number of balanced dimensions per
+process.
+
+**What it cost / workaround:** none.
+
+**Evidence:** EXP-09 (`src/lib.rs::burn`; RESULTS.md §2 (B)).

@@ -1,0 +1,18 @@
+error[E0308]: arguments to this function are incorrect
+  --> tests/ui/gas_air_swapped_in_burn.rs:10:16
+   |
+10 |     let _out = burn::<300, 300, 600, 11000, 4000>(air, gas);
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ---  --- expected `Air<300>`, found `Gas<300>`
+   |                                                   |
+   |                                                   expected `Gas<300>`, found `Air<300>`
+   |
+note: function defined here
+  --> src/lib.rs
+   |
+   |         pub fn burn<
+   |                ^^^^
+help: swap these arguments
+   |
+10 -     let _out = burn::<300, 300, 600, 11000, 4000>(air, gas);
+10 +     let _out = burn::<300, 300, 600, 11000, 4000>(gas, air);
+   |
