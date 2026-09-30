@@ -355,6 +355,23 @@ The requirements above make claims that stable Rust may or may not support well.
 - The recommended crate/module layout and helper pattern, stated precisely enough to adopt in the real project.
 - Any hole found in the boundary (e.g. a way to obtain a resource without the boundary module), with a demo.
 
+### EXP-09: Continuous resources, time budgets, and boundary sinks — `experiments/exp09-continuous-resources/`
+**Tests:** R15 — the only requirement with no experiment behind it. Its pieces are individually validated (EXP-04's split pattern, EXP-02's boundary traits); this tests the combination.
+**Build:**
+1. A sealed quantity container `GasBottle<const REMAINING: u64>` (grams) with a `draw` process using the caller-stated-remainder pattern; the empty state `GasBottle<0>` as a distinct resource that must be accounted for.
+2. Overdraw regression tests: drawing 6000 g from a 5000 g bottle must fail to compile. Per the R4 policy this is a post-monomorphization error, so use rustdoc `compile_fail` doc-tests, not trybuild.
+3. A time budget on a reusable resource: a `Person` carrying a `Qty<V, Milliseconds>` budget, drawn down across several process calls in one flow; overdraw fails like the bottle. Record the threading ergonomics — does the budget parameter infect every signature the person passes through?
+4. A two-dimension balancing process: `burn(fuel, air) -> (exhaust, heat, work)` with a mass assert (fuel + air = exhaust) **and** an energy assert in the same process. Does the two-assert pattern compose cleanly, and what does each violation's error look like?
+5. An unbounded boundary object `Atmosphere` with `type Next = Self`:
+   - as a **consumer** of two different things (exhaust and heat) — do multiple `Consumer<In>` impls on one boundary object work, and does `ConsumeList`-style repeated use tolerate `Next = Self`?
+   - as a **source** of air. **Key design probe:** the R12 `Supplier` trait supplies one fixed `Item` per step, which fits discrete items but not "draw an arbitrary amount of air". Try both: (a) fixed-packet supply (`Item = Air<Qty<PACKET, Grams>>`), and (b) a draw-style process (`draw_air<const TAKE>(atm: Atmosphere) -> (Air<TAKE>, Atmosphere)`) bypassing the `Supplier` trait. Record which fits R15 better and whether the `Supplier` trait should be documented as discrete-only.
+6. Integration flow: draw gas, draw the person's time, burn, send exhaust and heat to the atmosphere, return the part-empty bottle and part-spent person. Compose it in two valid orders; both must type-check. Include compile-fail (or `compile_fail` doc-test) cases: waste heat never consumed; the empty bottle dropped silently (should trip the conservation conventions — record which layer catches it).
+**Evaluate:**
+- Does the container pattern deliver compile-checked finite capacity as R15 claims, and where exactly does the overdraw error fire (with verbatim message)?
+- Does `Next = Self` coexist with the boundary traits, `on_unimplemented`, and repeated-use helper traits?
+- Is `Supplier` discrete-only in practice? If so, R15 needs an amendment saying continuous boundary sources are draw processes, not `Supplier` impls.
+- Threading ergonomics of budgeted resources; error quality for each failure mode; anything else that should change in R15.
+
 ### Consolidation (later — not part of the parallel runs)
 After all experiments have RESULTS.md files, a single follow-up pass (one agent, not parallel) will:
 1. Read every RESULTS.md and create the real `FINDINGS.md` (R14) from the candidate entries.
