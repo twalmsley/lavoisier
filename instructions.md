@@ -385,6 +385,36 @@ The requirements above make claims that stable Rust may or may not support well.
 - Is `Supplier` discrete-only in practice? If so, R15 needs an amendment saying continuous boundary sources are draw processes, not `Supplier` impls.
 - Threading ergonomics of budgeted resources; error quality for each failure mode; anything else that should change in R15.
 
+### EXP-10: Fallible processes — `experiments/exp10-failure-modes/`
+**Tests:** open question 1 (candidate R17). Can a process return *either* outcome — success or failure — with both branches conserving, and does the compiler force flows to handle the failure arm?
+**Protocol update for EXP-10..12:** unlike EXP-01..09, these experiments MAY depend on `model-core` by path (`path = "../../model/model-core"`, plus its `test-support` feature under dev-dependencies) — the library exists now, and testing against it is the point. model-core itself stays read-only; `trybuild` remains the only external dev-dependency.
+**Build:**
+1. Failure-state resources per "one type per state" (R9): `ScrapPlate<const G: u64>`, `BrokenDrillBit`, built with the kernel macros; a scrap consumer and a repair process (`BrokenDrillBit` + parts → working bit) so failure outputs are accounted, not dead ends.
+2. An **outcome token** design: variability enters only at the boundary (R12 spirit) — a sealed token type whose values are injected by boundary/test-support constructors, so processes stay deterministic and both outcomes are testable. Probe at least: one token type with success/failure constructors vs two distinct token types selected by the flow.
+3. A fallible process `drill_fallible(person, drill, plate, outcome) -> Result<OkBundle, FailBundle>` where both bundles conserve the same inputs (per-branch const asserts; the person comes back in both arms).
+4. Flows handling both arms; a repair-and-retry (bounded rework) composition on the failure path.
+5. Leak-surface probes: what happens on `.unwrap()` (panic unwinding is the known F-002 gap — demonstrate); a dropped `Result` (which layer catches it); a `match` that forgets resources in one arm.
+**Evaluate:** does `Result` + `must_use` + the tripwires force failure handling at compile/test time, and where are the holes (verbatim evidence); per-branch conservation ergonomics; error-message quality; a precise recommendation for the R17 wording.
+
+### EXP-11: Qualifications and safety as types — `experiments/exp11-qualifications/`
+**Tests:** open question 2 (candidate R18). Can the compiler refuse an unqualified person or an unguarded machine, with modeller-grade errors? Same protocol update as EXP-10 (model-core by path, read-only).
+**Build:**
+1. Qualification marker traits (`CertifiedDriller`, `CertifiedWelder`) with a `Qualification`-style kind trait; qualified person types carrying time budgets (probe: markers implemented on downstream `reusable_resource!`/hand-sealed person types generic over the budget, e.g. `impl<const MS: u64> CertifiedDriller for Driller<MS>`), interop with `model_core::common::Person` stated honestly.
+2. Safety resources: a `MachineGuard` (reusable) required and returned by the guarded process; a `FittedGuard` state if fitting is a process (one type per state).
+3. R10 requirement traits combining both: REQ-style "drilling requires a certified operator and a fitted guard", bound on the process, traced by trace.sh.
+4. trybuild: unqualified person rejected (with `on_unimplemented` phrasing like "this person is not certified for drilling"); missing guard rejected; the same person's budget still draws down through a qualified process.
+**Evaluate:** ergonomics (how much boilerplate per qualification/per person type); error quality; whether anything belongs in model-core (e.g. a `qualification!` helper or Person redesign) vs pure downstream convention; a precise recommendation for the R18 wording.
+
+### EXP-12: Money as a conserved dimension — `experiments/exp12-money/`
+**Tests:** open question 3 (candidate R19). Same protocol update as EXP-10 (model-core by path, read-only).
+**Build:**
+1. Currency units in the R7 style: one unit type per currency, integer minor units (`Pence` as the working default, plus a second currency to prove non-mixing is a type error).
+2. An `Account<const BALANCE: u64>` container (R15 pattern) with `draw_funds`; overspending must be a compile error like any overdraw.
+3. **Payment as a process chain** (R12 strictness): a `Vendor` boundary object that is both `Consumer<Money>` and a goods source; a `purchase` process that pays the vendor and obtains the goods, with money and goods each conserved. Change-giving as a split.
+4. A currency `exchange` process GBP→second currency with a stated integer rate, const-asserted (`out * DEN == in * NUM` style); document honestly that exchange is value-equivalence at a stated rate, not single-dimension conservation.
+5. trybuild/compile-fail: mixing currencies; overspending; paying with the wrong currency.
+**Evaluate:** does money need ANY new model-core machinery, or only a base-unit table row plus downstream conventions; rounding/remainder honesty in exchange (integer arithmetic); error quality; a precise recommendation for the R19 wording and the R7 table entry.
+
 ### Consolidation (later — not part of the parallel runs)
 After all experiments have RESULTS.md files, a single follow-up pass (one agent, not parallel) will:
 1. Read every RESULTS.md and create the real `FINDINGS.md` (R14) from the candidate entries.
