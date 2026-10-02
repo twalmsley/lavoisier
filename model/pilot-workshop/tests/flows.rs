@@ -1,10 +1,10 @@
 //! Integration tests: the full cut -> drill -> fasten flow, composed in two
 //! different valid orders (R9: the model describes connections, not
 //! sequences), with everything accounted for (R1) — swarf to the bin and on
-//! to disposal, labour to the boundary ledger, the assembly to the customer,
-//! reusable resources back to the caller. Plus the tripwire demonstration for
-//! abandoned swarf (R1 layer 2, F-008) and the downstream fixture path
-//! (F-004).
+//! to disposal, labour recorded into per-branch execution histories merged at
+//! the join (R16), the assembly to the customer, reusable resources back to
+//! the caller. Plus the tripwire demonstration for abandoned swarf (R1
+//! layer 2, F-008) and the downstream fixture path (F-004).
 //!
 //! These tests sit OUTSIDE the pilot's privacy boundary (an integration test
 //! is its own crate), so nothing here can mint or defuse a resource: every
@@ -20,7 +20,9 @@
 use model_core::boundary::send_to;
 use model_core::common::Person;
 use model_core::common::boundary::new_person;
-use model_core::fixtures::new_test_sink;
+use model_core::history::Entry;
+use model_core::history::boundary::new_history;
+use model_core::history::processes::{merge, record};
 use model_core::nat::aliases::{N1, N3, N4};
 use model_core::list::{Cons, Nil};
 use pilot_workshop::catalogue::boundary::full_box;
@@ -44,7 +46,11 @@ fn flow_order_a_type_checks_and_accounts_for_everything() {
     let drill = supply_drill();
     let bolts = full_box::<FasteningBolt, N4>();
     let bin = new_swarf_bin::<N3>();
-    let sink = new_test_sink();
+    // One execution history per branch of the flow, created at the boundary
+    // (R16): never a single global history threaded everywhere, which under
+    // R2 would serialize the whole model.
+    let h1 = new_history();
+    let h2 = new_history();
 
     let (p1, p2, cut_swarf) = cut::<2000, 900, 900, 200>(sheet);
     let (person, drill, d1, s1, l1) =
@@ -60,15 +66,37 @@ fn flow_order_a_type_checks_and_accounts_for_everything() {
     let bin = discard_swarf(bin, s2);
     dispose_bin(bin);
 
-    // Labour is accounted for at the boundary ledger; the product ships.
-    let sink = send_to(sink, l1);
-    let _sink = send_to(sink, l2);
+    // Labour is accounted to the execution histories, attributed to the
+    // process that spent it (R16, F-035); the branch records are merged at
+    // the join into one partial-order record. The product ships.
+    let h1 = record(h1, "drill_holes", l1);
+    let h2 = record(h2, "drill_holes", l2);
+    let history = merge(h1, h2);
     let _customer = send_to(new_customer(), assembly);
 
+    // The merged record is a partial order (R16): one Join holding the two
+    // branches, with no interleaving claimed between them.
+    assert_eq!(history.event_count(), 2);
+    match history.entries() {
+        [Entry::Join(left, right)] => match (&left[..], &right[..]) {
+            ([Entry::Event(e1)], [Entry::Event(e2)]) => {
+                assert_eq!(e1.process, "drill_holes");
+                assert_eq!(e1.item, "Labour");
+                assert_eq!(e1.magnitude, 2000);
+                assert_eq!(e1.unit, "person-milliseconds");
+                assert_eq!(e2.magnitude, 2000);
+            }
+            other => panic!("expected one recorded event per branch, got {other:?}"),
+        },
+        other => panic!("expected a single Join at the merge point, got {other:?}"),
+    }
+
     // The reusable resources come back out of the flow (R2) with the budget
-    // drawn down by exactly the drilling time, and stay with the caller.
+    // drawn down by exactly the drilling time, and stay with the caller —
+    // as does the merged execution record (R16).
     assert_eq!(Person::<6000>::BUDGET_MS, 6000);
     let _reusables = (person, drill);
+    let _execution_record = history;
     let _empty_box: EmptyBoltBox = rest; // the exhausted box is accounted for
 }
 
@@ -88,20 +116,29 @@ fn flow_order_b_type_checks_and_accounts_for_everything() {
     let (p1, p2, cut_swarf) = cut::<2000, 900, 900, 200>(sheet);
     let bin = discard_swarf(bin, cut_swarf);
 
+    // In this order each branch's history is created at the boundary and
+    // written as soon as its labour exists (R16): only data dependencies
+    // constrain when recording happens (R9).
     let (person, drill, d2, s2, l2) =
         drill_holes::<2000, 8000, 10_000, 900, 880, 20>(person, drill, p2);
     let bin = discard_swarf(bin, s2);
+    let h2 = record(new_history(), "drill_holes", l2);
     let (person, drill, d1, s1, l1) =
         drill_holes::<2000, 6000, 8000, 900, 880, 20>(person, drill, p1);
     let bin = discard_swarf(bin, s1);
+    let h1 = record(new_history(), "drill_holes", l1);
 
     let bolts = full_box::<FasteningBolt, N4>();
     let (assembly, rest): (Assembly<FasteningBolt, 1760>, EmptyBoltBox) = fasten(d2, d1, bolts);
     let _customer = send_to(new_customer(), assembly);
 
     dispose_bin(bin);
-    let sink = send_to(new_test_sink(), l2);
-    let _sink = send_to(sink, l1);
+    // The join merges the branch records into one partial order (R16); the
+    // merged record stays with the caller.
+    let history = merge(h2, h1);
+    assert_eq!(history.event_count(), 2);
+    assert!(matches!(history.entries(), [Entry::Join(_, _)]));
+    let _execution_record = history;
 
     assert_eq!(Person::<6000>::BUDGET_MS, 6000);
     let _reusables = (person, drill);
@@ -139,8 +176,9 @@ fn abandoned_swarf_trips_the_tripwire() {
     let _never_reaches_the_bin = s2;
     dispose_bin(bin);
 
-    let sink = send_to(new_test_sink(), l1);
-    let _sink = send_to(sink, l2);
+    let history = record(new_history(), "drill_holes", l1);
+    let history = record(history, "drill_holes", l2);
+    let _execution_record = history;
     let _customer = send_to(new_customer(), assembly);
     let _reusables = (person, drill);
     let _empty_box: EmptyBoltBox = rest;

@@ -4,7 +4,8 @@ Findings log required by R14 of `instructions.md`. F-001…F-026 consolidated on
 from the `RESULTS.md` files of experiments EXP-01 through EXP-08; F-027…F-033 added the same
 day from EXP-09 (`experiments/exp0N-*/RESULTS.md`); F-034 added 2026-10-02 during the
 `model-core` build; F-035…F-039 added 2026-10-02 during the `pilot-workshop` build; F-036 resolved and F-040
-added 2026-10-02 by the kernel-macro generics extension.
+added 2026-10-02 by the kernel-macro generics extension; F-041 added 2026-10-02 by the R16
+implementation.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -929,4 +930,33 @@ extractable contents are a `Consumer` with a sealed disposal path (F-039).
 
 **Evidence:** `model/model-core/src/resource.rs` (payload grammar rustdoc and tests);
 `pilot-workshop/src/resources.rs` (`Assembly`, `SwarfBin` contrast).
+
+---
+
+## F-041 — R16 implementation notes: the sanctioned `Vec`, records vs resources, and a refinement of F-029
+
+**What couldn't be expressed:** nothing — the agreed R16 design survived the compiler
+unchanged. Three notes from its implementation (which doubled as its validation):
+
+- **The sanctioned `Vec` (R13/R14 logging duty):** `History`'s entries are a runtime
+  `Vec<Entry>` because record count is flow-dependent; this is the R16-sanctioned use,
+  commented at the field per R13. The partial order is kept faithfully by
+  `Entry::Join(Vec<Entry>, Vec<Entry>)` — a series-parallel shape, claiming no interleaving
+  between merged branches.
+- **Records are not resources:** `Event` and `Entry` carry `Debug`/`PartialEq`/`Eq` derives
+  and public fields, which the R1 sealing rules forbid on resources — legal here precisely
+  because they are value-level records that cannot mint resources; the record's integrity
+  rests on `History`'s privacy (only `record`/`merge` can append), not on the record types'.
+  The conservation-safe consumption path is the sealed `Permit` token:
+  `Recordable::into_record` is implementable downstream but callable only by `History`'s
+  machinery, so the trait cannot be used to vanish a resource outside a consumer.
+- **F-029 refined:** `History` is a `Next = Self` unbounded boundary consumer that does
+  *not* discard its intake outright — it discards the resource (defusing it in its
+  sanctioned consumer role) but keeps its record. F-029's "necessarily discards" applies to
+  the resource, not to information about it.
+
+**What it cost / workaround:** none.
+
+**Evidence:** `model/model-core/src/history.rs`; pilot per-branch merge assertions in
+`model/pilot-workshop/tests/flows.rs`.
 

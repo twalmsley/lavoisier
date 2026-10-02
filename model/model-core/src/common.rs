@@ -37,11 +37,13 @@ crate::reusable_resource! {
 crate::container_resource! {
     /// Expended labour, in person-milliseconds (the R7 base time unit): the
     /// conserved output of [`processes::draw_time`] (R15). Like every waste
-    /// or by-product it must eventually reach a `Consumer` (e.g. a ledger at
-    /// the system boundary).
+    /// or by-product it must eventually reach a `Consumer` — its
+    /// production-legal sink is the execution history
+    /// ([`crate::history::History`], R16/F-035), which records what was
+    /// consumed instead of discarding it silently.
     Labour,
     unit = "person-milliseconds",
-    must_use = "Labour is a conserved resource: it must be accounted for by a Consumer (e.g. a ledger)"
+    must_use = "Labour is a conserved resource: it must be accounted for by a Consumer (the execution History, R16)"
 }
 
 /// A person with a remaining time budget of `BUDGET_MS` person-milliseconds
@@ -78,43 +80,15 @@ impl<const BUDGET_MS: u64> Person<BUDGET_MS> {
     }
 }
 
-/// A ledger at the system boundary that accounts for expended [`Labour`]:
-/// the production-legal sink for the labour that [`processes::draw_time`]
-/// produces (R12). Unbounded (`Next = Self`, R15), so it is legal only at
-/// the boundary and, like every unbounded consumer, it *discards* its intake
-/// rather than keeping it (F-029).
-///
-/// Placeholder: time ledger — assumed unbounded sink for labour; refine to
-/// the real accounting mechanism (a payroll ledger, a job card, a finite
-/// timesheet) in the modelling crate.
-#[must_use = "TimeLedger is a boundary resource: pass it on like any other resource"]
-pub struct TimeLedger {
-    _seal: (),
-}
-
-impl<const MS: u64> crate::boundary::Consumer<Labour<MS>> for TimeLedger {
-    type Next = TimeLedger;
-    fn consume(self, item: Labour<MS>) -> TimeLedger {
-        // Boundary exit: the labour leaves the model (F-029); defusing the
-        // tripwire here is the consumer playing its sanctioned role (F-008).
-        item.defuse();
-        self
-    }
-}
+// The TimeLedger placeholder that used to live here is superseded by the
+// execution history (R16): `crate::history::History` is the production-legal
+// boundary sink for Labour (F-035), and unlike the ledger it keeps a
+// value-level record of what it consumed.
 
 /// The creation boundary for the common types (R12): the only production
 /// code allowed to create them.
 pub mod boundary {
-    use super::{Location, Organisation, Person, TimeLedger};
-
-    /// A time ledger enters the model at the boundary, ready to account for
-    /// [`super::Labour`] (R12).
-    ///
-    /// Placeholder: time ledger — assumed unbounded; refine in the modelling
-    /// crate.
-    pub fn new_time_ledger() -> TimeLedger {
-        TimeLedger { _seal: () }
-    }
+    use super::{Location, Organisation, Person};
 
     /// A person enters the model with a time budget (R15: model a budget
     /// only where the time is genuinely being accounted for).
@@ -149,16 +123,21 @@ pub mod processes {
     /// Draws `SPEND` person-milliseconds from a person's time budget,
     /// leaving `LEFT` (R15 time-budget pattern; caller-stated remainder,
     /// F-022/F-030). The expended time leaves as a conserved [`Labour`]
-    /// value that must reach a `Consumer`.
+    /// value that must reach a `Consumer` — its production-legal sink is the
+    /// execution history ([`crate::history`], R16/F-035), which records it
+    /// attributed to the process that spent it.
     ///
     /// ```
-    /// use model_core::boundary::send_to;
-    /// use model_core::common::boundary::{new_person, new_time_ledger};
+    /// use model_core::common::boundary::new_person;
     /// use model_core::common::processes::draw_time;
+    /// use model_core::history::boundary::new_history;
+    /// use model_core::history::processes::record;
     ///
     /// let person = new_person::<10_000>();
     /// let (labour, person) = draw_time::<2000, 8000, 10_000>(person);
-    /// let _ledger = send_to(new_time_ledger(), labour);
+    /// let history = record(new_history(), "walk_to_station", labour);
+    /// assert_eq!(history.event_count(), 1);
+    /// let _execution_record = history;
     /// let _person_keeps_8000_ms = person;
     /// ```
     ///
@@ -192,20 +171,22 @@ pub mod processes {
 
 #[cfg(test)]
 mod tests {
-    use super::boundary::{new_location, new_organisation, new_person, new_time_ledger};
+    use super::boundary::{new_location, new_organisation, new_person};
     use super::processes::draw_time;
     use super::Person;
-    use crate::boundary::send_to;
+    use crate::history::boundary::new_history;
+    use crate::history::processes::record;
 
     /// The production path for labour: drawn time is accounted for at the
-    /// boundary by the [`super::TimeLedger`], with no test-support fixture
-    /// involved (R12, F-029).
+    /// boundary by the execution history (R16, F-035), with no test-support
+    /// fixture involved (R12).
     #[test]
     fn labour_has_a_production_legal_sink() {
         let person = new_person::<5000>();
         let (labour, person) = draw_time::<2000, 3000, 5000>(person);
-        let ledger = send_to(new_time_ledger(), labour);
-        let _ledger_stays_at_the_boundary = ledger;
+        let history = record(new_history(), "draw_time", labour);
+        assert_eq!(history.event_count(), 1);
+        let _execution_record_stays_with_the_caller = history;
         let _person_keeps_3000_ms = person;
     }
 

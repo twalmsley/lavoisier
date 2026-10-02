@@ -417,6 +417,8 @@ mod tests {
     use model_core::boundary::send_to;
     use model_core::common::boundary::new_person;
     use model_core::common::{Labour, Person};
+    use model_core::history::boundary::new_history;
+    use model_core::history::processes::record;
     use model_core::list::{Cons, Nil};
     use model_core::nat::Zero;
     use model_core::nat::aliases::{N2, N4};
@@ -453,9 +455,11 @@ mod tests {
         drilled.defuse();
         swarf.defuse();
         // Labour is a model-core resource: this crate cannot defuse it, only
-        // hand it to a consumer — here model-core's reference boundary sink
-        // (test-support feature, F-004).
-        let _ledger = send_to(model_core::fixtures::new_test_sink(), labour);
+        // hand it to a consumer — its production-legal sink is the execution
+        // history, which records it attributed to this process (R16, F-035).
+        let history = record(new_history(), "drill_holes", labour);
+        assert_eq!(history.event_count(), 1);
+        let _execution_record_stays_with_the_caller = history;
         let _reusables_stay_with_the_caller = (person, drill);
     }
 

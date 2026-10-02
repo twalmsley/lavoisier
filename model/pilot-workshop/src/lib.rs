@@ -6,7 +6,8 @@
 //! the drilled plates are fastened into an assembly with four catalogue bolts
 //! taken from a `BoltBox` supplier. Swarf from cutting and drilling goes to a
 //! `SwarfBin` consumer and on to waste disposal at the system boundary;
-//! labour goes to a boundary ledger; the assembly ships to a customer.
+//! labour is recorded into per-branch execution histories merged at the join
+//! (R16); the assembly ships to a customer.
 //!
 //! ## Module map
 //!

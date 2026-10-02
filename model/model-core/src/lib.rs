@@ -22,6 +22,7 @@
 //! | [`resource`] | The sealing/tripwire kernel: macros defining sealed, conserved resource types and draw processes (R1, R15) |
 //! | [`boundary`] | `Supplier` (discrete-only), `Consumer`, recursive `SupplyN`/`ConsumeList`, and the generic access processes (R12) |
 //! | [`common`] | Reusable common types: `Person` (with an R15 time budget), `Organisation`, `Location`, `Labour` (R11) |
+//! | [`history`] | Execution history (R16): the sealed `History` boundary consumer, value-level `Event`/`Entry` records, per-branch creation and partial-order `merge` |
 //! | [`requirement`] | The R10 requirement-trait pattern as macros, compatible with `trace.sh` (R10) |
 //! | `fixtures` | Test fixtures and reference boundary implementations — only with the `test-support` feature (F-004) |
 //!
@@ -106,6 +107,7 @@
 
 pub mod boundary;
 pub mod common;
+pub mod history;
 pub mod list;
 pub mod nat;
 pub mod quantity;
