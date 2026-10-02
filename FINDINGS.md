@@ -7,7 +7,8 @@ day from EXP-09 (`experiments/exp0N-*/RESULTS.md`); F-034 added 2026-10-02 durin
 added 2026-10-02 by the kernel-macro generics extension; F-041 added 2026-10-02 by the R16
 implementation; F-042…F-052 added 2026-10-02 from the `RESULTS.md` files of experiments EXP-10
 through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model-core` by path,
-with `trybuild` still the only external dev-dependency).
+with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
+R17–R19 implementation.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1111,6 +1112,13 @@ holding the sealed resources, so a grouping cannot mint, and the R1 sealing rule
 `Debug` (F-047).
 
 **Evidence:** EXP-10 (`src/flows.rs`; RESULTS §2f).
+
+**Extended (2026-10-02, R17–R19 implementation):** convergence across fallible arms has a
+further constraint with contents-keeping consumers (F-016): the consumer's type records what
+it has kept, so both arms must feed it **identical item types and magnitudes** for the flow to
+converge — the pilot's `SwarfBin` converges only because both arms yield 20 g of swarf, and
+across a retry flow's unequal paths it cannot converge at all and travels inside each
+`RetryOutcome` variant. Unbounded (`Next = Self`) sinks have no such constraint.
 
 ---
 
