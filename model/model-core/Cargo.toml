@@ -1,0 +1,35 @@
+[package]
+name = "model-core"
+version = "0.1.0"
+edition = "2024"
+description = "Type-system MBSE kernel: type-level numbers and lists, quantities and units, the resource sealing/tripwire kernel, boundary traits, common types, and requirement helpers"
+
+[features]
+# Test fixtures for downstream crates (R1; FINDINGS.md F-004). A downstream
+# crate enables this ONLY via a [dev-dependencies] re-declaration:
+#
+#   [dependencies]
+#   model-core = { path = "..." }          # production: NO features
+#   [dev-dependencies]
+#   model-core = { path = "...", features = ["test-support"] }
+#
+# The feature must never appear under [dependencies] anywhere in the graph;
+# ci.sh polices this with a grep. Note the F-004 caveat: during `cargo test`,
+# feature unification compiles production sources against the featured
+# library, so only the plain `cargo build` in ci.sh proves the boundary.
+test-support = []
+
+[dependencies]
+# None, by policy: the project writes its own units and type-level numbers
+# (R8); `typenum`, `uom` and `paste` are forbidden.
+
+[dev-dependencies]
+# Self re-declaration: enables the test fixtures for this crate's own
+# integration tests and doc-tests, exactly the way a downstream crate would
+# (F-004). Production builds (`cargo build`) are unaffected.
+model-core = { path = ".", features = ["test-support"] }
+# trybuild is the one allowed dev-dependency (R4), used ONLY for
+# type-check-time compile-fail tests; conservation violations are
+# post-monomorphization and invisible to it (F-001, F-003) - those are rustdoc
+# `compile_fail` doc-tests instead.
+trybuild = "1"

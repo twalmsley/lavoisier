@@ -2,7 +2,8 @@
 
 Findings log required by R14 of `instructions.md`. F-001…F-026 consolidated on 2026-09-30
 from the `RESULTS.md` files of experiments EXP-01 through EXP-08; F-027…F-033 added the same
-day from EXP-09 (`experiments/exp0N-*/RESULTS.md`).
+day from EXP-09 (`experiments/exp0N-*/RESULTS.md`); F-034 added 2026-10-02 during the
+`model-core` build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -778,3 +779,26 @@ process.
 **What it cost / workaround:** none.
 
 **Evidence:** EXP-09 (`src/lib.rs::burn`; RESULTS.md §2 (B)).
+
+---
+
+## F-034 — A contents-keeping consumer without a decreasing space parameter diverges trait resolution; at the mandated recursion limit this is a compiler crash, not an error
+
+**What couldn't be expressed:** a consumer that keeps its contents but has no decreasing
+type-level space parameter (`impl<C> Consumer<Token> for Bin<C> { type Next = Bin<Cons<Token,
+C>>; }`) used with `ConsumeList` — resolution explores `Bin<C>`, `Bin<Cons<Token, C>>`, …
+without bound.
+
+**What it cost:** at the default `recursion_limit` (128) the divergence is a graceful E0275.
+At the project-mandated `#![recursion_limit = "2048"]` (F-010), rustc 1.98.1 deterministically
+crashes with SIGBUS (stack overflow, no diagnostic at all). Minimal repro confirmed both ways.
+
+**Workaround adopted:** the `WasteBag<Space, Contents>` shape (F-016) and `Next = Self`
+unbounded sinks (F-029) are not just modelling conventions — a decreasing parameter (or a
+self-renewing `Next`) is what keeps trait resolution terminating. Treat "every
+contents-keeping consumer has a decreasing space parameter" as a hard rule, and know that the
+raised recursion limit converts violations from a diagnosable error into a compiler crash.
+
+**Evidence:** `model-core` build (LIMITATION comment in `model/model-core/src/boundary.rs`,
+tests module; minimal repro described there).
+

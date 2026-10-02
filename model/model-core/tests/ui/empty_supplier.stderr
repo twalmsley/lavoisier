@@ -1,0 +1,36 @@
+error[E0277]: `BoltBox<Nil>` cannot supply anything: it is exhausted, or it is not a supplier of discrete items
+  --> tests/ui/empty_supplier.rs:11:36
+   |
+11 |     let (_bolt2, _rest) = take_one(empty);
+   |                           -------- ^^^^^ this supplier has nothing left to supply
+   |                           |
+   |                           required by a bound introduced by this call
+   |
+   = help: the trait `Supplier` is not implemented for `BoltBox<Nil>`
+   = note: a supplier with items left is e.g. `BoltBox<Cons<..>>`; its empty state (`BoltBox<Nil>`) is a distinct resource that cannot supply (R12)
+   = note: `Supplier` is discrete-only (F-028): continuous material is drawn by a draw process (R15), not supplied through this trait
+help: the trait `Supplier` is implemented for `BoltBox<Cons<H, T>>`
+  --> src/fixtures.rs
+   |
+   | impl<H, T> Supplier for BoltBox<Cons<H, T>> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `take_one`
+  --> src/boundary.rs
+   |
+   | pub fn take_one<S: Supplier>(supplier: S) -> (S::Item, S::Next) {
+   |                    ^^^^^^^^ required by this bound in `take_one`
+
+error[E0277]: `BoltBox<Nil>` cannot supply anything: it is exhausted, or it is not a supplier of discrete items
+  --> tests/ui/empty_supplier.rs:11:27
+   |
+11 |     let (_bolt2, _rest) = take_one(empty);
+   |                           ^^^^^^^^^^^^^^^ this supplier has nothing left to supply
+   |
+   = help: the trait `Supplier` is not implemented for `BoltBox<Nil>`
+   = note: a supplier with items left is e.g. `BoltBox<Cons<..>>`; its empty state (`BoltBox<Nil>`) is a distinct resource that cannot supply (R12)
+   = note: `Supplier` is discrete-only (F-028): continuous material is drawn by a draw process (R15), not supplied through this trait
+help: the trait `Supplier` is implemented for `BoltBox<Cons<H, T>>`
+  --> src/fixtures.rs
+   |
+   | impl<H, T> Supplier for BoltBox<Cons<H, T>> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

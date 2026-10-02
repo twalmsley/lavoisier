@@ -1,0 +1,8 @@
+error[E0207]: the const parameter `LEFT` is not constrained by the impl trait, self type, or predicates
+  --> tests/ui/finite_container_cannot_impl_supplier.rs:15:23
+   |
+15 | impl<const TAKE: u64, const LEFT: u64, const FULL: u64> DrawSupplier<Gas<TAKE>>
+   |                       ^^^^^^^^^^^^^^^ unconstrained const parameter
+   |
+   = note: expressions using a const parameter must map each value to a distinct output value
+   = note: proving the result of expressions other than the parameter are unique is not supported

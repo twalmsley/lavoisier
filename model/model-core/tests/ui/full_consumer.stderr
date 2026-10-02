@@ -1,0 +1,36 @@
+error[E0277]: `WasteBag<model_core::nat::Zero, Cons<Bolt, Nil>>` cannot consume a `_`: it is full, or it does not accept this kind of resource
+  --> tests/ui/full_consumer.rs:14:24
+   |
+14 |     let _bag = send_to(bag, bolt2); // ...so this cannot compile
+   |                ------- ^^^ this consumer has no space left for this resource
+   |                |
+   |                required by a bound introduced by this call
+   |
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: the trait `Consumer<_>` is not implemented for `WasteBag<model_core::nat::Zero, Cons<Bolt, Nil>>`
+      but it is implemented for `WasteBag<Succ<_>, _>`
+  --> src/fixtures.rs
+   |
+   | impl<S, In, C> Consumer<In> for WasteBag<Succ<S>, C> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `Succ<_>`, found `model_core::nat::Zero`
+note: required by a bound in `send_to`
+  --> src/boundary.rs
+   |
+   | pub fn send_to<I, C: Consumer<I>>(consumer: C, item: I) -> C::Next {
+   |                      ^^^^^^^^^^^ required by this bound in `send_to`
+
+error[E0277]: `WasteBag<model_core::nat::Zero, Cons<Bolt, Nil>>` cannot consume a `Bolt`: it is full, or it does not accept this kind of resource
+  --> tests/ui/full_consumer.rs:14:16
+   |
+14 |     let _bag = send_to(bag, bolt2); // ...so this cannot compile
+   |                ^^^^^^^^^^^^^^^^^^^ this consumer has no space left for this resource
+   |
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: the trait `Consumer<Bolt>` is not implemented for `WasteBag<model_core::nat::Zero, Cons<Bolt, Nil>>`
+      but it is implemented for `WasteBag<Succ<_>, _>`
+  --> src/fixtures.rs
+   |
+   | impl<S, In, C> Consumer<In> for WasteBag<Succ<S>, C> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `Succ<_>`, found `model_core::nat::Zero`

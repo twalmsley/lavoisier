@@ -1,0 +1,16 @@
+# The real model workspace (see ../instructions.md).
+#
+# `model-core` is the kernel library (R8, R11): type-level numbers, lists,
+# quantities and units, the resource sealing/tripwire kernel, the R12 boundary
+# traits, common reusable types, and the R10 requirement helpers.
+#
+# A downstream pilot modelling crate (e.g. `pilot-workshop`) is added as a
+# further member in a later phase. It must:
+#   * depend on `model-core` normally under [dependencies] (no features), and
+#   * re-declare `model-core` under [dev-dependencies] with the `test-support`
+#     feature for its own test fixtures (R1, FINDINGS.md F-004).
+# ci.sh polices that the feature never appears under [dependencies].
+
+[workspace]
+resolver = "2"
+members = ["model-core"]

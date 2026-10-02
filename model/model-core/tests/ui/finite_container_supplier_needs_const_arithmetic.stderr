@@ -1,0 +1,15 @@
+error: generic parameters may not be used in const operations
+  --> tests/ui/finite_container_supplier_needs_const_arithmetic.rs:13:29
+   |
+13 |     type Next = GasBottle<{ FULL - TAKE }>;
+   |                             ^^^^ cannot perform const operation using `FULL`
+   |
+   = help: const parameters may only be used as standalone arguments here, i.e. `FULL`
+
+error: generic parameters may not be used in const operations
+  --> tests/ui/finite_container_supplier_needs_const_arithmetic.rs:13:36
+   |
+13 |     type Next = GasBottle<{ FULL - TAKE }>;
+   |                                    ^^^^ cannot perform const operation using `TAKE`
+   |
+   = help: const parameters may only be used as standalone arguments here, i.e. `TAKE`

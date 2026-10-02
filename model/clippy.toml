@@ -1,0 +1,12 @@
+# Layer 3 of the R1 conservation regime (instructions.md R1; FINDINGS.md F-007):
+# banned methods, each with a `reason` telling the modeller what to do instead.
+# CI runs clippy with `-D warnings`, so each of these is a hard error.
+#
+# Do not trim this list: the lint set is only sound as a whole (F-007) — each
+# mechanism's official fix-it suggestion is the next leak path.
+disallowed-methods = [
+    { path = "std::mem::drop", reason = "resources are conserved (R1): never drop a resource — pass it on, return it, or hand it to a Consumer at the system boundary" },
+    { path = "core::mem::drop", reason = "resources are conserved (R1): never drop a resource — pass it on, return it, or hand it to a Consumer at the system boundary" },
+    { path = "std::mem::ManuallyDrop::new", reason = "ManuallyDrop silently leaks a conserved resource (R1): pass the resource on, return it, or hand it to a Consumer instead" },
+    { path = "std::boxed::Box::leak", reason = "leaking loses a conserved resource (R1): pass the resource on, return it, or hand it to a Consumer instead" },
+]
