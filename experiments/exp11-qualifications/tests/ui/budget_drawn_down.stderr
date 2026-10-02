@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/budget_drawn_down.rs:16:68
+   |
+16 |     let (l2, operator) = operator_draw_time::<2000, 3000, 5000, _>(operator);
+   |                          ----------------------------------------- ^^^^^^^^ expected `5000`, found `3000`
+   |                          |
+   |                          arguments to this function are incorrect
+   |
+   = note: expected struct `Operator<_, 5000>`
+              found struct `Operator<DrillingCert, 3000>`
+note: function defined here
+  --> src/resources.rs
+   |
+   |     pub fn operator_draw_time<
+   |            ^^^^^^^^^^^^^^^^^^

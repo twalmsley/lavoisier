@@ -1,0 +1,40 @@
+error[E0277]: `ToolStores` cannot consume a `ScrapPlate<430>`: it is full, or it does not accept this kind of resource
+  --> tests/ui/scrap_cannot_return_to_stores.rs:14:27
+   |
+14 |     let _stores = send_to(new_tool_stores(), scrap);
+   |                   ------- ^^^^^^^^^^^^^^^^^ this consumer has no space left for this resource
+   |                   |
+   |                   required by a bound introduced by this call
+   |
+   = help: the trait `Consumer<ScrapPlate<430>>` is not implemented for `ToolStores`
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: `ToolStores` implements trait `Consumer<In>`
+  --> src/model.rs
+   |
+   | impl Consumer<SpareParts> for ToolStores {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<SpareParts>`
+...
+   | impl<const G: u64> Consumer<Plate<G>> for ToolStores {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<Plate<G>>`
+note: required by a bound in `send_to`
+  --> $MODEL_CORE/src/boundary.rs
+   |
+   | pub fn send_to<I, C: Consumer<I>>(consumer: C, item: I) -> C::Next {
+   |                      ^^^^^^^^^^^ required by this bound in `send_to`
+
+error[E0277]: `ToolStores` cannot consume a `ScrapPlate<430>`: it is full, or it does not accept this kind of resource
+  --> tests/ui/scrap_cannot_return_to_stores.rs:14:19
+   |
+14 |     let _stores = send_to(new_tool_stores(), scrap);
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this consumer has no space left for this resource
+   |
+   = help: the trait `Consumer<ScrapPlate<430>>` is not implemented for `ToolStores`
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: `ToolStores` implements trait `Consumer<In>`
+  --> src/model.rs
+   |
+   | impl Consumer<SpareParts> for ToolStores {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<SpareParts>`
+...
+   | impl<const G: u64> Consumer<Plate<G>> for ToolStores {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<Plate<G>>`

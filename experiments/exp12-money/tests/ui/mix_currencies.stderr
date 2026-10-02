@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/mix_currencies.rs:13:47
+   |
+13 |     let total: Qty<217, Pence> = combine(gbp, eur);
+   |                                  -------      ^^^ expected `Qty<_, Pence>`, found `Qty<117, EuroCents>`
+   |                                  |
+   |                                  arguments to this function are incorrect
+   |
+   = note: expected struct `Qty<_, Pence>`
+              found struct `Qty<117, EuroCents>`
+note: function defined here
+  --> $MODEL_CORE/src/quantity.rs
+   |
+   | pub fn combine<U: Unit, const A: u64, const B: u64, const OUT: u64>(
+   |        ^^^^^^^

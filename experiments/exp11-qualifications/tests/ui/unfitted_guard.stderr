@@ -1,0 +1,17 @@
+error[E0277]: the trait bound `MachineGuard: Req002FittedDrillGuard` is not satisfied
+  --> tests/ui/unfitted_guard.rs:14:76
+   |
+14 |     let (operator, guard, drilled, swarf) = drill_plate::<900, 880, 20, _, _>(operator, guard, plate);
+   |                                                                            ^ the trait `Fitted` is not implemented for `MachineGuard`
+   |
+help: the trait `Fitted` is implemented for `FittedGuard`
+  --> src/resources.rs
+   |
+   | impl Fitted for FittedGuard {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `MachineGuard` to implement `Req002FittedDrillGuard`
+note: required by a bound in `drill_plate`
+  --> src/resources.rs
+   |
+   | ...001CertifiedDrillingOperator, G: Req002FittedDrillGuard>(operator: O, guard: G, plate: Plate<PLATE>) -> (O, G, DrilledPlate<P_LE...
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `drill_plate`

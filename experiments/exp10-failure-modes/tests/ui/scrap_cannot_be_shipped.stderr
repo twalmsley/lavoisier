@@ -1,0 +1,22 @@
+error[E0308]: mismatched types
+  --> tests/ui/scrap_cannot_be_shipped.rs:12:45
+   |
+12 |     let _customer = send_to(new_customer(), scrap);
+   |                     -------                 ^^^^^ expected `DrilledPlate<_>`, found `ScrapPlate<430>`
+   |                     |
+   |                     arguments to this function are incorrect
+   |
+   = note: expected struct `DrilledPlate<_>`
+              found struct `ScrapPlate<430>`
+help: the return type of this call is `ScrapPlate<430>` due to the type of the argument passed
+  --> tests/ui/scrap_cannot_be_shipped.rs:12:21
+   |
+12 |     let _customer = send_to(new_customer(), scrap);
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^-----^
+   |                                             |
+   |                                             this argument influences the return type of `send_to`
+note: function defined here
+  --> $MODEL_CORE/src/boundary.rs
+   |
+   | pub fn send_to<I, C: Consumer<I>>(consumer: C, item: I) -> C::Next {
+   |        ^^^^^^^

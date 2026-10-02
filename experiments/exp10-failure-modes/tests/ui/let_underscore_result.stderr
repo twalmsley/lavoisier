@@ -1,0 +1,28 @@
+error: non-binding let on a type that has a destructor
+  --> tests/ui/let_underscore_result.rs:13:5
+   |
+13 | /     let _ = drill_fallible::<1000, 4000, 5000, 450, 440, 10, 430, 20>(
+14 | |         new_person::<5000>(),
+15 | |         supply_drill_bit(),
+16 | |         supply_plate::<450>(),
+17 | |         outcome_failure(),
+18 | |     );
+   | |______^
+   |
+note: the lint level is defined here
+  --> tests/ui/let_underscore_result.rs:6:9
+   |
+ 6 | #![deny(let_underscore_drop)]
+   |         ^^^^^^^^^^^^^^^^^^^
+help: consider binding to an unused variable to avoid immediately dropping the value
+   |
+13 |     let _unused = drill_fallible::<1000, 4000, 5000, 450, 440, 10, 430, 20>(
+   |          ++++++
+help: consider immediately dropping the value
+   |
+13 ~     drop(drill_fallible::<1000, 4000, 5000, 450, 440, 10, 430, 20>(
+14 |         new_person::<5000>(),
+...
+17 |         outcome_failure(),
+18 ~     ));
+   |

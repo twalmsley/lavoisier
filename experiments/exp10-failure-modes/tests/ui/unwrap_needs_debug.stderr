@@ -1,0 +1,14 @@
+error[E0277]: `DrillFail<4000, 430, 20, 1000>` doesn't implement `Debug`
+  --> tests/ui/unwrap_needs_debug.rs:17:22
+   |
+17 |     let _ok = result.unwrap();
+   |                      ^^^^^^ the trait `Debug` is not implemented for `DrillFail<4000, 430, 20, 1000>`
+   |
+note: required by a bound in `Result::<T, E>::unwrap`
+  --> $RUST/core/src/result.rs
+   |
+   |     pub fn unwrap(self) -> T
+   |            ------ required by a bound in this associated function
+   |     where
+   |         E: fmt::Debug,
+   |            ^^^^^^^^^^ required by this bound in `Result::<T, E>::unwrap`

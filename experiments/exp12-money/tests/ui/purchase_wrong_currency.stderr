@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/purchase_wrong_currency.rs:12:80
+   |
+12 |     let (spanner, change, vendor) = purchase::<_, 500, 350, 150>(new_vendor(), euros);
+   |                                     ----------------------------               ^^^^^ expected `Money<500>`, found `Euros<500>`
+   |                                     |
+   |                                     arguments to this function are incorrect
+   |
+   = note: expected struct `Money<500>`
+              found struct `Euros<500>`
+note: function defined here
+  --> src/lib.rs
+   |
+   |         pub fn purchase<V, const TENDERED: u64, const PRICE: u64, const CHANGE: u64>(
+   |                ^^^^^^^^

@@ -1,0 +1,27 @@
+[package]
+name = "exp12-money"
+version = "0.1.0"
+edition = "2024"
+description = "EXP-12: money as a conserved dimension (candidate R19), built on model-core"
+
+[features]
+# The model-core resource kernel macros expand each `test_fixture()`
+# constructor behind the INVOKING crate's `test-support` feature (R1, F-004),
+# so this crate declares the feature too. Enabled ONLY via the
+# [dev-dependencies] self re-declaration below, never under [dependencies].
+test-support = []
+
+[dependencies]
+# Protocol update for EXP-10..12: model-core by path, read-only, no features
+# in production (the test-support feature lives only under [dev-dependencies],
+# per R1/F-004).
+model-core = { path = "../../model/model-core" }
+
+[dev-dependencies]
+# Re-declaration enabling test fixtures for this crate's tests only (F-004).
+model-core = { path = "../../model/model-core", features = ["test-support"] }
+exp12-money = { path = ".", features = ["test-support"] }
+# The one allowed external dev-dependency (R4): type-check-time compile-fail
+# tests only; conservation violations are post-monomorphization and invisible
+# to trybuild (F-001, F-003) - those are rustdoc compile_fail doc-tests.
+trybuild = "1"

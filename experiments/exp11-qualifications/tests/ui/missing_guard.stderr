@@ -1,0 +1,33 @@
+error[E0277]: the trait bound `Plate<900>: Req002FittedDrillGuard` is not satisfied
+  --> tests/ui/missing_guard.rs:13:76
+   |
+13 |     let (operator, guard, drilled, swarf) = drill_plate::<900, 880, 20, _, _>(operator, plate);
+   |                                                                            ^ the trait `Fitted` is not implemented for `Plate<900>`
+   |
+help: the trait `Fitted` is implemented for `FittedGuard`
+  --> src/resources.rs
+   |
+   | impl Fitted for FittedGuard {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Plate<900>` to implement `Req002FittedDrillGuard`
+note: required by a bound in `drill_plate`
+  --> src/resources.rs
+   |
+   | ...001CertifiedDrillingOperator, G: Req002FittedDrillGuard>(operator: O, guard: G, plate: Plate<PLATE>) -> (O, G, DrilledPlate<P_LE...
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `drill_plate`
+
+error[E0061]: this function takes 3 arguments but 2 arguments were supplied
+  --> tests/ui/missing_guard.rs:13:45
+   |
+13 |     let (operator, guard, drilled, swarf) = drill_plate::<900, 880, 20, _, _>(operator, plate);
+   |                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^----------------- argument #3 of type `Plate<900>` is missing
+   |
+note: function defined here
+  --> src/resources.rs
+   |
+   |     pub fn drill_plate<const PLATE: u64, const P_LEFT: u64, const SW: u64, O: Req001CertifiedDrillingOperator, G: Req002FittedDrill...
+   |            ^^^^^^^^^^^
+help: provide the argument
+   |
+13 |     let (operator, guard, drilled, swarf) = drill_plate::<900, 880, 20, _, _>(operator, plate, /* Plate<900> */);
+   |                                                                                              ++++++++++++++++++

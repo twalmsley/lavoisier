@@ -1,0 +1,22 @@
+error[E0277]: this person may not drill: `Person<5000>` is not a certified drilling operator (REQ-001)
+  --> tests/ui/uncertified_person.rs:12:71
+   |
+12 |     let (person, guard, drilled, swarf) = drill_plate::<900, 880, 20, _, _>(person, guard, plate);
+   |                                                                       ^ REQ-001: drilling requires a certified drilling operator
+   |
+   = help: the trait `CertifiedDriller` is not implemented for `Person<5000>`
+   = note: qualifications are granted at the boundary (R12): `certify::<DrillingCert>(person)` wraps a `Person` into a certified `Operator`
+help: the following other types implement trait `CertifiedDriller`
+  --> src/resources.rs
+   |
+   | impl<const MS: u64> CertifiedDriller for Operator<DrillingCert, MS> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Operator<DrillingCert, MS>`
+...
+   | impl<const MS: u64> CertifiedDriller for Driller<MS> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Driller<MS>`
+   = note: required for `Person<5000>` to implement `Req001CertifiedDrillingOperator`
+note: required by a bound in `drill_plate`
+  --> src/resources.rs
+   |
+   | ...EFT: u64, const SW: u64, O: Req001CertifiedDrillingOperator, G: Req002FittedDrillGuard>(operator: O, guard: G, plate: Plate<PLAT...
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `drill_plate`

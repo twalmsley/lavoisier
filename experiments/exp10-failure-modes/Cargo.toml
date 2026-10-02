@@ -1,0 +1,30 @@
+[package]
+name = "exp10-failure-modes"
+version = "0.1.0"
+edition = "2024"
+description = "EXP-10: fallible processes - failure-state resources, a sealed outcome token, Result-returning processes with per-branch conservation, repair-and-retry flows, and the leak-surface probes (candidate R17)"
+
+[features]
+# The model-core resource kernel macros expand a `test_fixture()` constructor
+# behind the INVOKING crate's `test-support` feature (R1, FINDINGS.md F-004),
+# so this crate declares the feature too. Enabled ONLY via the
+# [dev-dependencies] self re-declaration below; it must never appear under
+# [dependencies] anywhere in the graph.
+test-support = []
+
+[dependencies]
+# Protocol update for EXP-10..12: model-core by path is allowed (and the
+# point). Production dependency: NO features (F-004 - a plain `cargo build`
+# is what proves production code cannot reach fixture constructors).
+model-core = { path = "../../model/model-core" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004): model-core's reference fixtures
+# and this crate's own macro-generated `test_fixture()`s.
+model-core = { path = "../../model/model-core", features = ["test-support"] }
+exp10-failure-modes = { path = ".", features = ["test-support"] }
+# trybuild is the one allowed external dev-dependency (R4), used ONLY for
+# type-check-time compile-fail cases; conservation violations are
+# post-monomorphization (F-001, F-003) and live as rustdoc `compile_fail`
+# doc-tests in src/ instead.
+trybuild = "1"

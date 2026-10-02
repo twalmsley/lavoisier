@@ -1,0 +1,35 @@
+error[E0277]: `Vendor` cannot consume a `Money<300>`: it is full, or it does not accept this kind of resource
+  --> tests/ui/purchase_wrong_price.rs:15:48
+   |
+15 |     let (spanner, change, vendor) = purchase::<_, 500, 300, 200>(new_vendor(), tendered);
+   |                                                ^ this consumer has no space left for this resource
+   |
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: the trait `Consumer<Money<300>>` is not implemented for `Vendor`
+      but trait `Consumer<Money<350>>` is implemented for it
+  --> src/lib.rs
+   |
+   |     impl Consumer<Money<SPANNER_PRICE_PENCE>> for Vendor {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `purchase`
+  --> src/lib.rs
+   |
+   |         pub fn purchase<V, const TENDERED: u64, const PRICE: u64, const CHANGE: u64>(
+   |                -------- required by a bound in this function
+...
+   |             V: Consumer<Money<PRICE>>,
+   |                ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `purchase`
+
+error[E0277]: `Vendor` cannot consume a `Money<300>`: it is full, or it does not accept this kind of resource
+  --> tests/ui/purchase_wrong_price.rs:15:37
+   |
+15 |     let (spanner, change, vendor) = purchase::<_, 500, 300, 200>(new_vendor(), tendered);
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this consumer has no space left for this resource
+   |
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: the trait `Consumer<Money<300>>` is not implemented for `Vendor`
+      but trait `Consumer<Money<350>>` is implemented for it
+  --> src/lib.rs
+   |
+   |     impl Consumer<Money<SPANNER_PRICE_PENCE>> for Vendor {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

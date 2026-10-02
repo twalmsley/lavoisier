@@ -1,0 +1,29 @@
+[package]
+name = "exp11-qualifications"
+version = "0.1.0"
+edition = "2024"
+description = "EXP-11: qualifications and safety as types - marker-trait qualifications on budgeted person types, guard states, and R10 requirement traits bound on a drilling process (candidate R18)"
+
+[features]
+# The model-core resource kernel macros expand `test_fixture()` constructors
+# behind the INVOKING crate's `test-support` feature (R1, FINDINGS.md F-004),
+# so this crate declares the feature too. It is enabled ONLY via the
+# [dev-dependencies] self re-declaration below and must never appear under
+# [dependencies] anywhere in the graph.
+test-support = []
+
+[dependencies]
+# Production dependency (EXP-10..12 protocol update): model-core by path,
+# read-only, NO features (a plain `cargo build` is what proves production
+# code cannot reach fixture constructors, F-004).
+model-core = { path = "../../model/model-core" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../../model/model-core", features = ["test-support"] }
+exp11-qualifications = { path = ".", features = ["test-support"] }
+# trybuild is the one allowed external dev-dependency (R4), used ONLY for
+# type-check-time compile-fail cases; conservation/overdraw violations are
+# post-monomorphization (F-001, F-003) and live as rustdoc `compile_fail`
+# doc-tests in src/ instead.
+trybuild = "1"

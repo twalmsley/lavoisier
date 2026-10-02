@@ -1,0 +1,25 @@
+warning: unreachable expression
+  --> tests/ui/outcome_cannot_be_minted.rs:11:16
+   |
+10 |         kind: todo!(),
+   |               ------- any code following this expression is unreachable
+11 |         _seal: (),
+   |                ^^ unreachable expression
+   |
+   = note: `#[warn(unreachable_code)]` (part of `#[warn(unused)]`) on by default
+
+error[E0451]: fields `kind` and `_seal` of struct `DrillOutcome` are private
+  --> tests/ui/outcome_cannot_be_minted.rs:10:9
+   |
+ 9 |     let _forged = DrillOutcome {
+   |                   ------------ in this type
+10 |         kind: todo!(),
+   |         ^^^^ private field
+11 |         _seal: (),
+   |         ^^^^^ private field
+
+error: type `model::OutcomeKind` is private
+  --> tests/ui/outcome_cannot_be_minted.rs:10:15
+   |
+10 |         kind: todo!(),
+   |               ^^^^^^^ private type
