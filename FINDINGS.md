@@ -5,7 +5,9 @@ from the `RESULTS.md` files of experiments EXP-01 through EXP-08; F-027…F-033 
 day from EXP-09 (`experiments/exp0N-*/RESULTS.md`); F-034 added 2026-10-02 during the
 `model-core` build; F-035…F-039 added 2026-10-02 during the `pilot-workshop` build; F-036 resolved and F-040
 added 2026-10-02 by the kernel-macro generics extension; F-041 added 2026-10-02 by the R16
-implementation.
+implementation; F-042…F-052 added 2026-10-02 from the `RESULTS.md` files of experiments EXP-10
+through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model-core` by path,
+with `trybuild` still the only external dev-dependency).
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -235,6 +237,10 @@ every resource type. Shadow lints **not** adopted; the tripwire (F-008) plus the
 **Evidence:** EXP-03 (`experiments/exp03-drop-prevention/RESULTS.md`, §2–§3 verbatim help
 texts and matrix); EXP-07 (`process_swallows_drill.stderr`, the borrow suggestion).
 
+**Extended (2026-10-02):** EXP-10 adds a fix-it family member: E0308 on a `Result` used as its
+success bundle suggests `.expect("REASON")` — the panic path, itself a conservation violation
+(and, with `Debug`-less bundles, one that does not even compile — F-047).
+
 ---
 
 ## F-008 — The tripwire `Drop` and `mem::forget` are exact complements; the tripwire reports the `Drop` impl, not the leak site
@@ -261,6 +267,11 @@ fired tripwire has a small search space.
 
 **Evidence:** EXP-03 (`experiments/exp03-drop-prevention/RESULTS.md`, matrix rows 4 and 8,
 `src/bin/unwind_abort.rs`, §3 tripwire output).
+
+**Extended (2026-10-02):** EXP-10 measured the `..` path's timing: skipped fields are a partial
+move that drops at the end of the destructured binding's scope, after every bound field, so a
+tripwire on a forgotten field fires at the end of the match arm, not at the destructuring
+statement (F-047).
 
 ---
 
@@ -782,6 +793,9 @@ process.
 
 **Evidence:** EXP-09 (`src/lib.rs::burn`; RESULTS.md §2 (B)).
 
+**Extended (2026-10-02):** EXP-10 extends the pattern from dimensions to `Result` branches: a
+fallible process carries one assert per arm and both fire at every instantiation (F-045).
+
 ---
 
 ## F-034 — A contents-keeping consumer without a decreasing space parameter diverges trait resolution; at the mandated recursion limit this is a compiler crash, not an error
@@ -959,4 +973,286 @@ unchanged. Three notes from its implementation (which doubled as its validation)
 
 **Evidence:** `model/model-core/src/history.rs`; pilot per-branch merge assertions in
 `model/pilot-workshop/tests/flows.rs`.
+
+---
+
+## F-042 — A fallible process needs one runtime-valued outcome token; selecting the outcome with types collapses fallibility
+
+**What couldn't be expressed:** compiler-forced failure handling with the outcome chosen by
+types. Two sealed token types selected by the flow are fully expressible on stable — as two
+monomorphic process variants, or as one generic process whose output is a const-generic GAT
+projection (`type Out<const …: u64, …>`) — but the outcome then becomes part of the flow's
+static text: there is no `Result`, no runtime branch, and no site anywhere is forced to handle
+the arm the flow did not pick, so "fallible process" collapses back into two infallible
+processes. A token-generic flow is no escape (its result is the opaque projection `O::Out<…>`,
+which it can only pass along), and each impl carries only its own branch's conservation assert,
+so the unchosen branch's split is never checked at any call site.
+
+**What it cost:** a design rule rather than machinery (~70 hand-written lines per token type —
+see the `outcome_token!` proposal).
+
+**Workaround adopted:** **one sealed token type per fallible-process kind**, runtime-valued: a
+private enum wrapped in a sealed struct (R1's "never a pub enum resource"), tripwired, minted
+only by boundary constructors (`/// Placeholder:` until calibrated) and test-support fixtures,
+unreadable by flows — the only way to learn the outcome is to run the process and handle the
+`Result` — consumed by exactly one process, with a boundary exit function for untried tokens.
+Processes stay deterministic (the variability is the token's *value*, injected at the boundary,
+R12 spirit), and both outcomes of one process are testable by injecting either token.
+
+**Evidence:** EXP-10 (`experiments/exp10-failure-modes/RESULTS.md` §1 C2;
+`src/model.rs::DrillOutcome`, `src/two_token.rs`, `tests/ui/outcome_cannot_be_minted.stderr`).
+
+---
+
+## F-043 — Qualification markers go on a sealed wrapper around `Person`, never on `Person`; a parallel person type forks the whole time-accounting family
+
+**What couldn't be expressed:** a qualification as a marker on `model_core::common::Person`
+itself. Coherence permits `impl<const MS: u64> CertifiedDriller for Person<MS>` (local trait),
+but `Person` has no qualification slot, so the impl certifies **every person in the model at
+once** — quiet model corruption of the F-017 class, with no compiler warning possible. The
+alternative, a parallel downstream person type (`reusable_resource!`, 2 lines to declare), holds
+no `Person` and so forks the entire time-accounting family: its own draw process, its own labour
+type (`Labour`'s mint is private to model-core), its own `Consumer` sink, and its own
+`Recordable` impl before it can reach `History` — ~40 duplicated lines of re-reviewable
+conservation code per person type, measured.
+
+**What it cost:** a hand-sealed wrapper `Operator<Q: Qualification, const BUDGET_MS: u64>`
+holding the `Person` as a private field (~34 lines once per model — `reusable_resource!` takes
+no held contents, F-040). Two diagnostic footnotes: the wrapper's delegating draw puts the
+overdraw E0080's "while instantiating" note (F-027) on its internal `draw_time` call, one hop
+from the modeller's flow line (the decimal magnitudes still identify the call); and with consts
+before a type parameter, callers must write a trailing `_` in the turbofish
+(`operator_draw_time::<2000, 3000, 5000, _>(op)` — E0107 otherwise).
+
+**Workaround adopted:** the wrapper, with the rule "qualification markers attach by one-line
+blanket impls **over the budget** (`impl<const MS: u64> CertifiedDriller for
+Operator<DrillingCert, MS>`), never on `Person`" — the blanket-impl-over-budgets pattern worked
+first try on both a hand-sealed and a macro-built type. Certify/decertify are conserving
+boundary processes (wrap/unwrap the same person, budget intact); the budget draw opens the
+wrapper, delegates to `draw_time`, re-wraps — the R15 overdraw error, F-030's hand-maintained
+balance, and the `Labour`→`History` path (F-035/R16) are inherited, not duplicated. The wrapper
+is proposed for promotion into model-core as `common::Qualified` (candidate R18). `Satisfies:`
+tags again went on aliases, per F-037.
+
+**Evidence:** EXP-11 (`experiments/exp11-qualifications/RESULTS.md` §1 C4, §3;
+`src/resources.rs::{Operator, Driller, Effort}`, `tests/flows.rs`).
+
+---
+
+## F-044 — `on_unimplemented` on a marker is ignored when the marker fails as a supertrait obligation; the attribute must go on the requirement trait, and its message is fixed per trait, not per impl
+
+**What couldn't be expressed:** one modeller-phrased message per characteristic that surfaces
+everywhere. When a process bounds `O: Req001…` (the R10 pattern) and the blanket impl's
+supertrait obligation fails, rustc surfaces only the **root** obligation's
+`#[diagnostic::on_unimplemented]`; the failing *marker's* own attribute (`CertifiedDriller`,
+`Fitted`) is never shown in that position — the error falls back to "the trait bound
+`MachineGuard: Req002FittedDrillGuard` is not satisfied". The pilot's `wrong_bolt.stderr` has
+the same shape (its `M8` message is likewise unused). A related granularity limit (EXP-12): the
+attribute's message is fixed at the **trait**, not per impl — model-core's `Consumer` note,
+phrased for waste bags, appears verbatim when the failing consumer is a vendor.
+
+**What it cost:** one more attribute per requirement trait, a convention to know, and a
+retrofit of the pilot's existing requirement traits.
+
+**Workaround adopted:** every `requirement!` invocation carries its own one-line
+`on_unimplemented` phrased as the requirement and naming the REQ id (the macro's meta slot
+already passes attributes through). Result, trybuild-pinned: the E0277's top line states the
+REQ ("this person may not drill: `Person<5000>` is not a certified drilling operator
+(REQ-001)"), the note says how to qualify, and rustc's impl list enumerates the types that
+would qualify — the best requirement error measured in the project. Keep marker-level
+attributes too, for direct marker bounds.
+
+**Evidence:** EXP-11 (`tests/ui/uncertified_person.stderr` vs `tests/ui/unfitted_guard.stderr`;
+`src/requirements.rs`); corroborated by `model/pilot-workshop/tests/ui/wrong_bolt.stderr`;
+EXP-12 (`tests/ui/purchase_wrong_price.stderr`).
+
+---
+
+## F-045 — Per-branch conservation is one const assert per branch, both checked at every instantiation; the cost is doubled const-parameter load
+
+**What worked:** a fallible process carries an independent `const { assert!(…) }` per `Result`
+arm (success split, failure split), each with a branch-naming message, and **both fire at every
+instantiation** (post-monomorphization, F-001 unchanged; decimal magnitudes and the caller's
+line in the instantiation note, F-027) — so a call site that only ever realises the success
+branch is still rejected for an unbalanced failure branch. The model proves both arms conserve
+everywhere. (Extends F-033 from dimensions to branches.)
+
+**What it cost:** the caller states **both** branches' splits — eight const parameters on one
+process (`drill_fallible::<1000, 4000, 5000, 450, 440, 10, 430, 20>`), roughly doubling the
+F-022/F-030 load. Not a correctness risk: a wrong number is the E0080. Drawing shared spends
+(time) before the branch keeps the reusable resource's return type equal in both arms.
+
+**Workaround adopted:** accept the load; violation regressions are rustdoc `compile_fail`
+doc-tests per the R4 policy (verified: `cargo check --tests` passes the violation,
+`cargo build --tests` rejects it).
+
+**Evidence:** EXP-10 (`src/model.rs::drill_fallible`; RESULTS §2a).
+
+---
+
+## F-046 — Converging after a fallible step requires equal types in both arms; `unused_must_use` sees through tuples but not `Option`, so one-arm outputs need named `#[must_use]` groupings
+
+**What couldn't be expressed:** a single return type for a flow whose arms produce different
+resources or different magnitudes. Reusable resources converge only when the failure arm
+restores the same state at the same magnitude (repair-on-the-spot; equal time spent in both
+arms); paths that spend different amounts (a retried flow: 1000 vs 2000 ms) have no common type
+at all. One-arm products can come back as `Option<resource>`, but — measured —
+`deny(unused_must_use)` fires per **tuple element** with each resource's own R1 message and
+does **not** look inside `Option<…>`: an Option-wrapped resource keeps only tripwire protection
+against discard.
+
+**What it cost:** per-flow outcome types instead of tuples containing `Option`s.
+
+**Workaround adopted:** converge what can be converged (repair in the failure arm); return
+per-path outcomes as a named `#[must_use]` grouping — one pub struct per arm, or a pub enum
+with one variant per flow path. **Groupings are not resources**: building one requires already
+holding the sealed resources, so a grouping cannot mint, and the R1 sealing rules (including
+"never a pub enum") bind resources, not groupings. Outcome bundles deliberately derive no
+`Debug` (F-047).
+
+**Evidence:** EXP-10 (`src/flows.rs`; RESULTS §2f).
+
+---
+
+## F-047 — `Debug`-less outcome bundles make `.unwrap()`/`.expect()` a compile error; the remaining panic path is F-002's hole, demonstrated for the `Result` shape
+
+**What worked (unplanned):** `Result::unwrap`/`expect` require `E: Debug`; outcome bundles hold
+sealed resources (which implement no `Debug`) and derive none, so the panicking shortcut past
+the failure arm **does not compile** (E0277 "doesn't implement `Debug`") — keep `Debug` off
+outcome bundles deliberately. Everything between the ends of the leak surface is caught:
+discard and `let _ =` at compile time by the lint pair (whose fix-its are F-007 verbatim, plus
+the new `.expect("REASON")` member), the `Result` used as its Ok bundle at type-check time
+(E0308), a failure state continuing the success flow at type-check time (E0308, or E0277 with
+`on_unimplemented` on multi-impl sinks — F-023 extended to failure states), and
+bound-but-unmatched results / forgetful match arms at test time by the tripwires (F-008,
+including the `..` partial-move timing).
+
+**What it cost / residual:** the `Debug` error is phrased as a formatting problem and needs an
+error-reading-guide entry ("you may not panic past the failure arm: match and account for both
+bundles"). The runtime unwrap-equivalent — an explicit panic while holding a bundle — remains
+F-002's hole: unwinding stands every tripwire down, and the bundle's five resources vanished
+with no abort and no leak report.
+
+**Workaround adopted:** no `Debug` on any outcome bundle (a candidate-R17 convention) plus the
+guide entries.
+
+**Evidence:** EXP-10 (`tests/ui/unwrap_needs_debug.stderr`,
+`tests/ui/result_is_not_the_bundle.stderr`,
+`tests/leaks.rs::panic_while_holding_the_failure_bundle_leaks_silently`; RESULTS §3 matrix).
+
+---
+
+## F-048 — A process that draws a budget inside itself must take the concrete type and loses the REQ-phrased error; keep draws as separate adjacent processes
+
+**What couldn't be expressed:** a process simultaneously (a) generic over "any certified
+operator" and (b) drawing the operator's time budget down inside itself. The budget change is a
+const-parameter change, which a generic `O: Req001…` bound cannot express (the F-028/E0207
+remainder problem in different clothes). Taking the concrete `Qualified<DrillingCert, BUDGET>`
+works, but a wrong operator there is an E0308 type mismatch, not the REQ-phrased E0277 of
+F-044.
+
+**What it cost:** a composition convention rather than machinery.
+
+**Workaround adopted:** default style — qualification-checked processes are generic with
+requirement bounds and do **not** draw budgets; the draw is its own adjacent process in the
+flow (R9/R15-idiomatic anyway). A process that must account its own time takes the concrete
+type and restates its requirement as a trivially-true where-clause for greppability (R10).
+
+**Evidence:** EXP-11 (`src/resources.rs::{drill_plate, drill_plate_timed}`; both styles
+exercised in `tests/flows.rs`).
+
+---
+
+## F-049 — A requirement sentence spanning several participants decomposes into one R10 trait per constrained parameter
+
+**What couldn't be expressed:** "drilling requires a certified operator **and** a fitted guard"
+as a single requirement trait — a trait bound constrains one type, and no type is both the
+operator and the guard (a composite aggregate would over-claim, F-024).
+
+**What it cost:** two REQ ids for one sentence of intent, both bound on the same one-line
+process signature (R10 rule 4).
+
+**Workaround adopted:** accept the decomposition; trace.sh then reports the one process under
+both ids, which reads correctly in the traceability table. The safety half additionally relies
+on one type per state (R9/F-023): `Fitted` is implemented only by `FittedGuard`, so "guard
+present but not fitted" (E0277) and "no guard at all" (E0061, with inference pulling the plate
+into the guard slot) are refused distinctly.
+
+**Evidence:** EXP-11 (`src/requirements.rs`; `tests/ui/unfitted_guard.rs`,
+`tests/ui/missing_guard.rs`; trace.sh green in RESULTS §1 C5).
+
+---
+
+## F-050 — Bounded rework is bounded by provisioning; early success returns reserves that must be re-accounted
+
+**What worked:** under strict conservation a retry consumes provisioned reserves (a second
+blank, a second outcome token, a repair kit), so the rework bound **is** the resources passed
+in — unbounded retry is inexpressible without unbounded inputs, which is the honest statement
+of real rework. Retry paths spend different amounts, so a retried flow returns a `#[must_use]`
+outcome enum, one variant per path (F-046). The cost surfaces symmetrically: on first-try
+success the unused reserves come back and must be re-accounted at the boundary (stores take
+back the blank and the kit; the untried token leaves through its boundary exit) —
+over-provisioning becomes an explicit, typed cost. Failure's labour is recorded in `History`
+like any other consumption (R16).
+
+**What it cost / workaround:** none beyond R5 discipline — every path tested (three tests for
+a one-retry flow).
+
+**Evidence:** EXP-10 (`src/flows.rs::drill_with_one_retry`, `tests/flows.rs`).
+
+---
+
+## F-051 — Money needs no new kernel machinery: one dimension per currency, and an exact-price `Consumer` impl turns wrong payments into type-check-time errors that name the right price
+
+**What couldn't be expressed:** nothing — EXP-12 added **zero** model-core machinery. A
+currency is one downstream `impl Unit` line (the kind trait is open); `container_resource!` +
+`draw_process!` fit cash and accounts verbatim (`draw_funds: Account => Money`), so overspending
+is the standard R15 overdraw E0080 (F-001/F-027/F-030 unchanged); a vendor is one boundary
+object implementing both `Consumer<money>` and `Supplier` (goods), `Next = Self` (F-029);
+purchase is an ordinary conserving process with change-giving as an R3 split, and the whole
+conservation regime covers money unchanged (abandoned change trips the tripwire naming
+`Money<150>`). There is deliberately no shared "money" unit: cross-currency sums are
+unrepresentable (E0308), like adding grams to millimetres.
+
+**Design result:** implement `Consumer` **only at the vendor's exact price** (a concrete
+`Money<350>`, stated once as a named const). Wrong amount and wrong currency then fail at
+**type-check time** — editor- and trybuild-visible, unlike the conservation asserts — and the
+error names the correct price: a single impl makes inference report `expected Money<350>,
+found Money<300>`, and through a priced generic bound the E0277 help lists the implemented
+impl (F-029's observation, now serving prices). Cost: one impl per (vendor, price point).
+
+**What it cost:** minor noise only: a violated assert inside a composed process (`purchase` →
+`split_money`) emits a second E0080 whose instantiation note points inside the library, not at
+the user's line — an echo to learn to skip, kin to F-009's duplicates; and F-044's per-trait
+message granularity shows here as waste-bag phrasing on a vendor error.
+
+**Workaround adopted:** none needed; the conventions become candidate R19 plus one R7 base-unit
+table row.
+
+**Evidence:** EXP-12 (`experiments/exp12-money/RESULTS.md` §1–§2; `tests/ui/*.rs` with pinned
+`.stderr`; `postmono-demo/`).
+
+---
+
+## F-052 — Currency exchange is value-equivalence at a stated integer rate, confined to the boundary; silent rounding is unrepresentable
+
+**What couldn't be expressed:** exchange as a conserving in-model process — correctly so. An
+exchange destroys an amount in one currency dimension and mints the equivalent in another,
+which R1 forbids inside the model; it is therefore a **boundary process** (the R15/F-031
+licence, like drawing from the atmosphere), threading a placeholder boundary object (`Bureau`),
+with the rate stated once as integer consts and every exchange const-asserted
+`OUT * DEN == IN * NUM` (E0080 on violation, F-001 visibility).
+
+**What it cost / gained:** the assert is exact multiplication — no division anywhere — so
+nothing ever rounds silently: an amount with no exact exchange at the rate has **no `OUT` that
+compiles** (333 pence at 117/100 rejects both 389 and 390 euro cents). The working idiom is
+split-then-exchange: split off the largest exchangeable sub-amount (R3) and the remainder stays
+conserved in the original currency; the modeller computes that sub-amount by hand (the
+F-022/F-030 cost, unchanged). A model that wants a rounding loss or spread must model it as an
+explicit fee output — a feature, not a limitation.
+
+**Workaround adopted:** none; documented as the candidate-R19 exchange convention.
+
+**Evidence:** EXP-12 (`src/lib.rs::exchange_gbp_to_eur` and its `compile_fail` doc-test;
+`postmono-demo/src/bin/inexact_exchange.rs`; RESULTS §2 (e)).
 
