@@ -1,7 +1,7 @@
 # Using a Statically-Typed Programming Language for Model-Based Systems Engineering
 
 ## Status
-The requirements below are agreed, and incorporate the amendments supported by the experiment results. The experiment plan at the end **has been run** (all eight experiments, rustc 1.98.1 stable, September 2026): results are in `experiments/exp0N-*/RESULTS.md`, and the consolidated findings log is `FINDINGS.md` at the repository root. The experiment code is exploratory — it is not the start of the real library. Library code has not been started; wait for the user's go-ahead.
+The requirements below are agreed, and incorporate the amendments supported by the experiment results. The experiment plan at the end **has been run** (all eight experiments, rustc 1.98.1 stable, September 2026): results are in `experiments/exp0N-*/RESULTS.md`, and the consolidated findings log is `FINDINGS.md` at the repository root. The experiment code is exploratory — it is not the start of the real library. The real library **has been built**: the `model/` workspace holds `model-core` (the library) and `pilot-workshop` (the downstream validation model), gated end to end by `model/ci.sh`. R16 is agreed but not yet implemented. New models are written as further downstream crates from a natural-language specification following `SPEC_TEMPLATE.md`.
 
 ## Summary
 This is an **experiment**. The aim is to find out how far a type system can be pushed for model-based systems engineering, and to record the limitations and complications that turn up along the way. When there is a choice, prefer the approach that puts more checking into the compiler, even if the types get complicated. Finding where that breaks down is part of the point.
@@ -250,6 +250,14 @@ No stable mechanism or combination makes "nothing is silently lost" a compile-ti
   - One boundary object may be both source and sink: the atmosphere supplies air *and* accepts exhaust, and the mass balance across combustion needs both.
   - An unbounded source of continuous material is a **draw-style boundary process** (`draw_air<const TAKE>(atm: Atmosphere) -> (Air<TAKE>, Atmosphere)`), not a `Supplier` impl. The `Supplier` trait (R12) is **discrete-only**: a finite continuous container cannot implement any supplier-shaped trait on stable — the next state would need the caller-stated remainder, which a trait impl cannot receive (E0207), or const arithmetic in a type, which is nightly-only — and fixed-packet supply forces `combine` chains and makes non-multiple amounts unreachable (FINDINGS.md F-028). `Consumer<In>` impls remain legal and useful on unbounded sinks: the consumed amount travels in `In`, so there is no remainder problem.
 
+### R16. Execution history
+*Design agreed 2026-10-02; not yet implemented — validate with its first implementation (as EXP-10 if run standalone).*
+- Consumed time — and any other event worth recording — is accounted to **`History`**, a sealed boundary consumer: "the past" as an explicit sink. A `History` value doubles as the record of the model execution.
+- **Value-level records only (the sound design).** `History` defuses each tripwired item it consumes (the consumer's sanctioned role, F-008) and keeps an **untripwired, value-level record** of it — process name, what was consumed, magnitudes — in a runtime list inside the sealed type. This is a sanctioned `Vec` under R13 (record count is flow-dependent); comment and log it per R13/R14.
+- **The type-level-recording variant is forbidden.** `History<Cons<Event1, Cons<Event2, …>>>` — keeping events in the type so the final type is the trace — is exactly the F-034 shape: a contents-keeping consumer with no decreasing space parameter. It diverges trait resolution (SIGBUS at the mandated recursion limit) and its ever-growing type infects every downstream signature. Do not build it.
+- **Per-branch histories, merged at joins.** One `History` per concurrent branch of a flow, never a single global one threaded everywhere: under strict conservation (R2) a global `History` is one resource and serializes the entire model, deleting the concurrency R9 exists to allow. A `merge` process combines branch histories at join points. The merged record is a **partial order** — deliberately: concurrent branches have no defined interleaving, and separate-then-merged records state that truthfully.
+- Records must carry enough information for the history to serve as an execution record usable in generated documents (see the documentation open question below).
+
 ## Experiment plan
 
 The requirements above make claims that stable Rust may or may not support well. Each experiment below tests one claim in isolation. They are written so that independent sub-agents can run and evaluate them **in parallel**: no experiment depends on another's code or results, and each one works entirely inside its own directory.
@@ -384,5 +392,12 @@ After all experiments have RESULTS.md files, a single follow-up pass (one agent,
 3. Propose what to build first for the real library.
 This pass waits for the user's go-ahead, and its instruction changes are agreed with the user before being committed.
 
-## Open questions
-None at present.
+## Open questions / future requirements
+Raised 2026-10-02; none yet agreed as requirements. Ordered roughly by how well each fits the type system.
+1. **Failure modes.** Every process currently succeeds. A fallible process should return *either* outcome — success or failure — with **both branches conserving** (a snapped bolt and a scrapped part are outputs, not disappearances). R5's "test every branch" already anticipates this. The strongest candidate for the next requirement.
+2. **Qualifications and safety as types.** Person characteristics (e.g. a certification) and safety resources (guards, PPE) as marker traits and required inputs, so the compiler refuses an unqualified person or an unguarded machine. Nearly free with the existing machinery (R6, R11).
+3. **Money.** A currency base unit (R7 table) makes cost a conserved dimension; payments already have a home, since the strict-supplier rule (R12) pushed them into processes.
+4. **Validation vs verification.** Tests (R5) prove the model self-consistent; nothing yet checks it against reality (does cutting really take 3 s and produce 500 g of swarf?). Needs calibration data and deserves its own requirement so the two are never confused.
+5. **Document generation.** Converting the model back to natural-language work instructions for real-world implementation: process signatures are work-instruction skeletons; `VALUE` constants supply the numbers (R7); `Placeholder:` tags are the open-items list; trace.sh output is the compliance matrix; fill functions are the bill of materials; R9 flows emit a dependency graph, not a fixed procedure. Costs only conventions we nearly have: structured greppable doc-comment fields (`/// Actor:`, `/// Duration:`) and real-world naming on every public item. Candidate R17 plus a `docgen` tool over rustdoc JSON. The forward direction (natural-language spec → model) is already adopted: see `SPEC_TEMPLATE.md`.
+6. **Change impact and subsystem decomposition** — two strengths worth documenting: changing a type makes the compiler enumerate every affected process (impact analysis for free), and crate boundaries are natural subsystem interfaces for multi-team work (R1 layout already points this way).
+7. **Tolerances.** Exact integers cannot say "1500 g ± 10 g". Min/max const pairs could, at real complexity cost — logged as a known limitation rather than solved now.
