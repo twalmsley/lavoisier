@@ -19,9 +19,9 @@
 //! | [`nat`] | Peano type-level naturals (`Zero`/`Succ`), `Nat::VALUE`, `Pred`, `Add`, `Lt`; generated aliases `N0`..`N1000` (R12) |
 //! | [`list`] | Type-level lists of real values (`Cons`/`Nil`) with their length as a `Nat` and a `const` (R12, R13) |
 //! | [`quantity`] | The `Unit` kind trait, the eight R7 base units, sealed `Qty<V, U>`, and conserving `split`/`combine` (R3, R7, R8) |
-//! | [`resource`] | The sealing/tripwire kernel: macros defining sealed, conserved resource types and draw processes (R1, R15) |
+//! | [`resource`] | The sealing/tripwire kernel: macros defining sealed, conserved resource types, draw processes, and outcome tokens for fallible processes (R1, R15, R17) |
 //! | [`boundary`] | `Supplier` (discrete-only), `Consumer`, recursive `SupplyN`/`ConsumeList`, and the generic access processes (R12) |
-//! | [`common`] | Reusable common types: `Person` (with an R15 time budget), `Organisation`, `Location`, `Labour` (R11) |
+//! | [`common`] | Reusable common types: `Person` (with an R15 time budget), the `Qualified` person wrapper (R18), `Organisation`, `Location`, `Labour` (R11) |
 //! | [`history`] | Execution history (R16): the sealed `History` boundary consumer, value-level `Event`/`Entry` records, per-branch creation and partial-order `merge` |
 //! | [`requirement`] | The R10 requirement-trait pattern as macros, compatible with `trace.sh` (R10) |
 //! | `fixtures` | Test fixtures and reference boundary implementations — only with the `test-support` feature (F-004) |
@@ -81,10 +81,26 @@
 //! * Aliases are erased in errors: type-level numbers print as `Succ<…>`
 //!   nests with no decimal value; long types go to `long-type-*.txt` side
 //!   files; the same bound error may appear twice at one call site (F-009).
+//! * **"`DrillFail<…>` doesn't implement `Debug`"** (any outcome bundle, on
+//!   `.unwrap()`/`.expect()`) — you may not panic past the failure arm:
+//!   `match` the `Result` and account for both bundles (R17). The missing
+//!   `Debug` is deliberate (F-047).
+//! * **A second E0080 whose "while instantiating" note points inside the
+//!   library** is a composed-process echo (e.g. `purchase` → `split_money`):
+//!   read the first E0080, whose note carries your call site (F-051).
+//!   Likewise, a delegating wrapper (`Qualified`'s draw) puts the note one
+//!   hop inside the wrapper — the decimal magnitudes still identify the
+//!   offending call (F-043).
+//! * **E0107 "function takes 4 generic arguments but 3 were supplied"** on a
+//!   mixed const/type turbofish — trailing generic arguments cannot be
+//!   omitted; add a `_` for the inferred type parameter:
+//!   `qualified_draw_time::<2000, 3000, 5000, _>(op)` (F-043).
 //! * **Ignore rustc/clippy fix-it suggestions that say** `let _ = …`,
-//!   `drop(…)`, "consider borrowing" or "consider cloning": each one is a
-//!   conservation violation (F-007). The real fix is always to pass the
-//!   resource on, return it, or hand it to a Consumer.
+//!   `drop(…)`, "consider borrowing", "consider cloning" or "consider using
+//!   `Result::expect`": each one is a conservation violation (F-007). The
+//!   real fix is always to pass the resource on, return it, hand it to a
+//!   Consumer — or, for a `Result`, match it and account for both bundles
+//!   (R17).
 //!
 //! ## The `test-support` feature (R1, F-004)
 //!

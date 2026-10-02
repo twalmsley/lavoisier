@@ -34,6 +34,7 @@
 //! | [`crate::consumable_resource!`] | plain discrete resource (`Bolt`) | yes (unless `no_tripwire`) |
 //! | [`crate::container_resource!`] | const-magnitude continuous resource or container (`Gas<G>`, `GasBottle<REMAINING>`) (R15) | yes |
 //! | [`crate::reusable_resource!`] | reusable resource (`Organisation`) — moved in and returned by every process (R2) | no — it legitimately outlives every flow and stays with the caller |
+//! | [`crate::outcome_token!`] | sealed outcome token for a fallible process (`DrillOutcome`) (R17, F-042) | yes |
 //!
 //! [`crate::draw_process!`] generates the R15 draw process over two container
 //! resources (caller-stated remainder, conservation assert).
@@ -1115,6 +1116,221 @@ macro_rules! draw_process {
     };
 }
 
+/// Defines a sealed, tripwired **outcome token** (R17, F-042): the boundary
+/// object through which variability enters a model with a fallible process,
+/// without making any process nondeterministic.
+///
+/// One token type per fallible-process kind, runtime-valued — **never two
+/// token types selected by the flow**: two types make the outcome part of the
+/// flow's static text, with no `Result` and no code ever forced to handle the
+/// arm it did not pick (F-042). The token wraps a **private enum in a sealed
+/// struct** (R1's "never a `pub enum` resource"); its value is injected only
+/// at the system boundary (the generated constructors, placeholders until
+/// calibrated) or by test-support fixtures. A flow holding a token cannot
+/// read it: the only way to learn the outcome is to run the consuming process
+/// and handle the `Result`, so both arms must be written.
+///
+/// ## What the expansion contains
+///
+/// * a `pub(crate)` outcome-kind enum (`Success`/`Failure`), `Copy` — a
+///   value-level record, not a resource; invisible outside the defining
+///   crate, so flows cannot read tokens;
+/// * the sealed `pub` token struct: private fields, no public constructor,
+///   no `Clone`/`Copy`/`Default`, `#[must_use]`, **tripwired** (F-008): a
+///   provisioned trial that is neither run nor returned to the environment
+///   fails the test that leaked it;
+/// * a `pub(crate)` `consume_kind(self)` — the sealed way for **the owning
+///   process** (exactly one per token type, R1) to consume the token and
+///   realise the outcome;
+/// * `pub` boundary constructors (one success, one failure), each tagged
+///   `/// Placeholder:` — refine to a calibrated outcome source (validation,
+///   open question 1);
+/// * a `pub` boundary **exit** for an untried token (R12): the accounted
+///   path for a provisioned retry trial a flow never needed (F-050);
+/// * `test_fixture_success()`/`test_fixture_failure()` constructors gated
+///   behind the invoking crate's `test-support` feature (F-004).
+///
+/// ## Grammar
+///
+/// ```text
+/// outcome_token! {
+///     /// docs…
+///     Name ( KindName ) ,          (KindName: the pub(crate) outcome enum)
+///     success = success_ctor,      (boundary constructor names)
+///     failure = failure_ctor,
+///     exit = exit_fn,              (boundary exit for an untried token)
+///     must_use = "…"
+/// }
+/// ```
+///
+/// The token is non-generic by design: a fallible-process *kind* has one
+/// token type, and per-call variation travels in the token's value, not its
+/// type (F-042).
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// A fallible welding step: the process consumes the token through
+/// `consume_kind` (callable only inside the defining crate) and returns a
+/// `Result`; an untried token leaves through the boundary exit.
+///
+/// ```
+/// model_core::outcome_token! {
+///     /// One trial of the environment: whether a single welding attempt
+///     /// succeeds or the torch flames out.
+///     WeldOutcome(WeldOutcomeKind),
+///     success = weld_goes_well,
+///     failure = weld_flames_out,
+///     exit = return_weld_outcome,
+///     must_use = "WeldOutcome is a boundary token: run it through exactly one fallible process or return it to the environment"
+/// }
+///
+/// /// The one process that consumes the token (R17): deterministic in its
+/// /// inputs — the variability is the token's value.
+/// fn weld(outcome: WeldOutcome) -> Result<(), ()> {
+///     match outcome.consume_kind() {
+///         WeldOutcomeKind::Success => Ok(()),
+///         WeldOutcomeKind::Failure => Err(()),
+///     }
+/// }
+///
+/// fn main() {
+///     assert!(weld(weld_goes_well()).is_ok());
+///     assert!(weld(weld_flames_out()).is_err());
+///     // An untried token has an accounted boundary exit (F-050).
+///     return_weld_outcome(weld_goes_well());
+/// }
+/// ```
+#[macro_export]
+macro_rules! outcome_token {
+    (
+        $(#[$meta:meta])*
+        $Name:ident ( $Kind:ident ),
+        success = $success_fn:ident,
+        failure = $failure_fn:ident,
+        exit = $exit_fn:ident,
+        must_use = $msg:literal
+    ) => {
+        /// The private outcome value inside the token: a value-level record
+        /// (like R16's `Event`), not a resource — `Copy` is fine here because
+        /// the *token* is the conserved thing, and the token is sealed and
+        /// tripwired. `pub(crate)`: only the defining crate's owning process
+        /// can name it, so flows cannot read outcomes.
+        #[derive(Clone, Copy)]
+        pub(crate) enum $Kind {
+            /// The trial will succeed.
+            Success,
+            /// The trial will fail.
+            Failure,
+        }
+
+        $(#[$meta])*
+        ///
+        /// Sealed outcome token (R17, F-042): a private enum wrapped in a
+        /// sealed struct, tripwired (F-008). Its value is injected only at
+        /// the system boundary or by test-support fixtures; a flow cannot
+        /// read it — the only way to learn the outcome is to run the
+        /// consuming process and handle both arms of its `Result`.
+        #[must_use = $msg]
+        pub struct $Name {
+            kind: $Kind,
+            _seal: (),
+        }
+
+        impl $Name {
+            /// Mints one token. Private: only the generated boundary
+            /// constructors and fixtures may create an outcome (R1, R12).
+            #[allow(dead_code)]
+            fn mint(kind: $Kind) -> Self {
+                $Name { kind, _seal: () }
+            }
+
+            /// Defuses the tripwire and lets the token go — the single
+            /// allowed forget site for this resource (R1, F-008), called only
+            /// by `consume_kind` and the boundary exit.
+            #[allow(dead_code)]
+            fn defuse(self) {
+                // The one sanctioned mem::forget for this type (F-008).
+                #[allow(clippy::mem_forget)]
+                ::core::mem::forget(self);
+            }
+
+            /// Consumes the token and reveals its kind — callable only
+            /// inside the defining crate (`pub(crate)`), i.e. only by the
+            /// one process that realises the outcome (R17). (A type with
+            /// `Drop` cannot be destructured, F-032, hence read-then-defuse.)
+            #[allow(dead_code)]
+            pub(crate) fn consume_kind(self) -> $Kind {
+                let kind = self.kind;
+                self.defuse();
+                kind
+            }
+
+            /// Test fixture: a success token from nowhere, for downstream
+            /// test code only (R1, F-004; `test-support` feature,
+            /// dev-dependencies only).
+            #[cfg(feature = "test-support")]
+            #[allow(dead_code)] // fixture API surface; unused in private invocations
+            pub fn test_fixture_success() -> Self {
+                Self::mint($Kind::Success)
+            }
+
+            /// Test fixture: a failure token from nowhere (R1, F-004) — both
+            /// outcomes of one process are testable by injecting either
+            /// token.
+            #[cfg(feature = "test-support")]
+            #[allow(dead_code)] // fixture API surface; unused in private invocations
+            pub fn test_fixture_failure() -> Self {
+                Self::mint($Kind::Failure)
+            }
+        }
+
+        impl ::core::ops::Drop for $Name {
+            /// Conservation tripwire (R1 layer 2, F-008): a provisioned
+            /// trial that is dropped without being run (or returned to the
+            /// environment) is a leak. Stands down while the thread is
+            /// already panicking.
+            fn drop(&mut self) {
+                if !::std::thread::panicking() {
+                    panic!(
+                        "resource leak: {} dropped without being consumed (R1 conservation)",
+                        stringify!($Name)
+                    );
+                }
+            }
+        }
+
+        /// A trial that will succeed enters the model (R17): the
+        /// environment's variability, injected at the boundary (R12) so
+        /// processes stay deterministic. A flow cannot read the token; it
+        /// must run the consuming process and handle both arms of the
+        /// `Result`.
+        ///
+        /// Placeholder: the environment — refine to a calibrated outcome
+        /// source (validation, open question 1) or use the test fixtures.
+        #[allow(dead_code)]
+        pub fn $success_fn() -> $Name {
+            $Name::mint($Kind::Success)
+        }
+
+        /// A trial that will fail enters the model (R17).
+        ///
+        /// Placeholder: the environment — refine to a calibrated outcome
+        /// source (validation, open question 1) or use the test fixtures.
+        #[allow(dead_code)]
+        pub fn $failure_fn() -> $Name {
+            $Name::mint($Kind::Failure)
+        }
+
+        /// An untried outcome token returns to the environment (R12 exit):
+        /// the accounted path for a provisioned retry trial a flow never
+        /// needed (F-050).
+        #[allow(dead_code)]
+        pub fn $exit_fn(token: $Name) {
+            token.defuse();
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     // The macros expand here, in the defining crate's own test module, so
@@ -1299,6 +1515,61 @@ mod tests {
     fn generic_reusable_outlives_the_flow_quietly() {
         let rig: Rig<Red, 4> = Rig::mint();
         let _stays_with_the_caller = rig;
+    }
+
+    // ---- Outcome tokens (R17, F-042) ----
+
+    crate::outcome_token! {
+        /// A demo trial: whether a single stamping attempt succeeds.
+        StampOutcome(StampOutcomeKind),
+        success = stamp_goes_well,
+        failure = stamp_jams,
+        exit = return_stamp_outcome,
+        must_use = "StampOutcome is a boundary token: run it through exactly one fallible process or return it to the environment"
+    }
+
+    /// The one process consuming the demo token (R17): both arms are
+    /// ordinary conserving outcomes.
+    fn stamp(outcome: StampOutcome) -> Result<(), ()> {
+        match outcome.consume_kind() {
+            StampOutcomeKind::Success => Ok(()),
+            StampOutcomeKind::Failure => Err(()),
+        }
+    }
+
+    /// The injected token value decides the arm (R17): processes stay
+    /// deterministic, both outcomes are testable, and the consumed token is
+    /// quiet.
+    #[test]
+    fn outcome_token_realises_the_injected_outcome() {
+        assert!(stamp(stamp_goes_well()).is_ok());
+        assert!(stamp(stamp_jams()).is_err());
+    }
+
+    /// An untried token has an accounted exit at the boundary (R12, F-050):
+    /// the tripwire stays quiet.
+    #[test]
+    fn untried_outcome_token_returns_to_the_environment() {
+        let token = stamp_goes_well();
+        return_stamp_outcome(token);
+    }
+
+    /// An abandoned token is caught by its tripwire at test time (R1 layer 2,
+    /// F-008): a provisioned trial must be run or returned, never dropped.
+    #[test]
+    #[should_panic(expected = "resource leak: StampOutcome dropped without being consumed")]
+    fn abandoned_outcome_token_trips_the_tripwire() {
+        let token = stamp_jams();
+        let _still_bound_but_never_run = token;
+    }
+
+    /// Outcome-token fixtures are gated exactly like resource fixtures (R1,
+    /// F-004): both outcomes can be conjured by downstream tests.
+    #[cfg(feature = "test-support")]
+    #[test]
+    fn outcome_token_fixtures_are_feature_gated() {
+        assert!(stamp(StampOutcome::test_fixture_success()).is_ok());
+        assert!(stamp(StampOutcome::test_fixture_failure()).is_err());
     }
 
     /// Generic `test_fixture()`s are gated exactly like non-generic ones

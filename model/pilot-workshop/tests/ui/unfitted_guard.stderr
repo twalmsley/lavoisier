@@ -1,0 +1,46 @@
+error[E0277]: drilling may not start: `MachineGuard` is not a machine guard fitted to the drill (REQ-005)
+  --> tests/ui/unfitted_guard.rs:13:62
+   |
+13 |     let r = drill_holes_fallible::<900, 880, 20, 880, 20, _, _>(
+   |                                                              ^ REQ-005: drilling requires the machine guard fitted
+   |
+   = help: the trait `Fitted` is not implemented for `MachineGuard`
+   = note: fitting is a process (one type per state, R9): `fit_guard(MachineGuard) -> FittedGuard`
+help: the trait `Fitted` is implemented for `FittedGuard`
+  --> src/resources.rs
+   |
+   | impl crate::characteristics::Fitted for FittedGuard {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `MachineGuard` to implement `Req005FittedDrillGuard`
+note: required by a bound in `drill_holes_fallible`
+  --> src/resources.rs
+   |
+   | ...rtifiedDrillingOperator, G: Req005FittedDrillGuard>(operator: O, guard: G, bit: DrillBit, plate: Plate<PLATE>, outcome: DrillOut...
+   |                                ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `drill_holes_fallible`
+
+error[E0277]: `MachineGuard` is not a machine guard fitted to the drill (REQ-005: drilling requires the guard fitted)
+  --> tests/ui/unfitted_guard.rs:13:13
+   |
+13 |       let r = drill_holes_fallible::<900, 880, 20, 880, 20, _, _>(
+   |  _____________^
+14 | |         operator,
+15 | |         guard,
+16 | |         supply_drill_bit(),
+17 | |         supply_plate::<900>(),
+18 | |         outcome_success(),
+19 | |     );
+   | |_____^ a fitted machine guard is required here
+   |
+   = help: the trait `Fitted` is not implemented for `MachineGuard`
+   = note: fitting is a process (one type per state, R9): `fit_guard(MachineGuard) -> FittedGuard`
+help: the trait `Fitted` is implemented for `FittedGuard`
+  --> src/resources.rs
+   |
+   | impl crate::characteristics::Fitted for FittedGuard {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `MachineGuard` to implement `Req005FittedDrillGuard`
+note: required by a bound in `DrillOk`
+  --> src/resources.rs
+   |
+   | pub struct DrillOk<O: Req004CertifiedDrillingOperator, G: Req005FittedDrillGuard, const P_LEFT: u64, const SW: u64> {
+   |                                                           ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `DrillOk`

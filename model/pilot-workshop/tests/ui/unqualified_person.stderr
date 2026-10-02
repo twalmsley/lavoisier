@@ -1,0 +1,48 @@
+error[E0277]: this person may not drill: `Person<5000>` is not a certified drilling operator (REQ-004)
+  --> tests/ui/unqualified_person.rs:13:59
+   |
+13 |     let r = drill_holes_fallible::<900, 880, 20, 880, 20, _, _>(
+   |                                                           ^ REQ-004: drilling requires a certified drilling operator
+   |
+   = help: the trait `CertifiedDriller` is not implemented for `Person<5000>`
+   = note: qualifications are granted at the boundary (R12): `qualify::<DrillingCert, BUDGET>(person)` wraps a `Person` into a `Qualified` operator
+help: the trait `CertifiedDriller` is implemented for `Qualified<DrillingCert, MS>`
+  --> src/characteristics.rs
+   |
+   | / impl<const MS: u64> CertifiedDriller
+   | |     for model_core::common::Qualified<DrillingCert, MS>
+   | |_______________________________________________________^
+   = note: required for `Person<5000>` to implement `Req004CertifiedDrillingOperator`
+note: required by a bound in `drill_holes_fallible`
+  --> src/resources.rs
+   |
+   | ...u64, const FSW: u64, O: Req004CertifiedDrillingOperator, G: Req005FittedDrillGuard>(operator: O, guard: G, bit: DrillBit, plate:...
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `drill_holes_fallible`
+
+error[E0277]: `Person<5000>` is not certified for drilling (REQ-004: drilling requires a certified operator)
+  --> tests/ui/unqualified_person.rs:13:13
+   |
+13 |       let r = drill_holes_fallible::<900, 880, 20, 880, 20, _, _>(
+   |  _____________^
+14 | |         person,
+15 | |         guard,
+16 | |         supply_drill_bit(),
+17 | |         supply_plate::<900>(),
+18 | |         outcome_success(),
+19 | |     );
+   | |_____^ a person certified for drilling is required here
+   |
+   = help: the trait `CertifiedDriller` is not implemented for `Person<5000>`
+   = note: qualifications are granted at the boundary (R12): `qualify::<DrillingCert, BUDGET>(person)` wraps a `Person` into a `Qualified` operator - a plain `Person` carries no qualification
+help: the trait `CertifiedDriller` is implemented for `Qualified<DrillingCert, MS>`
+  --> src/characteristics.rs
+   |
+   | / impl<const MS: u64> CertifiedDriller
+   | |     for model_core::common::Qualified<DrillingCert, MS>
+   | |_______________________________________________________^
+   = note: required for `Person<5000>` to implement `Req004CertifiedDrillingOperator`
+note: required by a bound in `DrillOk`
+  --> src/resources.rs
+   |
+   | pub struct DrillOk<O: Req004CertifiedDrillingOperator, G: Req005FittedDrillGuard, const P_LEFT: u64, const SW: u64> {
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `DrillOk`

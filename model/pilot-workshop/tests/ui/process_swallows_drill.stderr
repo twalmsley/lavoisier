@@ -1,20 +1,20 @@
 error[E0382]: use of moved value: `drill`
-  --> tests/ui/process_swallows_drill.rs:34:63
+  --> tests/ui/process_swallows_drill.rs:45:68
    |
-28 |     let drill = supply_drill();
+38 |     let drill = supply_drill();
    |         ----- move occurs because `drill` has type `Drill`, which does not implement the `Copy` trait
 ...
-31 |     let (person, _d1, _s1, _l1) = bad_drill_holes(person, drill, p1);
-   |                                                           ----- value moved here
+42 |     let (operator, guard, _d1, _s1, _l1) = bad_drill_holes(operator, drill, guard, p1);
+   |                                                                      ----- value moved here
 ...
-34 |         drill_holes::<2000, 6000, 8000, 900, 880, 20>(person, drill, p2);
-   |                                                               ^^^^^ value used here after move
+45 |         drill_holes::<2000, 6000, 8000, 900, 880, 20, _>(operator, drill, guard, p2);
+   |                                                                    ^^^^^ value used here after move
    |
 note: consider changing this parameter type in function `bad_drill_holes` to borrow instead if owning the value isn't necessary
-  --> tests/ui/process_swallows_drill.rs:17:12
+  --> tests/ui/process_swallows_drill.rs:20:12
    |
-15 | fn bad_drill_holes(
+18 | fn bad_drill_holes(
    |    --------------- in this function
-16 |     person: Person<10_000>,
-17 |     drill: Drill,
+19 |     operator: DrillingOperator<10_000>,
+20 |     drill: Drill,
    |            ^^^^^ this parameter takes ownership of the value

@@ -8,26 +8,62 @@
 //! (F-021); the report runs as a CI gate and fails on any requirement with no
 //! verifying test.
 //!
+//! **Every requirement trait carries its own one-line
+//! `#[diagnostic::on_unimplemented]`** phrased as the requirement and naming
+//! its REQ id, passed through `requirement!`'s meta slot (R10 rule 8, F-044):
+//! a failing marker's own attribute is ignored when the marker fails as a
+//! supertrait obligation of a requirement bound — only the root obligation's
+//! message is shown — so the requirement trait's message is the one modellers
+//! will see. Marker-level attributes stay too, for direct marker bounds. The
+//! attributes are single-line on purpose: trace.sh has no scope awareness and
+//! a multi-line attribute between the `/// REQ-NNN:` line and the trait would
+//! detach them (F-021).
+//!
 //! Requirements are used **only as bounds** in process signatures (F-019) —
-//! see `resources::processes::fasten` (REQ-001, REQ-002) and
-//! `resources::processes::discard_swarf` (REQ-003).
+//! see `resources::processes::fasten` (REQ-001, REQ-002),
+//! `resources::processes::discard_swarf` (REQ-003), and the drilling
+//! processes `resources::processes::{drill_holes, drill_holes_fallible}`
+//! (REQ-004, REQ-005). The sentence "drilling requires a certified operator
+//! and a fitted guard" spans two participants, so it decomposes into one
+//! requirement trait per constrained parameter — REQ-004 on the operator,
+//! REQ-005 on the guard — both bound on the same `fn`-name line (R10 rule 4,
+//! F-049); trace.sh then reports the one process under both ids.
 
-use crate::characteristics::{Drilled, IsBolt, Length15mm, M8, Steel, SwarfConsumer};
+use crate::characteristics::{
+    CertifiedDriller, Drilled, Fitted, IsBolt, Length15mm, M8, Steel, SwarfConsumer,
+};
 
 model_core::requirement! {
     /// REQ-001: Fastening bolts must be M8 steel, 15 mm long.
+    #[diagnostic::on_unimplemented(message = "this bolt may not be used for fastening: `{Self}` is not an M8 steel 15 mm bolt (REQ-001)", label = "REQ-001: fastening requires M8 steel bolts, 15 mm long", note = "the approved catalogue bolt is `Bolt<SizeM8, Steel, L15>` (`FasteningBolt`)")]
     pub trait Req001FasteningBolt: (IsBolt + M8 + Steel + Length15mm);
     assert = assert_req001;
 }
 
 model_core::requirement! {
     /// REQ-002: Plates must be drilled before they are fastened.
+    #[diagnostic::on_unimplemented(message = "this plate may not be fastened: `{Self}` has not been drilled (REQ-002)", label = "REQ-002: plates must be drilled before they are fastened", note = "drilling is a process (one type per state, R9): `drill_holes` turns a `Plate` into a `DrilledPlate`")]
     pub trait Req002DrilledBeforeFastening: (Drilled);
     assert = assert_req002;
 }
 
 model_core::requirement! {
     /// REQ-003: All swarf must reach a dedicated swarf waste consumer.
+    #[diagnostic::on_unimplemented(message = "swarf may not go here: `{Self}` is not a dedicated swarf waste consumer (REQ-003)", label = "REQ-003: all swarf must reach a dedicated swarf waste consumer", note = "the dedicated consumer is the `SwarfBin` (any fill state); it leaves the model through `dispose_bin`")]
     pub trait Req003SwarfWasteConsumer: (SwarfConsumer);
     assert = assert_req003;
+}
+
+model_core::requirement! {
+    /// REQ-004: Drilling must be performed by an operator certified for drilling.
+    #[diagnostic::on_unimplemented(message = "this person may not drill: `{Self}` is not a certified drilling operator (REQ-004)", label = "REQ-004: drilling requires a certified drilling operator", note = "qualifications are granted at the boundary (R12): `qualify::<DrillingCert, BUDGET>(person)` wraps a `Person` into a `Qualified` operator")]
+    pub trait Req004CertifiedDrillingOperator: (CertifiedDriller);
+    assert = assert_req004;
+}
+
+model_core::requirement! {
+    /// REQ-005: Drilling must happen behind a machine guard fitted to the drill.
+    #[diagnostic::on_unimplemented(message = "drilling may not start: `{Self}` is not a machine guard fitted to the drill (REQ-005)", label = "REQ-005: drilling requires the machine guard fitted", note = "fitting is a process (one type per state, R9): `fit_guard(MachineGuard) -> FittedGuard`")]
+    pub trait Req005FittedDrillGuard: (Fitted);
+    assert = assert_req005;
 }

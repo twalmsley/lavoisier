@@ -50,3 +50,39 @@ pub trait Drilled {}
 /// subject). Implemented by [`crate::resources::SwarfBin`] in every state.
 #[diagnostic::on_unimplemented(message = "`{Self}` is not a dedicated swarf waste consumer (REQ-003: all swarf must reach one)", label = "a swarf waste consumer is required here")]
 pub trait SwarfConsumer {}
+
+// ---------------------------------------------------------------------------
+// Qualifications and safety states (R18): characteristics like any other.
+// ---------------------------------------------------------------------------
+
+/// Qualification value (R18): certified to operate the pillar drill. A plain
+/// public marker implementing model-core's open `Qualification` kind trait —
+/// **not a resource**: it carries no sealed state and cannot mint anything.
+/// What *grants* the qualification is the boundary process
+/// `model_core::common::boundary::qualify` (a placeholder for the real
+/// training process, R12).
+pub struct DrillingCert;
+impl model_core::common::Qualification for DrillingCert {}
+
+/// Characteristic (R18): this person is certified for drilling. Attached by
+/// the one-line blanket impl over the time budget below (F-043), **never to
+/// `model_core::common::Person` itself** — `Person` carries no qualification
+/// slot, so a direct impl would certify every person in the model at once.
+#[diagnostic::on_unimplemented(message = "`{Self}` is not certified for drilling (REQ-004: drilling requires a certified operator)", label = "a person certified for drilling is required here", note = "qualifications are granted at the boundary (R12): `qualify::<DrillingCert, BUDGET>(person)` wraps a `Person` into a `Qualified` operator - a plain `Person` carries no qualification")]
+pub trait CertifiedDriller {}
+
+// The blanket-impl-over-budgets pattern (R6 bridging, F-043): one line per
+// qualification value, blanket over the time budget, added in the same commit
+// as the qualification value itself.
+impl<const MS: u64> CertifiedDriller
+    for model_core::common::Qualified<DrillingCert, MS>
+{
+}
+
+/// Characteristic (R18): a machine guard **fitted to the drill** — the safe
+/// state. Implemented only by `crate::resources::FittedGuard`, never by the
+/// unfitted `MachineGuard` (one type per state, R9/F-023), which is what lets
+/// REQ-005 distinguish "guard present but not fitted" from "guard fitted" at
+/// compile time (F-049).
+#[diagnostic::on_unimplemented(message = "`{Self}` is not a machine guard fitted to the drill (REQ-005: drilling requires the guard fitted)", label = "a fitted machine guard is required here", note = "fitting is a process (one type per state, R9): `fit_guard(MachineGuard) -> FittedGuard`")]
+pub trait Fitted {}

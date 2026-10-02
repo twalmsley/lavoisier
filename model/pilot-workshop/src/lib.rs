@@ -13,10 +13,12 @@
 //!
 //! | Module | Contents |
 //! |---|---|
-//! | [`characteristics`] | Marker characteristic traits (R6): `IsBolt`, `M8`, `Steel`, `Length15mm`, `Drilled`, `SwarfConsumer`, … |
+//! | [`characteristics`] | Marker characteristic traits (R6): `IsBolt`, `M8`, `Steel`, `Length15mm`, `Drilled`, `SwarfConsumer`, plus the R18 qualification/safety markers `CertifiedDriller` and `Fitted` |
 //! | [`catalogue`] | The parameterized bolt catalogue `Bolt<Size, Material, Length>` with kind traits and one-line bridging impls (R6); the `BoltBox` supplier and its sealed fill machinery (R12) |
-//! | [`requirements`] | The three modelled-system requirements (REQ-001, REQ-002, REQ-003) as R10 requirement traits via `model_core::requirement!` |
-//! | [`resources`] | The sealed resource family (R1): `SteelSheet`, `Plate`/`DrilledPlate`, `Swarf`, `Drill`, `Assembly`, the `SwarfBin` and `Customer` consumers, with `boundary` and `processes` child modules (F-006, F-031) |
+//! | [`requirements`] | The five modelled-system requirements (REQ-001..REQ-005) as R10 requirement traits via `model_core::requirement!`, each with a REQ-phrased `on_unimplemented` (R10 rule 8, F-044) |
+//! | [`resources`] | The sealed resource family (R1): `SteelSheet`, `Plate`/`DrilledPlate`, `Swarf`, `Drill`, `Assembly`, the `SwarfBin` and `Customer` consumers — plus the R17 failure states (`ScrapPlate`, `BrokenDrillBit`), the `DrillOutcome` token and the fallible drilling step, and the R18 safety states (`MachineGuard`/`FittedGuard`) — with `boundary` and `processes` child modules (F-006, F-031) |
+//! | [`flows`] | Fallible-flow compositions (R17): both-arms convergence and the bounded repair-and-retry with its `RetryOutcome` enum (F-046, F-050) |
+//! | [`money`] | Money as a conserved dimension (R19): `Money`/`Account`, the exact-price `Vendor`, and the `purchase` process with change as an R3 split (F-051) |
 //!
 //! ## Conservation regime (R1)
 //!
@@ -29,7 +31,7 @@
 //!
 //! ## Traceability (R10)
 //!
-//! The three requirements are defined in [`requirements`] and reported by the
+//! The five requirements are defined in [`requirements`] and reported by the
 //! workspace `trace.sh` (a CI gate). Satisfying types and processes carry
 //! compile-check-backed doc tags; tests are tagged with the requirement IDs
 //! they verify.
@@ -42,5 +44,7 @@
 
 pub mod catalogue;
 pub mod characteristics;
+pub mod flows;
+pub mod money;
 pub mod requirements;
 pub mod resources;
