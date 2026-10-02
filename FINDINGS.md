@@ -3,7 +3,8 @@
 Findings log required by R14 of `instructions.md`. F-001…F-026 consolidated on 2026-09-30
 from the `RESULTS.md` files of experiments EXP-01 through EXP-08; F-027…F-033 added the same
 day from EXP-09 (`experiments/exp0N-*/RESULTS.md`); F-034 added 2026-10-02 during the
-`model-core` build; F-035…F-039 added 2026-10-02 during the `pilot-workshop` build.
+`model-core` build; F-035…F-039 added 2026-10-02 during the `pilot-workshop` build; F-036 resolved and F-040
+added 2026-10-02 by the kernel-macro generics extension.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -839,8 +840,20 @@ plain ident, not a generics list.
 checklist (R1) and keep them beside a macro-built sibling for comparison; extending the kernel
 macros to accept generics is future work.
 
-**Evidence:** `pilot-workshop/src/catalogue.rs`, `pilot-workshop/src/resources.rs`
-(`Assembly`).
+**RESOLVED (2026-10-02):** the kernel macros now accept generic parameters (type params with
+one path bound each, then const params) and, for `consumable_resource!`, sealed payload
+fields; the pilot's `Bolt` and `Assembly` are macro-built and their hand-written
+sealing/tripwire duplication is deleted. The viable stable parsing pattern is a shared
+tt-muncher with trailing-comma accumulators and callback finish macros — shaped repetitions
+are impossible because `macro_rules!` reports a local ambiguity between an ident fragment and
+the `const` keyword as alternatives at one position (NT-vs-token is never disambiguated by
+lookahead). Residual grammar costs: types before consts, one bound per param (compound bounds
+go behind a named kind/requirement trait per R6/R10), no lifetimes/defaults/where clauses,
+and `container_resource!` reserves the magnitude parameter name `V`. See F-040 for the
+payload-field semantics.
+
+**Evidence:** `model/model-core/src/resource.rs` (kernel, grammar rustdoc,
+`__mc_parse_generics!`); `pilot-workshop/src/catalogue.rs`, `pilot-workshop/src/resources.rs`.
 
 ---
 
@@ -892,4 +905,28 @@ consumer plays the sanctioned-`mem::forget` role for everything it kept.
 
 **Evidence:** `pilot-workshop/src/resources.rs` (`dispose_bin`,
 `swarf_bin_keeps_swarf_until_disposal`).
+
+---
+
+## F-040 — Macro-held payload contents are consumption-only and must be untripwired
+
+**What couldn't be expressed:** general held contents in macro-built resources. The kernel's
+payload fields (F-036 resolution) support exactly one ownership shape: contents enter via
+`mint(field, …)` (the conserving combinator) and leave only when the whole resource is
+defused at a consumer — `Assembly`'s semantics. Contents that must come back out (a bin
+emptied at disposal, F-039) do not fit and stay hand-written consumers.
+
+**What it cost:** held contents must be **untripwired**: `defuse`'s single sanctioned
+`mem::forget` silently defuses any tripwired payload along with the wrapper, which would erase
+the payload's own leak protection. The new `no_tripwire` marker covers kept item types
+(e.g. `Bolt`), omitting both `Drop` and `defuse` (a `forget` on a `Drop`-less type is itself a
+leak path, `clippy::forget_non_drop`). Also, the generic tripwire message now reports
+`core::any::type_name::<Self>()` — full paths with decimal const magnitudes (F-027) instead of
+the old bare name.
+
+**Workaround adopted:** the documented rule — tripwired wrappers hold untripwired contents;
+extractable contents are a `Consumer` with a sealed disposal path (F-039).
+
+**Evidence:** `model/model-core/src/resource.rs` (payload grammar rustdoc and tests);
+`pilot-workshop/src/resources.rs` (`Assembly`, `SwarfBin` contrast).
 

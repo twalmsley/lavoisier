@@ -22,8 +22,9 @@ use model_core::common::Person;
 use model_core::common::boundary::new_person;
 use model_core::fixtures::new_test_sink;
 use model_core::nat::aliases::{N1, N3, N4};
+use model_core::list::{Cons, Nil};
 use pilot_workshop::catalogue::boundary::full_box;
-use pilot_workshop::catalogue::{EmptyBoltBox, FasteningBolt};
+use pilot_workshop::catalogue::{Bolt, EmptyBoltBox, FasteningBolt, FourOf};
 use pilot_workshop::resources::boundary::{
     dispose_bin, new_customer, new_swarf_bin, supply_drill, supply_sheet,
 };
@@ -157,4 +158,23 @@ fn fixtures_construct_sealed_resources_for_downstream_tests() {
     assert_eq!(Swarf::<25>::VALUE, 25);
     let bin = discard_swarf(new_swarf_bin::<N1>(), swarf);
     dispose_bin(bin);
+}
+
+/// The generic fixture path (F-036, F-004): macro-generated `test_fixture()`s
+/// on parameterized resources work downstream exactly like non-generic ones —
+/// including the payload-holding `Assembly`, whose fixture takes by value the
+/// real bolts it keeps (R12). The fixtures still have to be accounted for:
+/// the assembly ships to the customer like any real one.
+#[test]
+fn generic_fixtures_construct_sealed_resources_for_downstream_tests() {
+    let bolts: FourOf<FasteningBolt> = Cons(
+        Bolt::test_fixture(),
+        Cons(
+            Bolt::test_fixture(),
+            Cons(Bolt::test_fixture(), Cons(Bolt::test_fixture(), Nil)),
+        ),
+    );
+    let assembly: Assembly<FasteningBolt, 42> = Assembly::test_fixture(bolts);
+    assert_eq!(Assembly::<FasteningBolt, 42>::PLATE_GRAMS, 42);
+    let _customer = send_to(new_customer(), assembly);
 }
