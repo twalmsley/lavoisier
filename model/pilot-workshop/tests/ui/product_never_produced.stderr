@@ -1,0 +1,25 @@
+error[E0308]: arguments to this function are incorrect
+  --> tests/ui/product_never_produced.rs:19:77
+   |
+19 |     let (_assembly, _rest): (Assembly<FasteningBolt, 1800>, EmptyBoltBox) = fasten(p1, p2, bolts);
+   |                                                                             ^^^^^^
+   |
+note: expected `DrilledPlate<_>`, found `Plate<900>`
+  --> tests/ui/product_never_produced.rs:19:84
+   |
+19 |     let (_assembly, _rest): (Assembly<FasteningBolt, 1800>, EmptyBoltBox) = fasten(p1, p2, bolts);
+   |                                                                                    ^^
+   = note: expected struct `DrilledPlate<_>`
+              found struct `Plate<900>`
+note: expected `DrilledPlate<_>`, found `Plate<900>`
+  --> tests/ui/product_never_produced.rs:19:88
+   |
+19 |     let (_assembly, _rest): (Assembly<FasteningBolt, 1800>, EmptyBoltBox) = fasten(p1, p2, bolts);
+   |                                                                                        ^^
+   = note: expected struct `DrilledPlate<_>`
+              found struct `Plate<900>`
+note: function defined here
+  --> src/resources.rs
+   |
+   |     pub fn fasten<B: Req001FasteningBolt, S: SupplyN<N4, Taken = FourOf<B>>, const PA: u64, const PB: u64, const OUT: u64>(a: Drill...
+   |            ^^^^^^

@@ -1,0 +1,11 @@
+error[E0382]: use of moved value: `person`
+  --> tests/ui/person_used_twice.rs:20:57
+   |
+11 |     let person = new_person::<10_000>();
+   |         ------ move occurs because `person` has type `Person<10000>`, which does not implement the `Copy` trait
+...
+18 |         drill_holes::<2000, 8000, 10_000, 900, 880, 20>(person, drill_1, p1);
+   |                                                         ------ value moved here
+19 |     let (_person_b, _drill_2, _d2, _s2, _l2) =
+20 |         drill_holes::<2000, 8000, 10_000, 900, 880, 20>(person, drill_2, p2);
+   |                                                         ^^^^^^ value used here after move

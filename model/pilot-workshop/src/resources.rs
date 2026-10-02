@@ -1,0 +1,530 @@
+//! The workshop's sealed resource family (R1), its creation/exit boundary
+//! (R12) and its processes (F-031).
+//!
+//! Layout per F-006/F-031: this module holds the sealed resource types, with
+//! the [`boundary`] (suppliers, bin/customer constructors, waste disposal)
+//! and the [`processes`] (which mint quantity-bearing values and therefore
+//! live inside the privacy boundary) as child modules.
+//!
+//! One type per processing state (R9, F-023): a [`Plate`] is not a
+//! [`DrilledPlate`], so a flow that fastens an undrilled plate is a compile
+//! error reading "expected `DrilledPlate`, found `Plate`" — these plates have
+//! not been drilled yet.
+//!
+//! Every consumable here carries the kernel's tripwire `Drop` (R1 layer 2,
+//! F-008): swarf, plates, sheets or assemblies that never reach a consumer
+//! fail the test that leaked them. Reusable resources ([`Drill`], and
+//! model-core's `Person` with its R15 time budget) are moved in and returned
+//! by every process (R2) and stay with the caller.
+
+use crate::catalogue::FourOf;
+use crate::requirements::{assert_req002, assert_req003};
+use core::marker::PhantomData;
+use model_core::boundary::Consumer;
+use model_core::list::{Cons, Len, Nil};
+use model_core::nat::{Succ, Zero};
+
+model_core::container_resource! {
+    /// Sheet steel stock, in grams (R7 base mass unit): the raw material the
+    /// workshop cuts plates from. Enters the model only through
+    /// `boundary::supply_sheet` (R12).
+    SteelSheet,
+    unit = "grams",
+    must_use = "SteelSheet is a conserved resource: pass it on or hand it to a Consumer"
+}
+
+model_core::container_resource! {
+    /// A cut, undrilled plate blank of `V` grams. Its own processing state
+    /// (R9): no process accepts it where a drilled plate is required.
+    Plate,
+    unit = "grams",
+    must_use = "Plate is a conserved resource: pass it on or hand it to a Consumer"
+}
+
+model_core::container_resource! {
+    /// A plate of `V` grams with its bolt holes drilled — a distinct type
+    /// from the undrilled blank (R9, F-023), which is what makes "fasten
+    /// before drilling" a compile error.
+    DrilledPlate,
+    unit = "grams",
+    must_use = "DrilledPlate is a conserved resource: pass it on or hand it to a Consumer"
+}
+
+// The drilled state carries the drilled characteristic (R6); through the
+// blanket impl in `requirements` this is what satisfies REQ-002, and the
+// assertion keeps the claim compile-checked (F-020; the greppable tag lives
+// on the `fasten` process below).
+impl<const G: u64> crate::characteristics::Drilled for DrilledPlate<G> {}
+model_core::satisfies!(assert_req002, DrilledPlate<1>);
+
+model_core::container_resource! {
+    /// Swarf: `V` grams of metal chips from cutting or drilling. Tripwired
+    /// waste (R1 layer 2, F-008): swarf that never reaches a swarf consumer
+    /// panics the test that leaked it.
+    Swarf,
+    unit = "grams",
+    must_use = "Swarf is a conserved waste product: hand it to a swarf waste consumer"
+}
+
+model_core::reusable_resource! {
+    /// The workshop's pillar drill (R2): moved into every drilling step and
+    /// returned to the caller, so it can be used by only one process at a
+    /// time. No tripwire — a reusable resource legitimately outlives the
+    /// flow.
+    Drill,
+    must_use = "Drill is a reusable resource: pass it on or return it to the caller"
+}
+
+/// The final product: two drilled plates fastened with four catalogue bolts.
+/// `PLATE_G` is the plates' combined mass in grams (conserved from the two
+/// inputs at compile time); the four bolts are conserved as discrete objects
+/// (R13) and kept inside the assembly.
+///
+/// Sealed consumable resource (R1): private fields, no public constructor,
+/// no `Clone`/`Copy`/`Default`; tripwired (hand-written, because the kernel
+/// macros generate non-generic types only) and defused only when a consumer
+/// such as [`Customer`] takes delivery.
+#[must_use = "Assembly is a conserved resource: pass it on or hand it to a Consumer"]
+pub struct Assembly<B, const PLATE_G: u64> {
+    _bolts: FourOf<B>,
+    _seal: (),
+}
+
+impl<B, const PLATE_G: u64> Assembly<B, PLATE_G> {
+    /// The combined mass of the two plates, in grams (R7).
+    pub const PLATE_GRAMS: u64 = PLATE_G;
+
+    /// Conserving combinator (R1): only wraps values passed in by value —
+    /// the four bolts are kept, not destroyed. `pub(crate)`: only this
+    /// crate's processes may assemble.
+    pub(crate) fn assemble(bolts: FourOf<B>) -> Self {
+        Assembly {
+            _bolts: bolts,
+            _seal: (),
+        }
+    }
+
+    /// Defuses the tripwire when the assembly leaves the model at a boundary
+    /// consumer. The single allowed forget site for this resource (R1,
+    /// F-008); the bolts inside carry no `Drop`, so nothing else is skipped.
+    pub(crate) fn defuse(self) {
+        // The one sanctioned mem::forget for Assembly (F-008): the exact
+        // complement of the tripwire Drop below.
+        #[allow(clippy::mem_forget)]
+        core::mem::forget(self);
+    }
+}
+
+impl<B, const PLATE_G: u64> Drop for Assembly<B, PLATE_G> {
+    /// Conservation tripwire (R1 layer 2, F-008): an assembly that never
+    /// ships is a leak; stands down while the thread is already panicking.
+    fn drop(&mut self) {
+        if !std::thread::panicking() {
+            panic!(
+                "resource leak: Assembly<{PLATE_G}> dropped without being consumed (R1 conservation)"
+            );
+        }
+    }
+}
+
+/// A bin for swarf at the system boundary (R12): the dedicated swarf waste
+/// consumer that REQ-003 calls for. `Space` is the type-level number of
+/// pieces it can still accept; `Contents` keeps the real swarf objects it has
+/// consumed (F-016). The decreasing space parameter is a hard rule, not a
+/// style choice: a contents-keeping consumer without one sends trait
+/// resolution into unbounded exploration and, at this workspace's mandated
+/// recursion limit, crashes the compiler (F-034).
+///
+/// Placeholder: generic swarf bin — refine to a named scrap-metal stream.
+///
+/// Satisfies: REQ-003
+pub struct SwarfBin<Space, Contents = Nil> {
+    contents: Contents,
+    _space: PhantomData<Space>,
+}
+
+// Compile-checked backing for the tag above (R10, F-020).
+model_core::satisfies!(assert_req003, SwarfBin<Zero>);
+
+// The swarf-consumer characteristic (R6) holds in every state — REQ-003 is
+// about which consumer swarf goes to; whether there is space left is the
+// Consumer impl's business (R12).
+impl<Space, C> crate::characteristics::SwarfConsumer for SwarfBin<Space, C> {}
+
+/// A full bin: zero space left — a distinct resource type that must itself
+/// be accounted for (R12, e.g. via [`boundary::dispose_bin`]).
+pub type FullSwarfBin<Contents> = SwarfBin<Zero, Contents>;
+
+/// `Consumer` is implemented ONLY while space remains (R12, F-034): space
+/// goes down by one and the real swarf object is kept at the front of the
+/// contents list (F-016). Consuming into a full bin is a compile error with
+/// model-core's modeller-phrased message (F-015).
+impl<S, C, const G: u64> Consumer<Swarf<G>> for SwarfBin<Succ<S>, C> {
+    type Next = SwarfBin<S, Cons<Swarf<G>, C>>;
+    fn consume(self, item: Swarf<G>) -> Self::Next {
+        SwarfBin {
+            contents: Cons(item, self.contents),
+            _space: PhantomData,
+        }
+    }
+}
+
+impl<Space, Contents: Len> SwarfBin<Space, Contents> {
+    /// How many pieces of swarf the bin holds — the length of its contents
+    /// list, so count and contents cannot disagree (R7, R12).
+    pub const HELD: u64 = Contents::LEN;
+}
+
+/// The customer taking delivery of finished assemblies: an unbounded boundary
+/// sink (`type Next = Self`), legal only at the system boundary (R15, F-029).
+/// Being unbounded, it necessarily discards what it consumes — the one
+/// sanctioned exception to "a consumer keeps what it consumes" (R12).
+///
+/// Placeholder: customer — assumed able to take any number of assemblies.
+#[must_use = "Customer is a boundary resource: pass it on like any other resource"]
+pub struct Customer {
+    _seal: (),
+}
+
+/// The customer accepts any assembly; `Next = Self` (R15, F-029).
+impl<B, const PLATE_G: u64> Consumer<Assembly<B, PLATE_G>> for Customer {
+    type Next = Customer;
+    fn consume(self, item: Assembly<B, PLATE_G>) -> Customer {
+        item.defuse();
+        self
+    }
+}
+
+/// The creation and exit boundary of the workshop's resource family (R12,
+/// F-006): the only production code where sheets, drills, bins and the
+/// customer come into existence, and where full bins leave the model.
+pub mod boundary {
+    use super::{Customer, Drill, PhantomData, SteelSheet, Swarf, SwarfBin};
+    use model_core::list::{Cons, Nil};
+
+    /// A steel sheet of `GRAMS` grams enters the model (R12).
+    ///
+    /// Placeholder: steel stockholder — assumed able to deliver any sheet.
+    pub fn supply_sheet<const GRAMS: u64>() -> SteelSheet<GRAMS> {
+        SteelSheet::mint()
+    }
+
+    /// A drill enters the model (R12).
+    ///
+    /// Placeholder: tool store — one pillar drill.
+    pub fn supply_drill() -> Drill {
+        Drill::mint()
+    }
+
+    /// An empty swarf bin with `Space` slots. Creating an *empty* consumer
+    /// brings no resources into existence, so this is an ordinary public
+    /// boundary function (R12): `new_swarf_bin::<N3>()`.
+    pub fn new_swarf_bin<Space>() -> SwarfBin<Space, Nil> {
+        SwarfBin {
+            contents: Nil,
+            _space: PhantomData,
+        }
+    }
+
+    /// The customer enters the model (R12). An empty unbounded sink holds
+    /// nothing, so this too is an ordinary public boundary function.
+    pub fn new_customer() -> Customer {
+        Customer { _seal: () }
+    }
+
+    /// Recursively defuses a bin's kept swarf as the bin leaves the model.
+    /// Private: together with [`dispose_bin`] this is the only exit for
+    /// swarf (R1).
+    trait Dispose {
+        fn dispose(self);
+    }
+    impl Dispose for Nil {
+        fn dispose(self) {}
+    }
+    impl<const G: u64, T: Dispose> Dispose for Cons<Swarf<G>, T> {
+        fn dispose(self) {
+            let Cons(swarf, tail) = self;
+            swarf.defuse();
+            tail.dispose();
+        }
+    }
+
+    /// Public-in-signature but unimplementable-outside wrapper over the
+    /// private disposal machinery (the sealed-trait pattern, F-026), so
+    /// [`dispose_bin`] can name it without letting outside code defuse
+    /// swarf.
+    pub trait DisposeSealed: sealed::Sealed {
+        #[doc(hidden)]
+        fn dispose_all(self);
+    }
+    impl<L: Dispose + sealed::Sealed> DisposeSealed for L {
+        fn dispose_all(self) {
+            self.dispose()
+        }
+    }
+    mod sealed {
+        use super::super::Swarf;
+        use model_core::list::{Cons, Nil};
+        pub trait Sealed {}
+        impl Sealed for Nil {}
+        impl<const G: u64, T: Sealed> Sealed for Cons<Swarf<G>, T> {}
+    }
+
+    /// A bin — in any fill state — leaves the model to waste disposal (R12):
+    /// the only place kept swarf is defused, which is what makes the
+    /// tripwires on abandoned swarf trustworthy (R1, F-008).
+    ///
+    /// Placeholder: waste-disposal service — assumed able to take any bin.
+    pub fn dispose_bin<Space, Contents: DisposeSealed>(bin: SwarfBin<Space, Contents>) {
+        let SwarfBin {
+            contents,
+            _space: PhantomData,
+        } = bin;
+        contents.dispose_all();
+    }
+}
+
+/// The workshop's processes (R1, R2): pure by-value transformations. They
+/// mint quantity-bearing values (plates, swarf, assemblies), so they live
+/// inside the resource family's module (F-031), not outside the module tree.
+///
+/// Reusable resources are threaded loosely (R9, F-024): `drill_holes` takes
+/// and returns the person and the drill as loose values, so a flow that
+/// needs neither can run concurrently with one that does.
+pub mod processes {
+    use super::{Assembly, Drill, DrilledPlate, Plate, SteelSheet, Swarf};
+    use crate::catalogue::FourOf;
+    // One line on purpose: the traceability grep (F-021) skips `use` lines,
+    // but only when the line itself starts with `use`.
+    use crate::requirements::{Req001FasteningBolt, Req002DrilledBeforeFastening, Req003SwarfWasteConsumer};
+    use model_core::boundary::{Consumer, SupplyN};
+    use model_core::common::processes::draw_time;
+    use model_core::common::{Labour, Person};
+    use model_core::nat::aliases::N4;
+
+    /// Cuts a steel sheet into two plate blanks plus swarf (R1, R3). Mass is
+    /// conserved at compile time (`PA + PB + SW == SHEET`); the caller states
+    /// the split (outputs cannot be computed on stable, F-022). The check
+    /// fires at monomorphization (F-001): `cargo check` and editor
+    /// diagnostics will not show a violation — `cargo build`/`cargo test` do.
+    ///
+    /// Regression (R4 policy: conservation violations are rustdoc
+    /// `compile_fail` doc-tests, never trybuild cases, F-003): cutting a
+    /// 2000 g sheet into 900 g + 900 g plates plus 500 g of swarf must not
+    /// compile — 300 g would appear from nothing.
+    ///
+    /// ```compile_fail
+    /// use pilot_workshop::resources::boundary::supply_sheet;
+    /// use pilot_workshop::resources::processes::cut;
+    ///
+    /// let sheet = supply_sheet::<2000>();
+    /// let (a, b, swarf) = cut::<2000, 900, 900, 500>(sheet);
+    /// ```
+    pub fn cut<const SHEET: u64, const PA: u64, const PB: u64, const SW: u64>(
+        sheet: SteelSheet<SHEET>,
+    ) -> (Plate<PA>, Plate<PB>, Swarf<SW>) {
+        const {
+            assert!(
+                PA + PB + SW == SHEET,
+                "mass conservation violated in cut (R3): the two plates plus the swarf must sum exactly to the sheet"
+            )
+        };
+        // Conserving transform: the sheet's mass continues as PA + PB + SW.
+        sheet.defuse();
+        (Plate::mint(), Plate::mint(), Swarf::mint())
+    }
+
+    /// Drills the bolt holes in one plate (R1, R2, R15): the person and the
+    /// drill are moved in and returned; `SPEND_MS` of the person's time
+    /// budget is drawn down (model-core's `draw_time`, R15) and leaves as
+    /// conserved [`Labour`] that must reach a consumer; the removed material
+    /// leaves as swarf (`P_LEFT + SW == PLATE`, checked at compile time).
+    ///
+    /// The budget const parameters infect this signature and the modeller
+    /// restates the running balance at every call — the known R15 cost
+    /// (F-030); a wrong balance is a compile error, so the arithmetic stays
+    /// compiler-checked.
+    ///
+    /// Overspending the budget is a compile error exactly like overdrawing a
+    /// container (R15; E0080 at monomorphization, invisible to `cargo check`,
+    /// F-001). Regression: 2000 ms of drilling cannot come out of a 1000 ms
+    /// budget:
+    ///
+    /// ```compile_fail
+    /// use model_core::common::boundary::new_person;
+    /// use pilot_workshop::resources::boundary::{supply_drill, supply_sheet};
+    /// use pilot_workshop::resources::processes::{cut, drill_holes};
+    ///
+    /// let person = new_person::<1000>();
+    /// let drill = supply_drill();
+    /// let sheet = supply_sheet::<2000>();
+    /// let (p1, p2, swarf) = cut::<2000, 900, 900, 200>(sheet);
+    /// let out = drill_holes::<2000, 0, 1000, 900, 880, 20>(person, drill, p1);
+    /// ```
+    pub fn drill_holes<
+        const SPEND_MS: u64,
+        const T_LEFT: u64,
+        const BUDGET: u64,
+        const PLATE: u64,
+        const P_LEFT: u64,
+        const SW: u64,
+    >(
+        person: Person<BUDGET>,
+        drill: Drill,
+        plate: Plate<PLATE>,
+    ) -> (
+        Person<T_LEFT>,
+        Drill,
+        DrilledPlate<P_LEFT>,
+        Swarf<SW>,
+        Labour<SPEND_MS>,
+    ) {
+        const {
+            assert!(
+                P_LEFT + SW == PLATE,
+                "mass conservation violated in drill_holes (R3): the drilled plate plus the swarf must sum exactly to the plate blank"
+            )
+        };
+        // The time budget draw (R15): draw_time's own compile-time assert
+        // checks SPEND_MS + T_LEFT == BUDGET.
+        let (labour, person) = draw_time::<SPEND_MS, T_LEFT, BUDGET>(person);
+        // Conserving transform: the blank's mass continues as P_LEFT + SW.
+        plate.defuse();
+        (person, drill, DrilledPlate::mint(), Swarf::mint(), labour)
+    }
+
+    /// Fastens two drilled plates into an [`Assembly`] with four bolts taken
+    /// from ONE supplier in a single `SupplyN` bound (R12, F-014). Only
+    /// REQ-001-approved bolts are accepted — the requirement is the trait
+    /// bound on `B`, never a concrete `Bolt<…>` type (R10, F-019) — and only
+    /// the drilled processing state can be passed (R9, F-023), restated as
+    /// the REQ-002 bounds. Plate mass is conserved into the assembly
+    /// (`PA + PB == OUT`, compile-checked; F-001 caveat applies) and the four
+    /// bolts are conserved as objects, kept inside the assembly (R13).
+    ///
+    /// The whole signature sits on one line because the traceability grep
+    /// attributes requirement bounds to the line they are written on (R10
+    /// rule 4, F-021).
+    ///
+    /// Satisfies: REQ-002
+    pub fn fasten<B: Req001FasteningBolt, S: SupplyN<N4, Taken = FourOf<B>>, const PA: u64, const PB: u64, const OUT: u64>(a: DrilledPlate<PA>, b: DrilledPlate<PB>, bolts: S) -> (Assembly<B, OUT>, S::Rest) where DrilledPlate<PA>: Req002DrilledBeforeFastening, DrilledPlate<PB>: Req002DrilledBeforeFastening {
+        const {
+            assert!(
+                PA + PB == OUT,
+                "mass conservation violated in fasten (R3): the assembly's plate mass must sum the two drilled plates exactly"
+            )
+        };
+        let (taken, rest) = bolts.supply_n();
+        // Conserving transforms: the plates' mass continues as OUT; the
+        // bolts continue as objects inside the assembly (R13).
+        a.defuse();
+        b.defuse();
+        (Assembly::assemble(taken), rest)
+    }
+
+    /// Hands one piece of swarf to a dedicated swarf waste consumer — the
+    /// only sanctioned route for swarf out of a flow, and the process form of
+    /// REQ-003. Generic over the consumer (R12, F-015): capacity mistakes
+    /// produce the modeller-phrased trait-bound error, and the consumer's
+    /// REQ-003 fitness is checked here, at the hand-over.
+    pub fn discard_swarf<const G: u64, C: Req003SwarfWasteConsumer + Consumer<Swarf<G>>>(consumer: C, swarf: Swarf<G>) -> C::Next {
+        consumer.consume(swarf)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    //! Per-process unit tests (R5): every process turns specific inputs into
+    //! the expected outputs with nothing left unaccounted for. These tests
+    //! sit inside the privacy boundary, so they may mint fixtures and defuse
+    //! outputs directly; downstream-style accounting is exercised by the
+    //! integration tests in `tests/`.
+
+    use super::boundary::{dispose_bin, new_customer, new_swarf_bin, supply_drill, supply_sheet};
+    use super::processes::{cut, discard_swarf, drill_holes, fasten};
+    use super::{Assembly, DrilledPlate, FullSwarfBin, Plate, Swarf, SwarfBin};
+    use crate::catalogue::boundary::full_box;
+    use crate::catalogue::{EmptyBoltBox, FasteningBolt};
+    use model_core::boundary::send_to;
+    use model_core::common::boundary::new_person;
+    use model_core::common::{Labour, Person};
+    use model_core::list::{Cons, Nil};
+    use model_core::nat::Zero;
+    use model_core::nat::aliases::{N2, N4};
+
+    /// `cut` conserves mass (R3, R5): the values are recoverable as
+    /// constants and balance by construction — the compile-time assert
+    /// already checked the split.
+    #[test]
+    fn cut_conserves_mass_and_exposes_values() {
+        let sheet = supply_sheet::<1000>();
+        let (a, b, swarf) = cut::<1000, 450, 450, 100>(sheet);
+        assert_eq!(
+            Plate::<450>::VALUE + Plate::<450>::VALUE + Swarf::<100>::VALUE,
+            1000
+        );
+        assert_eq!(Swarf::<100>::UNIT, "grams");
+        a.defuse();
+        b.defuse();
+        swarf.defuse();
+    }
+
+    /// `drill_holes` conserves mass and time (R3, R15): the drilled plate
+    /// plus the swarf equal the blank, the budget goes down by exactly the
+    /// labour that comes out, and the person and drill come back (R2).
+    #[test]
+    fn drill_holes_conserves_mass_and_draws_time() {
+        let person = new_person::<5000>();
+        let drill = supply_drill();
+        let plate: Plate<450> = Plate::mint();
+        let (person, drill, drilled, swarf, labour) =
+            drill_holes::<1000, 4000, 5000, 450, 440, 10>(person, drill, plate);
+        assert_eq!(DrilledPlate::<440>::VALUE + Swarf::<10>::VALUE, 450);
+        assert_eq!(Person::<4000>::BUDGET_MS + Labour::<1000>::VALUE, 5000);
+        drilled.defuse();
+        swarf.defuse();
+        // Labour is a model-core resource: this crate cannot defuse it, only
+        // hand it to a consumer — here model-core's reference boundary sink
+        // (test-support feature, F-004).
+        let _ledger = send_to(model_core::fixtures::new_test_sink(), labour);
+        let _reusables_stay_with_the_caller = (person, drill);
+    }
+
+    /// `fasten` takes exactly four REQ-001 bolts from one supplier (F-014),
+    /// conserves the plates' mass into the assembly, and returns the
+    /// exhausted box as a distinct resource (R12).
+    ///
+    /// Verifies: REQ-001, REQ-002
+    #[test]
+    fn fasten_joins_two_drilled_plates_with_four_bolts() {
+        let a: DrilledPlate<440> = DrilledPlate::mint();
+        let b: DrilledPlate<440> = DrilledPlate::mint();
+        let bolts = full_box::<FasteningBolt, N4>();
+        let (assembly, rest): (Assembly<FasteningBolt, 880>, EmptyBoltBox) = fasten(a, b, bolts);
+        assert_eq!(Assembly::<FasteningBolt, 880>::PLATE_GRAMS, 880);
+        let _empty_box: EmptyBoltBox = rest;
+        // The product leaves through the boundary customer (R12).
+        let _customer = send_to(new_customer(), assembly);
+    }
+
+    /// The swarf bin keeps what it consumes while its space counts down
+    /// (R12, F-016, F-034), and a full bin leaves the model only through the
+    /// boundary's waste disposal.
+    ///
+    /// Verifies: REQ-003
+    #[test]
+    fn swarf_bin_keeps_swarf_until_disposal() {
+        let bin = new_swarf_bin::<N2>();
+        assert_eq!(SwarfBin::<N2>::HELD, 0);
+        let s1: Swarf<100> = Swarf::mint();
+        let s2: Swarf<10> = Swarf::mint();
+        let bin = discard_swarf(bin, s1);
+        let bin = discard_swarf(bin, s2);
+        assert_eq!(
+            FullSwarfBin::<Cons<Swarf<10>, Cons<Swarf<100>, Nil>>>::HELD,
+            2
+        );
+        let full: SwarfBin<Zero, _> = bin; // full: a distinct state (R12)
+        dispose_bin(full);
+    }
+}

@@ -1,0 +1,5 @@
+error[E0451]: field `_seal` of struct `Swarf` is private
+ --> tests/ui/construct_outside_boundary.rs:9:35
+  |
+9 |     let _conjured = Swarf::<25> { _seal: () };
+  |                                   ^^^^^ private field

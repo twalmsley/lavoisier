@@ -3,7 +3,7 @@
 Findings log required by R14 of `instructions.md`. F-001…F-026 consolidated on 2026-09-30
 from the `RESULTS.md` files of experiments EXP-01 through EXP-08; F-027…F-033 added the same
 day from EXP-09 (`experiments/exp0N-*/RESULTS.md`); F-034 added 2026-10-02 during the
-`model-core` build.
+`model-core` build; F-035…F-039 added 2026-10-02 during the `pilot-workshop` build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -801,4 +801,95 @@ raised recursion limit converts violations from a diagnosable error into a compi
 
 **Evidence:** `model-core` build (LIMITATION comment in `model/model-core/src/boundary.rs`,
 tests module; minimal repro described there).
+
+---
+
+## F-035 — Common conserved outputs need a production-legal boundary sink in the library itself
+
+**What couldn't be expressed (as first built):** a downstream *production* flow that draws a
+person's time had no way to dispose of the `Labour` it produces: `Labour`'s `defuse` is
+`pub(crate)` to model-core, and the only `Consumer<Labour>` shipped was the test-support-gated
+`fixtures::TestSink` — so production code could satisfy the lint regime only by never drawing
+time.
+
+**What it cost:** discovered by the pilot; its flows initially had to live in tests.
+
+**Workaround adopted (fixed in model-core):** every library-provided conserved output ships
+with a production-legal placeholder sink at the boundary — `common::TimeLedger`
+(`Next = Self`, `/// Placeholder:`-marked, created by `boundary::new_time_ledger`). Rule of
+thumb: whoever mints a tripwired type must also ship at least one production consumer for it,
+or downstream crates cannot account for it at all.
+
+**Evidence:** `pilot-workshop` build report; fix in `model/model-core/src/common.rs`
+(`TimeLedger`, `labour_has_a_production_legal_sink`).
+
+---
+
+## F-036 — The resource kernel macros generate non-generic types only
+
+**What couldn't be expressed:** defining a *parameterized* sealed resource
+(`Bolt<Size, Material, Length>`, `Assembly<B, const PLATE_G: u64>`) through
+`consumable_resource!`/`container_resource!` — `macro_rules!` patterns in the kernel take a
+plain ident, not a generics list.
+
+**What it cost:** the pilot's catalogue and assembly types needed hand-written sealing, and
+`Assembly` a hand-rolled tripwire/`defuse`, duplicating what the macros exist to guarantee.
+
+**Workaround adopted:** hand-write parameterized resources against the sealing-rules
+checklist (R1) and keep them beside a macro-built sibling for comparison; extending the kernel
+macros to accept generics is future work.
+
+**Evidence:** `pilot-workshop/src/catalogue.rs`, `pilot-workshop/src/resources.rs`
+(`Assembly`).
+
+---
+
+## F-037 — A `Satisfies:` tag inside a kernel-macro invocation is silently invisible to trace.sh
+
+**What couldn't be expressed:** tagging a macro-defined resource type directly — the doc
+comment sits inside the macro invocation, so the line after the tag is not an item keyword
+and trace.sh's grep drops it without a warning.
+
+**What it cost:** a silently missing "satisfied by" row (the dangerous direction: the lint
+gate stays green).
+
+**Workaround adopted:** put `Satisfies:` tags on a type alias (`FasteningBolt`) or on the
+process that uses the bound (`fasten`), never inside a macro invocation; the `satisfies!`
+compile-checked assertion stays beside the macro invocation, so the *truth* half of the
+R10 tag+assert pair is unaffected.
+
+**Evidence:** `pilot-workshop/src/catalogue.rs` (`FasteningBolt`), build report.
+
+---
+
+## F-038 — Grep-discipline costs of R10 in a real model (extends F-021)
+
+**What couldn't be expressed:** tidy formatting. R10's rule 4 (requirement bounds on the
+`fn`-name line) forces `fasten`'s full signature onto one ~290-character line; and trace.sh's
+bound-use pass counts continuation lines of multi-line `use` statements as bound uses.
+
+**What it cost:** cosmetic — one very long line per bounded process, and single-line imports
+required near requirement names.
+
+**Workaround adopted:** accept the long signature lines; keep imports of requirement traits
+on one line. Both are lintable by the same pass that polices the tags.
+
+**Evidence:** `pilot-workshop/src/resources.rs` (`fasten`), build report.
+
+---
+
+## F-039 — Tripwired contents kept by a bin need a sealed recursive disposal path (F-008 × F-016 interaction)
+
+**What couldn't be expressed:** letting a contents-keeping consumer (the `SwarfBin`) reach
+its own legitimate end-of-model exit directly — dropping the bin drops its kept tripwired
+swarf, and every tripwire fires.
+
+**What it cost:** one more sealed recursive mechanism per contents-keeping consumer.
+
+**Workaround adopted:** a boundary disposal process (`dispose_bin`) that recursively defuses
+the kept contents inside the privacy boundary before the bin itself exits — the bin's
+consumer plays the sanctioned-`mem::forget` role for everything it kept.
+
+**Evidence:** `pilot-workshop/src/resources.rs` (`dispose_bin`,
+`swarf_bin_keeps_swarf_until_disposal`).
 

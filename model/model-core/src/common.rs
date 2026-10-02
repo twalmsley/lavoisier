@@ -78,10 +78,43 @@ impl<const BUDGET_MS: u64> Person<BUDGET_MS> {
     }
 }
 
+/// A ledger at the system boundary that accounts for expended [`Labour`]:
+/// the production-legal sink for the labour that [`processes::draw_time`]
+/// produces (R12). Unbounded (`Next = Self`, R15), so it is legal only at
+/// the boundary and, like every unbounded consumer, it *discards* its intake
+/// rather than keeping it (F-029).
+///
+/// Placeholder: time ledger — assumed unbounded sink for labour; refine to
+/// the real accounting mechanism (a payroll ledger, a job card, a finite
+/// timesheet) in the modelling crate.
+#[must_use = "TimeLedger is a boundary resource: pass it on like any other resource"]
+pub struct TimeLedger {
+    _seal: (),
+}
+
+impl<const MS: u64> crate::boundary::Consumer<Labour<MS>> for TimeLedger {
+    type Next = TimeLedger;
+    fn consume(self, item: Labour<MS>) -> TimeLedger {
+        // Boundary exit: the labour leaves the model (F-029); defusing the
+        // tripwire here is the consumer playing its sanctioned role (F-008).
+        item.defuse();
+        self
+    }
+}
+
 /// The creation boundary for the common types (R12): the only production
 /// code allowed to create them.
 pub mod boundary {
-    use super::{Location, Organisation, Person};
+    use super::{Location, Organisation, Person, TimeLedger};
+
+    /// A time ledger enters the model at the boundary, ready to account for
+    /// [`super::Labour`] (R12).
+    ///
+    /// Placeholder: time ledger — assumed unbounded; refine in the modelling
+    /// crate.
+    pub fn new_time_ledger() -> TimeLedger {
+        TimeLedger { _seal: () }
+    }
 
     /// A person enters the model with a time budget (R15: model a budget
     /// only where the time is genuinely being accounted for).
@@ -120,13 +153,12 @@ pub mod processes {
     ///
     /// ```
     /// use model_core::boundary::send_to;
-    /// use model_core::common::boundary::new_person;
+    /// use model_core::common::boundary::{new_person, new_time_ledger};
     /// use model_core::common::processes::draw_time;
-    /// use model_core::fixtures::new_test_sink; // test-support feature
     ///
     /// let person = new_person::<10_000>();
     /// let (labour, person) = draw_time::<2000, 8000, 10_000>(person);
-    /// let _ledger = send_to(new_test_sink(), labour);
+    /// let _ledger = send_to(new_time_ledger(), labour);
     /// let _person_keeps_8000_ms = person;
     /// ```
     ///
@@ -160,9 +192,22 @@ pub mod processes {
 
 #[cfg(test)]
 mod tests {
-    use super::boundary::{new_location, new_organisation, new_person};
+    use super::boundary::{new_location, new_organisation, new_person, new_time_ledger};
     use super::processes::draw_time;
     use super::Person;
+    use crate::boundary::send_to;
+
+    /// The production path for labour: drawn time is accounted for at the
+    /// boundary by the [`super::TimeLedger`], with no test-support fixture
+    /// involved (R12, F-029).
+    #[test]
+    fn labour_has_a_production_legal_sink() {
+        let person = new_person::<5000>();
+        let (labour, person) = draw_time::<2000, 3000, 5000>(person);
+        let ledger = send_to(new_time_ledger(), labour);
+        let _ledger_stays_at_the_boundary = ledger;
+        let _person_keeps_3000_ms = person;
+    }
 
     /// The budget is drawn down across several calls; the modeller restates
     /// the running balance and the compiler checks every step (R15, F-030).

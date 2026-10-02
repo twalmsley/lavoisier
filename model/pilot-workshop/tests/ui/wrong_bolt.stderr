@@ -1,0 +1,36 @@
+error[E0277]: the trait bound `pilot_workshop::catalogue::Bolt<SizeM6, pilot_workshop::catalogue::Brass, L15>: Req001FasteningBolt` is not satisfied
+  --> tests/ui/wrong_bolt.rs:27:9
+   |
+27 |         fasten(d1, d2, wrong_bolts);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `M8` is not implemented for `pilot_workshop::catalogue::Bolt<SizeM6, pilot_workshop::catalogue::Brass, L15>`
+   |
+help: the trait `M8` is implemented for `pilot_workshop::catalogue::Bolt<SizeM8, M, L>`
+  --> src/catalogue.rs
+   |
+   | impl<M: Material, L: Length> crate::characteristics::M8 for Bolt<SizeM8, M, L> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `pilot_workshop::catalogue::Bolt<SizeM6, pilot_workshop::catalogue::Brass, L15>` to implement `Req001FasteningBolt`
+note: required by a bound in `fasten`
+  --> src/resources.rs
+   |
+   |     pub fn fasten<B: Req001FasteningBolt, S: SupplyN<N4, Taken = FourOf<B>>, const PA: u64, const PB: u64, const OUT: u64>(a: Drill...
+   |                      ^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten`
+
+error[E0277]: the trait bound `pilot_workshop::catalogue::Bolt<SizeM6, pilot_workshop::catalogue::Brass, L15>: Req001FasteningBolt` is not satisfied
+  --> tests/ui/wrong_bolt.rs:27:9
+   |
+27 |         fasten(d1, d2, wrong_bolts);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+   = help: the trait `pilot_workshop::characteristics::Steel` is not implemented for `pilot_workshop::catalogue::Bolt<SizeM6, pilot_workshop::catalogue::Brass, L15>`
+help: the trait `pilot_workshop::characteristics::Steel` is implemented for `pilot_workshop::catalogue::Bolt<S, pilot_workshop::catalogue::Steel, L>`
+  --> src/catalogue.rs
+   |
+   | impl<S: Size, L: Length> crate::characteristics::Steel for Bolt<S, Steel, L> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `pilot_workshop::catalogue::Bolt<SizeM6, pilot_workshop::catalogue::Brass, L15>` to implement `Req001FasteningBolt`
+note: required by a bound in `fasten`
+  --> src/resources.rs
+   |
+   |     pub fn fasten<B: Req001FasteningBolt, S: SupplyN<N4, Taken = FourOf<B>>, const PA: u64, const PB: u64, const OUT: u64>(a: Drill...
+   |                      ^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten`
