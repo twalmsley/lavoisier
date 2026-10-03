@@ -10,6 +10,9 @@
 > given throughout so you can open the worked example next to this guide.
 >
 > F-numbers refer to entries in `FINDINGS.md`; R-numbers to `instructions.md`.
+>
+> **New to this?** Start with the tutorials (`docs/tutorials/`) and the hands-on
+> exercises crate (`learn/`) — they teach toward this guide.
 
 ## Contents
 
@@ -477,8 +480,12 @@ Trait-bound failures are where this project's own messages appear. Three familie
 
   (`model/model-core/tests/ui/empty_supplier.stderr`.) The box is empty — refill or enlarge
   it at the boundary. The mirror case, a full consumer, is
-  `model/model-core/tests/ui/full_consumer.rs`. `SupplyN`'s version reads "cannot supply
-  this many items: it would run out partway".
+  `model/model-core/tests/ui/full_consumer.rs`. `SupplyN` carries its own
+  "cannot supply this many items" message, but in the real some-but-not-enough case rustc
+  surfaces the **deepest** failing obligation instead: asking three items of a two-item
+  supplier reports the `Supplier` message on the computed empty state ("`BiscuitTin<Nil>`
+  cannot supply anything: it is exhausted…") — arguably clearer, and what you will actually
+  see. `SupplyN`'s own message leads only when the type is not a supplier at all.
 
 - **An unmet requirement**, phrased as the requirement and naming its id:
 

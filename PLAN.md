@@ -57,7 +57,7 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 1 CS-1 spec | done (v0.2 agreed) | — | 2026-10-03: §8 1–3 as proposed; disposal step added; single History, merge demo deferred to a later CS |
 | 2 CS-1 model | done (`model/cs1-pot-of-tea`, full gate green) | F-053, F-054 | 2026-10-03: closed — F-053 fixed via template rule (workspace-unique ids at spec time); feedback items 2/3/5/6 folded into SPEC_TEMPLATE |
 | 3 Documentation | done (`docs/modellers-guide.md`, rustdoc pass, README refresh) | — (4 doc bugs found and fixed) | pending |
-| 4 Learning materials | not started | | |
+| 4 Learning materials | done (`docs/tutorials/` 00–06 incl. Rust on-ramp and toast capstone; `learn/` exercises crate, solutions verified) | F-015 extended | pending |
 | 5 Overview deck | not started | | |
 | 6 Walkthrough deck | not started | | |
 | 7 White paper | not started | | |

@@ -8,7 +8,8 @@ added 2026-10-02 by the kernel-macro generics extension; F-041 added 2026-10-02 
 implementation; F-042…F-052 added 2026-10-02 from the `RESULTS.md` files of experiments EXP-10
 through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model-core` by path,
 with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
-R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build.
+R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build; F-015 extended 2026-10-03 by
+the learning-materials build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -444,6 +445,14 @@ processes — which R12 requires anyway — so mistakes hit the good path.
 
 **Evidence:** EXP-02 (`experiments/exp02-supplier-consumer/RESULTS.md`, criterion 1b, errors
 1–5).
+
+**Extended (2026-10-03, learning-materials build):** when several `on_unimplemented`-carrying
+obligations fail together, rustc surfaces the **deepest** one: a some-but-not-enough `SupplyN`
+request reports the `Supplier` message on the computed empty state, not `SupplyN`'s own
+"cannot supply this many items" (which leads only when the type is not a supplier at all).
+Also noted: the tripwire panic's type name differs in shape between macro forms (bare name
+with magnitude from the non-generic container form; fully-qualified `type_name` from the
+generic forms).
 
 ---
 

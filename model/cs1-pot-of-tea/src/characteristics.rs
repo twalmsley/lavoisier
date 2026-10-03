@@ -18,7 +18,7 @@
 //! F-048: REQ-phrased errors) while still stating compile-time conservation
 //! over the inputs' magnitudes. Each also carries the one conserving
 //! extraction its consuming process needs, gated by the sealed
-//! [`crate::resources::BrewPermit`] (the R16 `Permit` pattern): downstream
+//! [`crate::resources::BrewPermit`] (the permit-gated extraction pattern, F-054 — the same sealed-`Permit` idea R16 introduced): downstream
 //! code can neither call the extraction (no permit can be constructed) nor
 //! implement the trait for its own types (the private supertrait below), so
 //! the characteristics cannot be used to mint or vanish resources.

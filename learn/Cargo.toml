@@ -1,0 +1,32 @@
+# learn/ — the hands-on exercises crate for the tutorial sequence in
+# docs/tutorials/. Deliberately OUTSIDE the model/ workspace: this crate is a
+# learner's sandbox — nothing in it is gated by model/ci.sh, and breaking it
+# cannot break the real models. It depends on model-core exactly the way a
+# real downstream model crate does (see docs/modellers-guide.md §2.2).
+
+[package]
+name = "learn"
+version = "0.1.0"
+edition = "2024"
+description = "Hands-on exercises for the type-system MBSE method: numbered broken files you fix until cargo test passes"
+
+# Standalone on purpose: this crate is not a member of the model/ workspace.
+[workspace]
+
+[features]
+# The exercises define their own resources with the model-core kernel macros,
+# which expand a `test_fixture()` constructor behind the INVOKING crate's
+# `test-support` feature (FINDINGS.md F-004) — so this crate declares the
+# feature exactly as a real model crate does.
+test-support = []
+
+[dependencies]
+# Production dependency: NO features. A plain `cargo build` is what proves
+# production code cannot reach fixture constructors (F-004).
+model-core = { path = "../model/model-core" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004) — the same shape as
+# model/cs1-pot-of-tea/Cargo.toml.
+model-core = { path = "../model/model-core", features = ["test-support"] }
+learn = { path = ".", features = ["test-support"] }
