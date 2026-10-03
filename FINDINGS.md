@@ -8,7 +8,7 @@ added 2026-10-02 by the kernel-macro generics extension; F-041 added 2026-10-02 
 implementation; F-042…F-052 added 2026-10-02 from the `RESULTS.md` files of experiments EXP-10
 through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model-core` by path,
 with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
-R17–R19 implementation.
+R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1263,4 +1263,46 @@ explicit fee output — a feature, not a limitation.
 
 **Evidence:** EXP-12 (`src/lib.rs::exchange_gbp_to_eur` and its `compile_fail` doc-test;
 `postmono-demo/src/bin/inexact_exchange.rs`; RESULTS §2 (e)).
+
+---
+
+## F-053 — trace.sh's requirement-id namespace is workspace-global: a second crate reusing REQ-001 stays silently green while the report merges and shadows
+
+**What couldn't be expressed:** per-model requirement numbering. CS-1's agreed spec assigned
+REQ-001..REQ-004, but the pilot already owns REQ-001..REQ-005 in the same workspace:
+implementing the spec literally left the CI gate **green** while the traceability report
+silently merged CS-1's tags and tests under the pilot's requirements and shadowed CS-1's
+definitions (file-sort-order dependent) — the dangerous green-but-wrong direction, like F-037.
+
+**What it cost:** requirement ids must currently be allocated workspace-uniquely at
+specification time; CS-1 shipped as REQ-006..REQ-009 with the spec mapping documented at the
+definitions.
+
+**Workaround adopted:** continue the workspace sequence per case study and record the
+spec↔code id mapping in the crate. Fix candidates for the project: scope trace.sh's ids per
+crate, or make SPEC_TEMPLATE allocate from the workspace sequence.
+
+**Evidence:** `model/cs1-pot-of-tea/src/requirements.rs` (mapping note); CS-1 build report.
+
+---
+
+## F-054 — A requirement-bounded process can consume a state-changing resource and keep REQ-phrased errors: associated-const magnitudes plus a permit-gated extraction
+
+**What couldn't be expressed (previously, F-048):** style-A (generic, requirement-bounded)
+processes were thought unable to consume resources whose magnitudes they must assert over,
+degrading their errors to E0308 via style-B concrete types.
+
+**What it cost / the pattern:** when the state change lands on a **fixed output type**, the
+magnitudes go on the sealed characteristic trait as associated consts (R6), usable inside
+inline `const { assert!(…) }` blocks, and the resource is opened by a **permit-gated
+conserving extraction** on that trait (the R16 `Permit` pattern). Sealing the characteristic
+is mandatory: an open trait would let outside impls smuggle a fake "boiling water" past the
+bound or vanish resources through a free extraction (F-026). CS-1's `pour_and_brew` keeps
+REQ-phrased E0277s for all four requirements this way.
+
+**Workaround adopted:** none needed — this is a positive pattern, narrowing F-048: style-B is
+only required when the *returned* type's const parameters must vary with the input's.
+
+**Evidence:** `model/cs1-pot-of-tea/src/characteristics.rs` (`Boiling`, `BrewPermit`),
+`src/resources.rs` (`pour_and_brew`).
 

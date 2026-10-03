@@ -1,0 +1,19 @@
+error[E0277]: this kettle may not be poured into the pot: `FilledKettle<1500>` is not at the boil (REQ-006)
+  --> tests/ui/pour_non_boiling_kettle.rs:21:57
+   |
+21 |     let out = pour_and_brew::<_, 1473, 480_000, 20_000, _, _, _, _>(
+   |                                                         ^ REQ-006: tea must be brewed with boiling water
+   |
+   = help: the trait `Boiling` is not implemented for `FilledKettle<1500>`
+   = note: boiling is a process state (R9): `boil` turns a `FilledKettle` into a `BoilingKettle` - only that state can be poured
+help: the trait `Boiling` is implemented for `BoilingKettle<G, E>`
+  --> src/resources.rs
+   |
+   | impl<const G: u64, const E: u64> Boiling for BoilingKettle<G, E> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `FilledKettle<1500>` to implement `Req006PouredAtTheBoil`
+note: required by a bound in `pour_and_brew`
+  --> src/resources.rs
+   |
+   | ...A_E: u64, const HEAT_J: u64, K: Req006PouredAtTheBoil, P: Req007LoadedWithThreeBags, BinC: Req008FoodWasteBinOnly + ConsumeList<...
+   |                                    ^^^^^^^^^^^^^^^^^^^^^ required by this bound in `pour_and_brew`

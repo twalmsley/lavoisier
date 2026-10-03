@@ -1,0 +1,22 @@
+error[E0308]: mismatched types
+  --> tests/ui/spent_bag_straight_to_council.rs:13:53
+   |
+13 |     let council = send_to(new_council_collection(), bag);
+   |                   -------                           ^^^ expected `FoodWaste<_>`, found `SpentTeabag`
+   |                   |
+   |                   arguments to this function are incorrect
+   |
+   = note: expected struct `FoodWaste<_>`
+              found struct `SpentTeabag`
+help: the return type of this call is `SpentTeabag` due to the type of the argument passed
+  --> tests/ui/spent_bag_straight_to_council.rs:13:19
+   |
+13 |     let council = send_to(new_council_collection(), bag);
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^---^
+   |                                                     |
+   |                                                     this argument influences the return type of `send_to`
+note: function defined here
+  --> $WORKSPACE/model-core/src/boundary.rs
+   |
+   | pub fn send_to<I, C: Consumer<I>>(consumer: C, item: I) -> C::Next {
+   |        ^^^^^^^

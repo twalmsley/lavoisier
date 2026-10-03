@@ -13,4 +13,4 @@
 
 [workspace]
 resolver = "2"
-members = ["model-core", "pilot-workshop"]
+members = ["model-core", "pilot-workshop", "cs1-pot-of-tea"]

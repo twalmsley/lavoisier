@@ -1,0 +1,63 @@
+error[E0277]: spent teabags may not go here: `KitchenAir` is not the food-waste bin (REQ-008)
+  --> tests/ui/spent_bags_past_the_bin.rs:21:63
+   |
+21 |     let out = pour_and_brew::<_, 1473, 480_000, 20_000, _, _, _, _>(
+   |                                                               ^ REQ-008: all spent teabags must reach the food-waste bin
+   |
+   = help: the trait `FoodWasteConsumer` is not implemented for `KitchenAir`
+   = note: the dedicated consumer is the `FoodWasteBin` (any fill state); it leaves its contents to the council collection only through `empty_bin` (the sealed F-039 disposal path)
+help: the trait `FoodWasteConsumer` is implemented for `FoodWasteBin<Space, C>`
+  --> src/resources.rs
+   |
+   | impl<Space, C> FoodWasteConsumer for FoodWasteBin<Space, C> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `KitchenAir` to implement `Req008FoodWasteBinOnly`
+note: required by a bound in `pour_and_brew`
+  --> src/resources.rs
+   |
+   | ...eq007LoadedWithThreeBags, BinC: Req008FoodWasteBinOnly + ConsumeList<ThreeSpentBags>, Air: Req009HeatToKitchenAir + Consumer<Was...
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `pour_and_brew`
+
+error[E0277]: `KitchenAir` cannot consume this list of items: it fills up partway, or it does not accept one of them
+  --> tests/ui/spent_bags_past_the_bin.rs:21:63
+   |
+21 |     let out = pour_and_brew::<_, 1473, 480_000, 20_000, _, _, _, _>(
+   |                                                               ^ cannot take every item in this list
+   |
+   = note: `ConsumeList` needs a `Consumer` impl (with space left) for each item type in the list, in order (R12)
+help: the trait `Consumer<SpentTeabag>` is not implemented for `KitchenAir`
+      but trait `Consumer<WasteHeat<_>>` is implemented for it
+  --> src/resources.rs
+   |
+   | impl<const E: u64> Consumer<WasteHeat<E>> for KitchenAir {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `WasteHeat<_>`, found `SpentTeabag`
+   = note: required for `KitchenAir` to implement `ConsumeList<Cons<SpentTeabag, Cons<SpentTeabag, Cons<SpentTeabag, Nil>>>>`
+note: required by a bound in `pour_and_brew`
+  --> src/resources.rs
+   |
+   | ...nC: Req008FoodWasteBinOnly + ConsumeList<ThreeSpentBags>, Air: Req009HeatToKitchenAir + Consumer<WasteHeat<HEAT_J>>>(person: Per...
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `pour_and_brew`
+
+error[E0277]: `KitchenAir` cannot consume a `SpentTeabag`: it is full, or it does not accept this kind of resource
+  --> tests/ui/spent_bags_past_the_bin.rs:21:15
+   |
+21 |       let out = pour_and_brew::<_, 1473, 480_000, 20_000, _, _, _, _>(
+   |  _______________^
+22 | |         person,
+23 | |         boiling,
+24 | |         pot,
+25 | |         new_kitchen_air(), // the air is not the food-waste bin (REQ-008)
+26 | |         new_kitchen_air(),
+27 | |     );
+   | |_____^ this consumer has no space left for this resource
+   |
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: the trait `Consumer<SpentTeabag>` is not implemented for `KitchenAir`
+      but trait `Consumer<WasteHeat<_>>` is implemented for it
+  --> src/resources.rs
+   |
+   | impl<const E: u64> Consumer<WasteHeat<E>> for KitchenAir {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `WasteHeat<_>`, found `SpentTeabag`
+   = note: required for `KitchenAir` to implement `ConsumeList<Cons<SpentTeabag, Cons<SpentTeabag, Cons<SpentTeabag, Nil>>>>`

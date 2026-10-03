@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.2 |
+| Specification version | v0.3 (implemented) |
 | Date | 2026-10-03 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-03) |
 | Status | agreed |
@@ -28,6 +28,11 @@ type, not a reading); cost (no money in CS-1).
 - **REQ-002:** The pot must be loaded with exactly 3 teabags before brewing.
 - **REQ-003:** All spent teabags must reach the food-waste bin.
 - **REQ-004:** All waste heat must be accounted to the kitchen-air sink.
+
+> **Implementation note (2026-10-03):** requirement ids are workspace-global in the tooling
+> (FINDINGS.md F-053), and the pilot already owns REQ-001..005, so these four are implemented
+> as **REQ-006..REQ-009** in spec order. The mapping is recorded at the definitions in
+> `model/cs1-pot-of-tea/src/requirements.rs`.
 
 ## 3. Resources
 
@@ -141,4 +146,25 @@ quantities — **agreed as proposed**; (4) a disposal step **added** (P5, the F-
 Additionally agreed: CS-1 keeps a single History (R16 requires one wherever time is drawn) and
 defers the per-branch merge demonstration to a later case study.
 
-- *(further questions to be added during implementation)*
+Implementation round-trip feedback (2026-10-03) — items for the template and tooling:
+1. **Requirement-id scope (F-053):** ids are workspace-global; allocate workspace-unique ids
+   at spec time (CS-1 shipped as REQ-006..009) or scope the tooling per crate.
+2. **Where a time draw lives:** "person (draws N ms)" was implemented per F-048 as an adjacent
+   `draw_time` recorded to the History under the process's name, with the process itself
+   taking/returning the person unchanged. The template should state this convention.
+3. **Produces vs Waste routing:** P4 listed the spent bags under both; implemented the strong
+   reading (the process takes the bin and air as requirement-bounded consumer parameters and
+   feeds them internally, so spent bags never exist loose). The template should ask the author
+   to say whether a process takes its consumers or the flow routes its outputs.
+4. **REQ-002's observable failures:** because the loaded state exists only at exactly 3 bags,
+   the only writable violation is brewing with an unloaded pot; an under-filled box fails at
+   `load_pot` with the capacity message, not a REQ-phrased one.
+5. **Assert vs structural balances:** P1's 1500 = 1500 and P2's 3 = 3 are structural (shared
+   consts / `SupplyN<N3>`), not asserts; §5's Balances rows could distinguish the two.
+6. **Multi-quantity states:** `container_resource!` fixes one magnitude slot, so the second
+   dimension rides as a declared const parameter (`BoilingKettle<1500, 500_000>`); worth a
+   template note for states carrying more than one quantity.
+7. **P3's heat routing:** kettle losses reach the air via the flow's `vent_heat` (which
+   carries the REQ bound), not inside P3; the spec's "Satisfies: —" on P3 is therefore
+   correct as implemented — venting is the flow's job.
+8. **Single-History decision:** implemented exactly as agreed; no friction.

@@ -1,0 +1,19 @@
+error[E0277]: this pot may not be brewed: `Teapot` is not a pot loaded with exactly 3 teabags (REQ-007)
+  --> tests/ui/brew_with_unloaded_pot.rs:17:60
+   |
+17 |     let out = pour_and_brew::<_, 1473, 480_000, 20_000, _, _, _, _>(
+   |                                                            ^ REQ-007: the pot must be loaded with exactly 3 teabags before brewing
+   |
+   = help: the trait `LoadedToBrew` is not implemented for `Teapot`
+   = note: loading is a process (R9): `load_pot` takes 3 bags from the teabag box and turns a `Teapot` into a `LoadedPot` - the loaded state exists only at exactly 3 bags
+help: the trait `LoadedToBrew` is implemented for `LoadedPot`
+  --> src/resources.rs
+   |
+   | impl LoadedToBrew for LoadedPot {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Teapot` to implement `Req007LoadedWithThreeBags`
+note: required by a bound in `pour_and_brew`
+  --> src/resources.rs
+   |
+   | ... K: Req006PouredAtTheBoil, P: Req007LoadedWithThreeBags, BinC: Req008FoodWasteBinOnly + ConsumeList<ThreeSpentBags>, Air: Req009...
+   |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `pour_and_brew`

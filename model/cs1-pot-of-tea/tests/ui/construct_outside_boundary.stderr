@@ -1,0 +1,5 @@
+error[E0451]: field `_seal` of struct `ColdWater` is private
+  --> tests/ui/construct_outside_boundary.rs:10:41
+   |
+10 |     let _conjured = ColdWater::<1500> { _seal: () };
+   |                                         ^^^^^ private field
