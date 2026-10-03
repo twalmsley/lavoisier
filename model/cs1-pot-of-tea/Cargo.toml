@@ -1,13 +1,13 @@
 # CS-1: making a pot of tea — the first spec→model round trip. Built from the
 # agreed natural-language specification
-# ../../case-studies/cs1-pot-of-tea/SPEC.md (v0.2), following
+# ../../case-studies/cs1-pot-of-tea/SPEC.md (v0.3, implemented), following
 # instructions.md and the pilot-workshop crate layout.
 
 [package]
 name = "cs1-pot-of-tea"
 version = "0.1.0"
 edition = "2024"
-description = "Case study CS-1: one person makes one pot of tea in a kitchen - continuous resources (water, energy, time), one ordering freedom, and a sealed bin-disposal path, modelled downstream of model-core from the agreed SPEC.md v0.2"
+description = "Case study CS-1: one person makes one pot of tea in a kitchen - continuous resources (water, energy, time), one ordering freedom, and a sealed bin-disposal path, modelled downstream of model-core from the agreed SPEC.md"
 
 [features]
 # The crate's own downstream-test fixtures (R1, FINDINGS.md F-004): the

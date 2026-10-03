@@ -49,11 +49,14 @@ project, and both are documented.
 
 | Path | What it is |
 |---|---|
-| [`instructions.md`](instructions.md) | The agreed requirements of the modelling approach itself (R1–R16): conservation rules, type-level capacity, traceability conventions, the lint/tripwire regime, boundary design, open questions. Every rule is backed by experiment evidence. |
-| [`FINDINGS.md`](FINDINGS.md) | The findings log (F-001–F-040): everything stable Rust could not express, what each limitation cost, and the workaround adopted — from "conservation errors are invisible to `cargo check`" to a deterministic rustc SIGBUS. |
-| [`experiments/`](experiments/) | Ten self-contained experiment crates (EXP-01–EXP-09), each testing one risky claim in isolation, with per-criterion verdicts and verbatim compiler output in each `RESULTS.md`. |
-| [`model/`](model/) | The real library: **`model-core`** (type-level numbers, units and quantities, the sealed-resource kernel, boundary traits, requirement macros) and **`pilot-workshop`** (a complete small model — cut → drill → fasten — with live requirements traceability). Gated by `ci.sh`. |
+| [`instructions.md`](instructions.md) | The agreed requirements of the modelling approach itself (R1–R19): conservation rules, type-level capacity, traceability conventions, the lint/tripwire regime, boundary design, fallible processes, qualifications, money, open questions. Every rule is backed by experiment evidence. |
+| [`FINDINGS.md`](FINDINGS.md) | The findings log (F-001–F-054): everything stable Rust could not express, what each limitation cost, and the workaround adopted — from "conservation errors are invisible to `cargo check`" to a deterministic rustc SIGBUS. |
+| [`experiments/`](experiments/) | Twelve self-contained experiment crates (EXP-01–EXP-12), each testing one risky claim in isolation, with per-criterion verdicts and verbatim compiler output in each `RESULTS.md`. |
+| [`model/`](model/) | The real library: **`model-core`** (type-level numbers, units and quantities, the sealed-resource kernel, boundary traits, execution history, requirement macros), **`pilot-workshop`** (a complete small model — cut → drill → fasten — with fallible drilling, a qualified operator, money, and live requirements traceability) and **`cs1-pot-of-tea`** (the CS-1 case-study model). Gated by `ci.sh`. |
+| [`docs/`](docs/) | Project documentation, led by the **[modeller's guide](docs/modellers-guide.md)**: the practical companion to `instructions.md` — setting up a model crate, the spec-to-model walkthrough on CS-1, the full error-reading guide, the must-not-break checklist, and the known limitations stated plainly. |
 | [`SPEC_TEMPLATE.md`](SPEC_TEMPLATE.md) | The natural-language specification template new models are written from: each section maps mechanically onto model elements, and anything a spec leaves out comes back as a numbered question rather than a guess. |
+| [`case-studies/`](case-studies/) | The agreed case-study specifications (filled-in copies of the template), starting with [CS-1: making a pot of tea](case-studies/cs1-pot-of-tea/SPEC.md) — the first spec→model round trip, implemented as `model/cs1-pot-of-tea`. |
+| [`PLAN.md`](PLAN.md) | The programme plan for the case-study and publication phase: the case-study ladder (CS-1–CS-5, each stressing something no earlier one did), the deliverables in order, and the live status table. |
 
 ## Getting started
 
@@ -71,6 +74,10 @@ integration, pinned compile-fail cases, doc-test `compile_fail` regressions, tri
 build proving test fixtures can't leak into production code, the requirements
 traceability report, and a feature-placement audit.
 
+To model a system yourself, start with the
+**[modeller's guide](docs/modellers-guide.md)** — it walks from a blank crate to a passing
+gate on the CS-1 example and translates the compiler's errors back into model language.
+
 ## Method
 
 Everything here was built evidence-first: requirements were agreed in writing, each risky
@@ -83,7 +90,11 @@ outright), the loss is recorded as a finding and mitigated, not papered over.
 
 ## Status
 
-Working and verified: the core library, the pilot model, and the full CI gate. Agreed but
-not yet implemented: execution history (R16). Open questions — failure modes, cost as a
-conserved dimension, qualifications and safety as types, generating work-instruction
-documents back out of the model — are listed at the end of `instructions.md`.
+Working and verified: the core library with all agreed requirements implemented (R1–R19,
+including execution history, fallible processes, qualifications and money), the pilot
+model, and the full CI gate. The case-study programme ([`PLAN.md`](PLAN.md)) is underway:
+CS-1 (making a pot of tea) is done — agreed spec, full gate green, findings logged — and
+the documentation step that produced the [modeller's guide](docs/modellers-guide.md) came
+next, with learning materials, slide decks and the white paper to follow. Open questions —
+validation vs verification, document generation, change impact, tolerances — are listed at
+the end of `instructions.md`.

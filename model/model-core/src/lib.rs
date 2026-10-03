@@ -4,13 +4,28 @@
 //! model-based systems engineering approach: **types stand for things,
 //! functions stand for processes, and compiler errors show where the model
 //! does not fit.** Every design decision here was validated by the
-//! experiments EXP-01..EXP-09; the known limitations are recorded in
-//! `FINDINGS.md` (F-001..F-033) and cited throughout.
+//! experiments EXP-01..EXP-12; the known limitations are recorded in
+//! `FINDINGS.md` (F-001 onwards) and cited throughout.
 //!
 //! This crate is **infrastructure**: it defines no `REQ-NNN` requirements of
 //! a modelled system itself (R10 requirement traits belong to the downstream
 //! modelling crates), so the workspace `trace.sh` report notes "no
 //! requirements defined" for it.
+//!
+//! ## Where to start
+//!
+//! * **The modeller's guide** — `docs/modellers-guide.md` at the repository
+//!   root — is the practical how-to: setting up a model crate, the
+//!   walkthrough from specification to passing CI gate, the full
+//!   error-reading guide with worked examples, the must-not-break checklist,
+//!   and the known limitations. Read it before modelling anything; the
+//!   normative requirements it companions are `instructions.md` (R1–R19).
+//! * **Worked downstream models**: `pilot-workshop` (catalogue, fallible
+//!   processes, qualifications and safety, money) and `cs1-pot-of-tea` (the
+//!   first spec→model round trip: continuous resources, the boundary, the
+//!   execution history, the sealed bin-disposal path), both in this
+//!   workspace. New models are written as further downstream crates from a
+//!   specification following `SPEC_TEMPLATE.md`.
 //!
 //! ## Module map
 //!
@@ -55,7 +70,9 @@
 //!
 //! ## Modeller's error-reading guide (R4, R9)
 //!
-//! Recurring translations from compiler language to model language:
+//! Recurring translations from compiler language to model language. (The
+//! expanded version — each entry with a worked example from the pinned
+//! compile-fail cases — is §4 of `docs/modellers-guide.md`.)
 //!
 //! * **"use of moved value: `x`"** — the resource is already in use by
 //!   another process, or was lost upstream; get it back from that process's

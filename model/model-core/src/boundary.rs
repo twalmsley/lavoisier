@@ -217,9 +217,9 @@ mod tests {
     /// A minimal in-module consumer in the unbounded-sink shape
     /// (`Next = Self`, R15/F-029).
     ///
-    /// LIMITATION(candidate finding): a finite consumer that keeps its
-    /// contents MUST also carry a decreasing type-level space parameter (the
-    /// F-016 `WasteBag<Space, Contents>` shape). An impl that applies to
+    /// LIMITATION (F-034): a finite consumer that keeps its contents MUST
+    /// also carry a decreasing type-level space parameter (the F-016
+    /// `WasteBag<Space, Contents>` shape). An impl that applies to
     /// every state and only grows, such as
     /// `impl<C> Consumer<Token> for Bin<C> { type Next = Bin<Cons<Token, C>>; }`,
     /// sends `ConsumeList` trait resolution into unbounded candidate
@@ -227,7 +227,7 @@ mod tests {
     /// E0275, but at the project-mandated `recursion_limit = "2048"` (F-010)
     /// rustc 1.98.1 exhausts its stack and dies with SIGBUS instead of
     /// reporting an error. Reproduced deterministically while building this
-    /// module's tests; minimal repro in the workspace report.
+    /// module's tests; logged as FINDINGS.md F-034.
     struct Bin;
 
     impl Consumer<Token> for Bin {

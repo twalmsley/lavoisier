@@ -27,7 +27,7 @@
 //! family's `boundary`, `test_support` and continuous `processes` modules as
 //! children (F-006, F-031).
 //!
-//! ## The three resource shapes
+//! ## The four resource shapes
 //!
 //! | Macro | Shape | Tripwire |
 //! |---|---|---|
@@ -706,6 +706,33 @@ macro_rules! __mc_consumable_resource {
 /// container, even empty, is exactly what the tripwire exists to catch,
 /// F-032). The generic forms' tripwire reports the full type name via
 /// `core::any::type_name`, magnitude included.
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// A declared const parameter rides as a second quantity beside the appended
+/// magnitude `V` — the multi-quantity-state shape CS-1's
+/// `BoilingKettle<WATER_G, V>` uses (`model/cs1-pot-of-tea/src/resources.rs`):
+///
+/// ```
+/// model_core::container_resource! {
+///     /// A kettle at the boil: `WATER_G` grams of water carrying `V`
+///     /// joules of embodied energy (the magnitude slot).
+///     BoilingKettle<const WATER_G: u64>,
+///     unit = "joules (embodied)",
+///     must_use = "BoilingKettle is a conserved resource: pour it or hand it to a Consumer"
+/// }
+///
+/// fn main() {
+///     // mint/defuse are pub(crate): this code only exists inside the
+///     // defining crate's boundary (here, the doc-test crate).
+///     let kettle: BoilingKettle<1500, 500_000> = BoilingKettle::mint();
+///     assert_eq!(BoilingKettle::<1500, 500_000>::VALUE, 500_000);
+///     assert_eq!(BoilingKettle::<1500, 500_000>::UNIT, "joules (embodied)");
+///     // A real model hands this to a process or Consumer; the boundary
+///     // defuses it here to keep the example self-contained.
+///     kettle.defuse();
+/// }
+/// ```
 #[macro_export]
 macro_rules! container_resource {
     // ---- 1. Plain non-generic form (the original grammar, unchanged) ----
@@ -940,6 +967,33 @@ macro_rules! __mc_container_resource {
 /// bound each, then const parameters; no lifetimes, defaults, `where`
 /// clauses or trailing commas). A reusable resource takes no held contents
 /// and no flags.
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// A reusable tool is moved into a process and returned as part of its
+/// output (R2), then legitimately stays with the caller — no tripwire fires:
+///
+/// ```
+/// model_core::reusable_resource! {
+///     /// A spanner: moved in and returned by every process that uses it.
+///     Spanner,
+///     must_use = "Spanner is a reusable resource: pass it on or return it to the caller"
+/// }
+///
+/// /// A process takes the tool by value and gives it back (R1, R2).
+/// fn tighten(spanner: Spanner) -> Spanner {
+///     spanner
+/// }
+///
+/// fn main() {
+///     // mint is pub(crate): only the defining crate's boundary (here, the
+///     // doc-test crate) creates the resource.
+///     let spanner = Spanner::mint();
+///     let spanner = tighten(spanner);
+///     // Reusable resources outlive the flow and stay with the caller.
+///     let _stays_with_the_caller = spanner;
+/// }
+/// ```
 #[macro_export]
 macro_rules! reusable_resource {
     // ---- 1. Plain non-generic form (the original grammar, unchanged) ----
@@ -1086,9 +1140,42 @@ macro_rules! __mc_reusable_resource {
 ///   exists yet; extending this generator is deliberate future work, not a
 ///   parsing limitation.
 ///
-/// See the [module docs](crate::resource) for a worked example, the overdraw
-/// `compile_fail` regression, and the message `assert = …` should carry (it
-/// leads the E0080 output, so phrase it for modellers).
+/// See the [module docs](crate::resource) for the overdraw `compile_fail`
+/// regression and the message `assert = …` should carry (it leads the E0080
+/// output, so phrase it for modellers).
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// ```
+/// model_core::container_resource! {
+///     /// Drawn fuel, in grams.
+///     Fuel,
+///     unit = "grams",
+///     must_use = "Fuel is a conserved resource: pass it on or hand it to a Consumer"
+/// }
+///
+/// model_core::container_resource! {
+///     /// A fuel can holding `V` grams; `FuelCan<0>` is the empty state.
+///     FuelCan,
+///     unit = "grams remaining",
+///     must_use = "FuelCan is a conserved resource: even an empty can must be accounted for"
+/// }
+///
+/// model_core::draw_process! {
+///     /// Draws `TAKE` grams from a can holding `FULL`, leaving `LEFT`.
+///     pub fn draw_fuel: FuelCan => Fuel,
+///     assert = "conservation violated in draw_fuel (R15): TAKE + LEFT must equal FULL - is the draw larger than the can's remaining contents?"
+/// }
+///
+/// fn main() {
+///     let can: FuelCan<800> = FuelCan::mint(); // boundary fill (pub(crate) mint)
+///     let (fuel, can) = draw_fuel::<300, 500, 800>(can);
+///     assert_eq!(Fuel::<300>::VALUE + FuelCan::<500>::VALUE, 800);
+///     // A real model hands these on; the boundary defuses them here.
+///     fuel.defuse();
+///     can.defuse();
+/// }
+/// ```
 #[macro_export]
 macro_rules! draw_process {
     (

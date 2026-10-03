@@ -2,7 +2,7 @@
 //!
 //! The first spec→model round trip: this crate implements, downstream of
 //! `model-core`, the agreed natural-language specification
-//! `case-studies/cs1-pot-of-tea/SPEC.md` (v0.2). One person makes one pot of
+//! `case-studies/cs1-pot-of-tea/SPEC.md` (v0.3, implemented). One person makes one pot of
 //! tea in a kitchen with an electric kettle: continuous resources (water,
 //! energy, time) dominate, the flow has one genuine ordering freedom (the
 //! kettle boils with **no person**, so the pot can be loaded before or while
