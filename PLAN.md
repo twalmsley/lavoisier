@@ -55,7 +55,7 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 |---|---|---|---|
 | 0 Plan | done | — | — |
 | 1 CS-1 spec | done (v0.2 agreed) | — | 2026-10-03: §8 1–3 as proposed; disposal step added; single History, merge demo deferred to a later CS |
-| 2 CS-1 model | done (`model/cs1-pot-of-tea`, full gate green) | F-053, F-054 | pending: 8 round-trip feedback items (SPEC §8); template/tooling changes to agree |
+| 2 CS-1 model | done (`model/cs1-pot-of-tea`, full gate green) | F-053, F-054 | 2026-10-03: closed — F-053 fixed via template rule (workspace-unique ids at spec time); feedback items 2/3/5/6 folded into SPEC_TEMPLATE |
 | 3 Documentation | not started | | |
 | 4 Learning materials | not started | | |
 | 5 Overview deck | not started | | |

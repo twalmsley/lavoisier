@@ -33,8 +33,11 @@ failure handling), so its absence is a decision, not an oversight.>
 
 ## 2. Requirements
 
-> One sentence each, numbered `REQ-001` upward (three digits, sequential, never reused —
-> R10). Each becomes a requirement trait verbatim, so phrase each as a checkable property
+> One sentence each, with `REQ-NNN` ids (three digits, sequential, never reused — R10).
+> Ids are **workspace-global** (F-053): number from the next free id across the whole
+> workspace (check the latest trace.sh report for the highest in use), not from 001 — a
+> reused id leaves the CI gate green while the traceability report silently merges your
+> requirement with another model's. Each becomes a requirement trait verbatim, so phrase each as a checkable property
 > of a *thing* or a *process* ("X must be/have Y"), not as a wish. Every requirement will
 > need at least one verifying test; if you can't imagine the test, rephrase the
 > requirement.
@@ -51,7 +54,10 @@ failure handling), so its absence is a decision, not an oversight.>
 > **product** — what the model exists to produce.
 > Quantities are integers in the base units (R7): g, mm, ms, mm², mm³, mK, mA, J.
 > *States*: list every processing state separately — one type per state (R9), so "plate"
-> and "drilled plate" are two rows or one row listing both states.
+> and "drilled plate" are two rows or one row listing both states. A state carrying more
+> than one quantity (mass *and* embodied energy, say) lists both; in code the extra
+> quantities ride as further const parameters on the state type
+> (`BoilingKettle<1500, 500_000>`).
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
@@ -88,14 +94,25 @@ failure handling), so its absence is a decision, not an oversight.>
 > everything it produces — nothing appears or disappears (R1). **The balances must
 > actually balance**; the compiler checks them, so wrong numbers here fail the build.
 > If a process needs payment, orders or receipts, it is a process chain, not a supplier
-> (R12) — spell out the chain.
+> (R12) — spell out the chain. Three conventions the implementation relies on:
+> - "Actor: person (draws N ms)" means the draw is an **adjacent** `draw_time` step,
+>   recorded to the History under this process's name; the process itself takes and returns
+>   the person unchanged (F-048). A process needing no person should say so — that is what
+>   creates ordering freedom (§6).
+> - Say where each waste output **goes**: either the process takes its consumer as a
+>   requirement-bounded parameter and feeds it internally (the waste never exists loose and
+>   the requirement becomes structural), or the flow routes the loose output. Name which.
+> - Mark each Balances line **(assert)** — checked by a `const` assert — or
+>   **(structural)** — true by construction (shared consts, a fixed item count). Both are
+>   conservation; only asserts carry stated numbers on both sides.
 
 ### P1. <cut>
 - **Actor(s) and reusables:** <1 person (≥ 5000 ms of their budget), the saw> — returned.
 - **Consumes:** <steel sheet, 5000 g>.
 - **Produces:** <2 plate blanks (2 × 2250 g)>.
 - **Waste:** <swarf, 500 g → swarf bin (§4)>.
-- **Balances:** <mass: 5000 = 2250 + 2250 + 500>; <time drawn: 5000 ms → History>.
+- **Waste routing:** <taken as a bounded consumer parameter / routed by the flow>.
+- **Balances:** <mass: 5000 = 2250 + 2250 + 500 (assert)>; <time drawn: 5000 ms → History (structural)>.
 - **Satisfies:** <REQ-00N, if any>.
 - **Failure modes:** <none modelled / describe — see instructions.md open question 1>.
 
