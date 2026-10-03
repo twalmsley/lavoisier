@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Specification version | v0.1 |
+| Specification version | v0.2 |
 | Date | 2026-10-03 |
-| Author | Tony (drafted by Claude for review) |
-| Status | draft |
+| Author | Tony (drafted by Claude; reviewed and agreed 2026-10-03) |
+| Status | agreed |
 
 ## 1. Purpose and scope
 
@@ -57,9 +57,9 @@ type, not a reading); cost (no money in CS-1).
 | What leaves | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
 | Pot of tea (with its mass and embodied energy) | the drinker | unbounded | placeholder |
-| Spent teabags | food-waste bin | holds 10 items | real: kitchen bin (not emptied in this model) |
+| Spent teabags | food-waste bin, then council food-waste collection (P5) | bin holds 10; collection unbounded | bin real; collection placeholder |
 | Waste heat | kitchen air | unbounded | placeholder |
-| Expended time | History (R16) | unbounded | per-branch, merged |
+| Expended time | History (R16) | unbounded | a single History threaded with the person (one actor serializes all draws); the per-branch merge demonstration is deferred to a later case study |
 
 ## 5. Processes
 
@@ -99,18 +99,29 @@ type, not a reading); cost (no money in CS-1).
 - **Satisfies:** REQ-001 (accepts only the boiling kettle state), REQ-003 (spent bags exit
   only to the bin), REQ-004.
 
+### P5. Empty the bin
+- **Actor(s) and reusables:** person (draws 10 000 ms); the bin — returned empty.
+- **Consumes:** the bin's kept contents: 3 spent teabags (36 g), released only through this
+  sealed disposal path (F-039).
+- **Produces:** —.
+- **Waste:** 36 g food waste → council food-waste collection (boundary consumer).
+- **Balances:** mass 36 = 36; time 10 000 ms → History.
+- **Satisfies:** REQ-003 (completes the spent bags' journey out of the system).
+
 ## 6. Flows
 
 - Dependencies: P1 → P3 (boiling needs the filled kettle); P2 is independent of P1 and P3
-  (it needs only the person, pot and box); P4 joins P3's and P2's outputs.
+  (it needs only the person, pot and box); P4 joins P3's and P2's outputs; P5 follows P4.
 - **Concurrency:** P3 needs no person, so the person can load the pot (P2) *while the kettle
   boils* — or before filling it. At least two valid orders must compile:
-  (a) P1, P2, P3, P4 and (b) P1, P3, P2, P4. The kettle/water branch and the pot/teabag
-  branch each carry their own History, merged at P4 (R16).
+  (a) P1, P2, P3, P4, P5 and (b) P1, P3, P2, P4, P5. A single History travels with the person
+  (one actor, so the draws are serialized through them); the per-branch merge is deliberately
+  not exercised here (deferred to a later case study with two actors).
 - **Everything accounted at flow end:** pot of tea (with embodied energy) at the drinker;
-  3 spent bags in the bin (bin at 7 remaining, stays in the kitchen); 70 000 J total waste
-  heat at the kitchen air; kettle back, empty; person back with 235 000 ms; teabag box back
-  at 37; merged History (3 recorded draws, 65 000 ms) with the caller.
+  36 g of food waste at the council collection; the bin back, empty (capacity 10 restored);
+  70 000 J total waste heat at the kitchen air; kettle back, empty; person back with
+  225 000 ms; teabag box back at 37; the History (4 recorded draws, 75 000 ms) with the
+  caller.
 
 ## 7. Assumptions and placeholders
 
@@ -124,14 +135,10 @@ type, not a reading); cost (no money in CS-1).
 
 ## 8. Open questions for the author
 
-1. **Embodied energy in the type:** the spec carries each water state's energy as a second
-   const parameter (`BoilingWater<G, J>` style) so the energy balance is compiler-checked end
-   to end. The cheaper alternative keeps energy per-process only (asserted at P3 and P4 but
-   not carried in types). Typed is proposed — confirm?
-2. **Teabag count as a requirement:** REQ-002 is expressed by making the loaded-pot state
-   exist only at exactly 3 bags. Acceptable, or should the pot accept 1–4 bags with 3 as this
-   flow's choice (weaker type, more realistic pot)?
-3. Quantities sanity check: 1500 g water, 3 bags (3 g dry / 12 g spent), 550 000 J drawn,
-   5-minute person budget, bin capacity 10 — happy with these round numbers?
-4. The bin is **not** emptied in CS-1 (it ends holding 3 spent bags). OK, or should the flow
-   end with a bin-disposal boundary step (F-039 pattern) for completeness?
+Review decisions (2026-10-03): (1) embodied energy carried in the types — **agreed as
+proposed**; (2) loaded pot exists only at exactly 3 bags — **agreed as proposed**; (3) round
+quantities — **agreed as proposed**; (4) a disposal step **added** (P5, the F-039 pattern).
+Additionally agreed: CS-1 keeps a single History (R16 requires one wherever time is drawn) and
+defers the per-branch merge demonstration to a later case study.
+
+- *(further questions to be added during implementation)*

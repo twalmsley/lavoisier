@@ -54,7 +54,7 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | Step | State | Findings raised | Review |
 |---|---|---|---|
 | 0 Plan | done | — | — |
-| 1 CS-1 spec | drafted (`case-studies/cs1-pot-of-tea/SPEC.md` v0.1) — awaiting review | — | pending: §8 questions 1–4 |
+| 1 CS-1 spec | done (v0.2 agreed) | — | 2026-10-03: §8 1–3 as proposed; disposal step added; single History, merge demo deferred to a later CS |
 | 2 CS-1 model | not started | | |
 | 3 Documentation | not started | | |
 | 4 Learning materials | not started | | |
