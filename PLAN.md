@@ -44,10 +44,14 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 2 | **CS-1 model** (crate `cs1-pot-of-tea` in `model/`) | step 1 | Full gate green; findings logged; review decides instruction changes. |
 | 3 | **Documentation** (item 4) | step 2 | The modeller's guide as a real document: assembled from the error-reading guide, the conventions scattered through R1–R19, and CS-1 examples; plus a rustdoc polish pass over model-core and a README refresh. Docs come before teaching materials because everything later cites them. |
 | 4 | **Learning materials** (item 1) | step 3 | A tutorial sequence ("model your first system"): from blank crate to a passing gate, using CS-1; exercises with compile-error answers (the errors are the pedagogy). |
-| 5 | **Overview slide deck** (item 2) | steps 2–4 | Motivation, rationale, hypothesis, goals — and the evidence so far (experiments, findings, what the compiler catches). |
-| 6 | **Walkthrough slide deck** (item 2.1) | steps 2–5 | How to model, end to end, on CS-1: spec → types → processes → boundary → gate → traceability report. |
+| 5 | **Overview slide deck** (item 2) | steps 2–4 | 12 slides (1 intro, 10 content, 1 summary), non-technical audience (managers, team leaders): motivation, rationale, hypothesis, goals, evidence, honest costs. Format: markdown in `decks/` (GitHub-viewable) + committed PDF built by `decks/build.sh` (pandoc → beamer → xelatex). |
+| 6 | **Technical features deck** (item 2.1) | steps 2–5 | ~22 slides complementing the overview: the main features, deliberately code-light — the tutorials, guide and case studies carry that depth. Same format as step 5. |
 | 7 | **White paper** (item 3) | steps 2–6 | The full account: approach, method, experiments, findings F-001…, limitations, conclusions. Written as a living document (v0.x), extended as later case studies land rather than rewritten. |
-| 8+ | CS-2…CS-5, each followed by doc/deck/paper increments | review gates | Chosen one at a time at review; each updates the white paper and, where it teaches something new, the learning materials. |
+| 8 | **Diagram generation** (A) | step 2 | Generated from the models at three levels: **context** (boundary crossings only, no internals), **top-level** (first-level processes linked to each other and the boundary), **detailed** (all levels including sub-processes, fully connected). GitHub-viewable, with hyperlinks from diagram elements to the relevant code. Vehicle to decide at the step: Mermaid renders natively on GitHub but sandboxes click-links there; committed SVG with embedded links is the likely answer. |
+| 9 | **Process document generation** (B) | step 8 | Candidate R20 made real: a generated, human-readable document per process — inputs, outputs, internal details, embedded diagrams, well-structured text — detailed enough for real-world implementation by people. Draws on the open-questions docgen notes (signatures as work-instruction skeletons, VALUE consts as the numbers, placeholders as the open-items list, trace report as the compliance matrix). |
+| 10 | **DSL** (C) | review | A comprehensive systems-engineering DSL over the library — easier for humans to write and machines to read. Needs its own experiment batch: macro front-end vs external notation compiled to Rust vs generation from SPEC documents; error-message quality through the extra layer is the make-or-break criterion. |
+| 11 | **Model analysis** (D) | review | Completeness and style analysis beyond ci.sh/trace.sh: a model linter that highlights where improvement is needed — unaccounted outputs, placeholder density, requirements with thin verification, convention violations (sealing, tag discipline), oversized processes — with actionable hints. Partly exists (trace.sh warnings, sealing greps); this step makes it a single tool with a report. |
+| 12+ | CS-2…CS-5, each followed by doc/deck/paper increments | review gates | Chosen one at a time at review; each updates the white paper and, where it teaches something new, the learning materials. Steps 8–11 interleave with case studies as agreed at review gates. |
 
 ## Status
 
@@ -56,8 +60,12 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 0 Plan | done | — | — |
 | 1 CS-1 spec | done (v0.2 agreed) | — | 2026-10-03: §8 1–3 as proposed; disposal step added; single History, merge demo deferred to a later CS |
 | 2 CS-1 model | done (`model/cs1-pot-of-tea`, full gate green) | F-053, F-054 | 2026-10-03: closed — F-053 fixed via template rule (workspace-unique ids at spec time); feedback items 2/3/5/6 folded into SPEC_TEMPLATE |
-| 3 Documentation | done (`docs/modellers-guide.md`, rustdoc pass, README refresh) | — (4 doc bugs found and fixed) | pending |
-| 4 Learning materials | done (`docs/tutorials/` 00–06 incl. Rust on-ramp and toast capstone; `learn/` exercises crate, solutions verified) | F-015 extended | pending |
-| 5 Overview deck | not started | | |
-| 6 Walkthrough deck | not started | | |
+| 3 Documentation | done (`docs/modellers-guide.md`, rustdoc pass, README refresh) | — (4 doc bugs found and fixed) | 2026-10-03: closed (proceed approved; step-4 shape set) |
+| 4 Learning materials | done (`docs/tutorials/` 00–06 incl. Rust on-ramp and toast capstone; `learn/` exercises crate, solutions verified) | F-015 extended | 2026-10-06: closed (deck parameters set) |
+| 5 Overview deck | done (`decks/overview.md` + PDF, 12 slides) | — | pending |
+| 6 Technical deck | done (`decks/technical.md` + PDF, 22 slides) | — | pending |
 | 7 White paper | not started | | |
+| 8 Diagram generation (A) | not started | | |
+| 9 Process docgen (B) | not started | | |
+| 10 DSL (C) | not started | | |
+| 11 Model analysis (D) | not started | | |
