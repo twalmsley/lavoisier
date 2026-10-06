@@ -38,32 +38,32 @@ flowchart LR
   n_system -- "WasteHeat" --> n_KitchenAir
   n_person -- "Person (time budget)" --> n_system
   n_system -- "Labour (expended time)" --> n_history
-  click n_system "../../../model/cs1-pot-of-tea/src/lib.rs#L1" "model/cs1-pot-of-tea/src/lib.rs"
-  click n_MainsTap "../../../model/cs1-pot-of-tea/src/resources.rs#L265" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_GridSocket "../../../model/cs1-pot-of-tea/src/resources.rs#L274" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_full_teabag_box "../../../model/cs1-pot-of-tea/src/resources.rs#L555" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_kettle "../../../model/cs1-pot-of-tea/src/resources.rs#L454" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_teapot "../../../model/cs1-pot-of-tea/src/resources.rs#L461" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_CouncilCollection "../../../model/cs1-pot-of-tea/src/resources.rs#L426" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_Drinker "../../../model/cs1-pot-of-tea/src/resources.rs#L403" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_FoodWasteBin "../../../model/cs1-pot-of-tea/src/resources.rs#L332" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_KitchenAir "../../../model/cs1-pot-of-tea/src/resources.rs#L379" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_system "/model/cs1-pot-of-tea/src/lib.rs#L1" "model/cs1-pot-of-tea/src/lib.rs"
+  click n_MainsTap "/model/cs1-pot-of-tea/src/resources.rs#L265" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_GridSocket "/model/cs1-pot-of-tea/src/resources.rs#L274" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_full_teabag_box "/model/cs1-pot-of-tea/src/resources.rs#L555" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_kettle "/model/cs1-pot-of-tea/src/resources.rs#L454" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_teapot "/model/cs1-pot-of-tea/src/resources.rs#L461" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_CouncilCollection "/model/cs1-pot-of-tea/src/resources.rs#L426" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_Drinker "/model/cs1-pot-of-tea/src/resources.rs#L403" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_FoodWasteBin "/model/cs1-pot-of-tea/src/resources.rs#L332" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_KitchenAir "/model/cs1-pot-of-tea/src/resources.rs#L379" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ## Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_system` (cs1-pot-of-tea — the modelled system) | the system | [model/cs1-pot-of-tea/src/lib.rs#L1](../../../model/cs1-pot-of-tea/src/lib.rs#L1) |
-| `n_MainsTap` (MainsTap) | external party | [model/cs1-pot-of-tea/src/resources.rs#L265](../../../model/cs1-pot-of-tea/src/resources.rs#L265) |
-| `n_GridSocket` (GridSocket) | external party | [model/cs1-pot-of-tea/src/resources.rs#L274](../../../model/cs1-pot-of-tea/src/resources.rs#L274) |
-| `n_full_teabag_box` (full_teabag_box) | external party | [model/cs1-pot-of-tea/src/resources.rs#L555](../../../model/cs1-pot-of-tea/src/resources.rs#L555) |
-| `n_new_kettle` (new_kettle) | external party | [model/cs1-pot-of-tea/src/resources.rs#L454](../../../model/cs1-pot-of-tea/src/resources.rs#L454) |
-| `n_new_teapot` (new_teapot) | external party | [model/cs1-pot-of-tea/src/resources.rs#L461](../../../model/cs1-pot-of-tea/src/resources.rs#L461) |
-| `n_CouncilCollection` (CouncilCollection) | external party | [model/cs1-pot-of-tea/src/resources.rs#L426](../../../model/cs1-pot-of-tea/src/resources.rs#L426) |
-| `n_Drinker` (Drinker) | external party | [model/cs1-pot-of-tea/src/resources.rs#L403](../../../model/cs1-pot-of-tea/src/resources.rs#L403) |
-| `n_FoodWasteBin` (FoodWasteBin) | external party | [model/cs1-pot-of-tea/src/resources.rs#L332](../../../model/cs1-pot-of-tea/src/resources.rs#L332) |
-| `n_KitchenAir` (KitchenAir) | external party | [model/cs1-pot-of-tea/src/resources.rs#L379](../../../model/cs1-pot-of-tea/src/resources.rs#L379) |
+| `n_system` (cs1-pot-of-tea — the modelled system) | the system | [model/cs1-pot-of-tea/src/lib.rs#L1](/model/cs1-pot-of-tea/src/lib.rs#L1) |
+| `n_MainsTap` (MainsTap) | external party | [model/cs1-pot-of-tea/src/resources.rs#L265](/model/cs1-pot-of-tea/src/resources.rs#L265) |
+| `n_GridSocket` (GridSocket) | external party | [model/cs1-pot-of-tea/src/resources.rs#L274](/model/cs1-pot-of-tea/src/resources.rs#L274) |
+| `n_full_teabag_box` (full_teabag_box) | external party | [model/cs1-pot-of-tea/src/resources.rs#L555](/model/cs1-pot-of-tea/src/resources.rs#L555) |
+| `n_new_kettle` (new_kettle) | external party | [model/cs1-pot-of-tea/src/resources.rs#L454](/model/cs1-pot-of-tea/src/resources.rs#L454) |
+| `n_new_teapot` (new_teapot) | external party | [model/cs1-pot-of-tea/src/resources.rs#L461](/model/cs1-pot-of-tea/src/resources.rs#L461) |
+| `n_CouncilCollection` (CouncilCollection) | external party | [model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426) |
+| `n_Drinker` (Drinker) | external party | [model/cs1-pot-of-tea/src/resources.rs#L403](/model/cs1-pot-of-tea/src/resources.rs#L403) |
+| `n_FoodWasteBin` (FoodWasteBin) | external party | [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332) |
+| `n_KitchenAir` (KitchenAir) | external party | [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379) |
 | `n_person` (person (model-core boundary)) | external party | — |
 | `n_history` (History — the execution record (R16)) | external party | — |
 
@@ -71,13 +71,13 @@ flowchart LR
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
-| `ColdWater` | continuous (container) | grams | [model/cs1-pot-of-tea/src/resources.rs#L44](../../../model/cs1-pot-of-tea/src/resources.rs#L44) |
-| `DryTeabag` | discrete (consumable) | — | [model/cs1-pot-of-tea/src/resources.rs#L157](../../../model/cs1-pot-of-tea/src/resources.rs#L157) |
-| `Electricity` | continuous (container) | joules | [model/cs1-pot-of-tea/src/resources.rs#L53](../../../model/cs1-pot-of-tea/src/resources.rs#L53) |
-| `FoodWaste` | continuous (container) | grams | [model/cs1-pot-of-tea/src/resources.rs#L72](../../../model/cs1-pot-of-tea/src/resources.rs#L72) |
-| `Kettle` | reusable (placeholder) | — | [model/cs1-pot-of-tea/src/resources.rs#L87](../../../model/cs1-pot-of-tea/src/resources.rs#L87) |
-| `PotOfTea` | continuous (container) | joules (embodied) | [model/cs1-pot-of-tea/src/resources.rs#L245](../../../model/cs1-pot-of-tea/src/resources.rs#L245) |
-| `SpentTeabag` | discrete (consumable) | — | [model/cs1-pot-of-tea/src/resources.rs#L173](../../../model/cs1-pot-of-tea/src/resources.rs#L173) |
-| `TeabagBox` | boundary object (placeholder) | — | [model/cs1-pot-of-tea/src/resources.rs#L296](../../../model/cs1-pot-of-tea/src/resources.rs#L296) |
-| `Teapot` | reusable (placeholder) | — | [model/cs1-pot-of-tea/src/resources.rs#L198](../../../model/cs1-pot-of-tea/src/resources.rs#L198) |
-| `WasteHeat` | continuous (container) | joules | [model/cs1-pot-of-tea/src/resources.rs#L62](../../../model/cs1-pot-of-tea/src/resources.rs#L62) |
+| `ColdWater` | continuous (container) | grams | [model/cs1-pot-of-tea/src/resources.rs#L44](/model/cs1-pot-of-tea/src/resources.rs#L44) |
+| `DryTeabag` | discrete (consumable) | — | [model/cs1-pot-of-tea/src/resources.rs#L157](/model/cs1-pot-of-tea/src/resources.rs#L157) |
+| `Electricity` | continuous (container) | joules | [model/cs1-pot-of-tea/src/resources.rs#L53](/model/cs1-pot-of-tea/src/resources.rs#L53) |
+| `FoodWaste` | continuous (container) | grams | [model/cs1-pot-of-tea/src/resources.rs#L72](/model/cs1-pot-of-tea/src/resources.rs#L72) |
+| `Kettle` | reusable (placeholder) | — | [model/cs1-pot-of-tea/src/resources.rs#L87](/model/cs1-pot-of-tea/src/resources.rs#L87) |
+| `PotOfTea` | continuous (container) | joules (embodied) | [model/cs1-pot-of-tea/src/resources.rs#L245](/model/cs1-pot-of-tea/src/resources.rs#L245) |
+| `SpentTeabag` | discrete (consumable) | — | [model/cs1-pot-of-tea/src/resources.rs#L173](/model/cs1-pot-of-tea/src/resources.rs#L173) |
+| `TeabagBox` | boundary object (placeholder) | — | [model/cs1-pot-of-tea/src/resources.rs#L296](/model/cs1-pot-of-tea/src/resources.rs#L296) |
+| `Teapot` | reusable (placeholder) | — | [model/cs1-pot-of-tea/src/resources.rs#L198](/model/cs1-pot-of-tea/src/resources.rs#L198) |
+| `WasteHeat` | continuous (container) | joules | [model/cs1-pot-of-tea/src/resources.rs#L62](/model/cs1-pot-of-tea/src/resources.rs#L62) |

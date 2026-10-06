@@ -9,7 +9,7 @@ implementation; F-042…F-052 added 2026-10-02 from the `RESULTS.md` files of ex
 through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model-core` by path,
 with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
 R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build; F-015 extended 2026-10-03 by
-the learning-materials build.
+the learning-materials build; F-055 added 2026-10-06 by the diagram-generator build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1319,4 +1319,36 @@ only required when the *returned* type's const parameters must vary with the inp
 
 **Evidence:** `model/cs1-pot-of-tea/src/characteristics.rs` (`Boiling`, `BrewPermit`),
 `src/resources.rs` (`pour_and_brew`).
+
+---
+
+## F-055 — Machine-reading the models: five gaps in the grep discipline (extends F-021/F-038)
+
+**What couldn't be expressed:** building the diagram generator (`tools/diagram-gen`) against
+the R10 grep discipline showed the discipline covers human-and-grep traceability but is not
+yet sufficient for *tools* that must recover the full model structure from source:
+
+1. **A generic `Supplier` impl hides what a supplier supplies** (`type Item = H`): "what does
+   this box hold" has no greppable single line — the generator recovers it from the sealed
+   fill machinery (`Fill for Cons<DryTeabag, T>`), which is incidental, not contractual.
+2. **Plain (non-requirement) bounds live in `where` clauses.** R10 rule 4 pins only
+   requirement bounds to the `fn`-name line, so one-line signature parsing is insufficient
+   (`purchase`); tools must parse `where` clauses — a candidate extension to the discipline.
+3. **REQ→type resolution via `satisfies!` is unique today but many-to-many in principle:** a
+   second satisfying type per requirement would make bound-to-type resolution ambiguous; the
+   generator picks the first, deterministically.
+4. **Path-qualified return types** (`fn new_kettle() -> super::Kettle`) complicate line
+   parsing; bare return-type names would keep it trivial.
+5. **Kernel-helper semantics are hard-coded coupling:** `draw_time`'s TAKE/LEFT/FULL turbofish
+   order and the `send_to`/`record` roles had to be built into the tool as a fixed table —
+   acceptable for a fixed kernel, but any kernel change silently breaks the tooling.
+
+**What it cost:** heuristics plus in-file WARN comments where parsing is not certain.
+
+**Workaround adopted:** conservative parsing that warns rather than guesses; the gaps are
+candidate convention extensions to consider before the process-docgen step (PLAN step 9),
+which will lean on the same extraction.
+
+**Evidence:** `tools/diagram-gen/src/{scan,flow}.rs`; the WARN comments in
+`docs/diagrams/pilot-workshop/*.md`.
 

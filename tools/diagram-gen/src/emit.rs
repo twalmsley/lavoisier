@@ -1016,7 +1016,7 @@ fn mermaid(g: &FlowGraph, direction: &str) -> String {
     // the legend table below is the contract).
     for n in &g.nodes {
         if let Some(loc) = &n.loc {
-            let _ = writeln!(s, "  click {} \"../../../{}#L{}\" \"{}\"", n.id, loc.file, loc.line, loc.file);
+            let _ = writeln!(s, "  click {} \"/{}#L{}\" \"{}\"", n.id, loc.file, loc.line, loc.file);
         }
     }
     let _ = writeln!(s, "```");
@@ -1029,7 +1029,7 @@ fn legend(g: &FlowGraph) -> String {
     let _ = writeln!(s, "|---|---|---|");
     for n in &g.nodes {
         let link = match &n.loc {
-            Some(loc) => format!("[{}#L{}](../../../{}#L{})", loc.file, loc.line, loc.file, loc.line),
+            Some(loc) => format!("[{}#L{}](/{}#L{})", loc.file, loc.line, loc.file, loc.line),
             None => "—".to_string(),
         };
         let _ = writeln!(s, "| `{}` ({}) | {} | {} |", n.id, sanitize_label(&n.label), kind_name(n.kind), link);
@@ -1071,7 +1071,7 @@ fn resource_table(cm: &CrateModel, graphs: &[&FlowGraph]) -> String {
         let ph = if r.placeholder { " (placeholder)" } else { "" };
         let _ = writeln!(
             s,
-            "| `{}` | {}{} | {} | [{}#L{}](../../../{}#L{}) |",
+            "| `{}` | {}{} | {} | [{}#L{}](/{}#L{}) |",
             b, kind, ph, unit, r.loc.file, r.loc.line, r.loc.file, r.loc.line
         );
     }
@@ -1221,7 +1221,7 @@ pub fn emit_crate(
         let _ = writeln!(s, "\n## {title}\n");
         let _ = writeln!(
             s,
-            "Source: [{}#L{}](../../../{}#L{})\n",
+            "Source: [{}#L{}](/{}#L{})\n",
             loc.file, loc.line, loc.file, loc.line
         );
         s.push_str(&mermaid(g, "LR"));

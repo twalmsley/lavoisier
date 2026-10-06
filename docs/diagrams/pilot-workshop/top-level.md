@@ -123,114 +123,114 @@ flowchart LR
   n_FittedGuard -.- n_drill_holes_fallible
   n_Qualified -.- n_drill_holes_fallible
   n_qualify -- "Qualified" --> n_Qualified
-  click n_draw_funds "../../../model/pilot-workshop/src/money.rs#L173" "model/pilot-workshop/src/money.rs"
-  click n_deposit "../../../model/pilot-workshop/src/money.rs#L181" "model/pilot-workshop/src/money.rs"
-  click n_split_money "../../../model/pilot-workshop/src/money.rs#L200" "model/pilot-workshop/src/money.rs"
-  click n_purchase "../../../model/pilot-workshop/src/money.rs#L243" "model/pilot-workshop/src/money.rs"
-  click n_cut "../../../model/pilot-workshop/src/resources.rs#L584" "model/pilot-workshop/src/resources.rs"
-  click n_fit_guard "../../../model/pilot-workshop/src/resources.rs#L601" "model/pilot-workshop/src/resources.rs"
-  click n_remove_guard "../../../model/pilot-workshop/src/resources.rs#L609" "model/pilot-workshop/src/resources.rs"
-  click n_repair_bit "../../../model/pilot-workshop/src/resources.rs#L618" "model/pilot-workshop/src/resources.rs"
-  click n_drill_holes "../../../model/pilot-workshop/src/resources.rs#L668" "model/pilot-workshop/src/resources.rs"
-  click n_drill_holes_fallible "../../../model/pilot-workshop/src/resources.rs#L747" "model/pilot-workshop/src/resources.rs"
-  click n_fasten "../../../model/pilot-workshop/src/resources.rs#L799" "model/pilot-workshop/src/resources.rs"
-  click n_discard_swarf "../../../model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
-  click n_Account "../../../model/pilot-workshop/src/money.rs#L54" "model/pilot-workshop/src/money.rs"
-  click n_open_account "../../../model/pilot-workshop/src/money.rs#L115" "model/pilot-workshop/src/money.rs"
-  click n_close_account "../../../model/pilot-workshop/src/money.rs#L124" "model/pilot-workshop/src/money.rs"
-  click n_Customer "../../../model/pilot-workshop/src/resources.rs#L377" "model/pilot-workshop/src/resources.rs"
-  click n_Drill "../../../model/pilot-workshop/src/resources.rs#L82" "model/pilot-workshop/src/resources.rs"
-  click n_supply_drill "../../../model/pilot-workshop/src/resources.rs#L430" "model/pilot-workshop/src/resources.rs"
-  click n_DrillBit "../../../model/pilot-workshop/src/resources.rs#L107" "model/pilot-workshop/src/resources.rs"
-  click n_supply_drill_bit "../../../model/pilot-workshop/src/resources.rs#L446" "model/pilot-workshop/src/resources.rs"
-  click n_DrillOutcome "../../../model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
-  click n_outcome_failure "../../../model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
-  click n_outcome_success "../../../model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
-  click n_return_outcome "../../../model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
-  click n_FittedGuard "../../../model/pilot-workshop/src/resources.rs#L155" "model/pilot-workshop/src/resources.rs"
-  click n_supply_guard "../../../model/pilot-workshop/src/resources.rs#L460" "model/pilot-workshop/src/resources.rs"
-  click n_Money "../../../model/pilot-workshop/src/money.rs#L45" "model/pilot-workshop/src/money.rs"
-  click n_Plate "../../../model/pilot-workshop/src/resources.rs#L47" "model/pilot-workshop/src/resources.rs"
-  click n_supply_plate "../../../model/pilot-workshop/src/resources.rs#L439" "model/pilot-workshop/src/resources.rs"
-  click n_ScrapYard "../../../model/pilot-workshop/src/resources.rs#L249" "model/pilot-workshop/src/resources.rs"
-  click n_supply_spare_parts "../../../model/pilot-workshop/src/resources.rs#L453" "model/pilot-workshop/src/resources.rs"
-  click n_supply_sheet "../../../model/pilot-workshop/src/resources.rs#L423" "model/pilot-workshop/src/resources.rs"
-  click n_SwarfBin "../../../model/pilot-workshop/src/resources.rs#L333" "model/pilot-workshop/src/resources.rs"
-  click n_dispose_bin "../../../model/pilot-workshop/src/resources.rs#L534" "model/pilot-workshop/src/resources.rs"
-  click n_Vendor "../../../model/pilot-workshop/src/money.rs#L77" "model/pilot-workshop/src/money.rs"
-  click n_BoltBox "../../../model/pilot-workshop/src/catalogue.rs#L139" "model/pilot-workshop/src/catalogue.rs"
-  click n_full_box "../../../model/pilot-workshop/src/catalogue.rs#L229" "model/pilot-workshop/src/catalogue.rs"
-  click n_new_vendor "../../../model/pilot-workshop/src/money.rs#L132" "model/pilot-workshop/src/money.rs"
-  click n_qualify "../../../model/model-core/src/common.rs#L166" "model/model-core/src/common.rs"
+  click n_draw_funds "/model/pilot-workshop/src/money.rs#L173" "model/pilot-workshop/src/money.rs"
+  click n_deposit "/model/pilot-workshop/src/money.rs#L181" "model/pilot-workshop/src/money.rs"
+  click n_split_money "/model/pilot-workshop/src/money.rs#L200" "model/pilot-workshop/src/money.rs"
+  click n_purchase "/model/pilot-workshop/src/money.rs#L243" "model/pilot-workshop/src/money.rs"
+  click n_cut "/model/pilot-workshop/src/resources.rs#L584" "model/pilot-workshop/src/resources.rs"
+  click n_fit_guard "/model/pilot-workshop/src/resources.rs#L601" "model/pilot-workshop/src/resources.rs"
+  click n_remove_guard "/model/pilot-workshop/src/resources.rs#L609" "model/pilot-workshop/src/resources.rs"
+  click n_repair_bit "/model/pilot-workshop/src/resources.rs#L618" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes "/model/pilot-workshop/src/resources.rs#L668" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes_fallible "/model/pilot-workshop/src/resources.rs#L747" "model/pilot-workshop/src/resources.rs"
+  click n_fasten "/model/pilot-workshop/src/resources.rs#L799" "model/pilot-workshop/src/resources.rs"
+  click n_discard_swarf "/model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
+  click n_Account "/model/pilot-workshop/src/money.rs#L54" "model/pilot-workshop/src/money.rs"
+  click n_open_account "/model/pilot-workshop/src/money.rs#L115" "model/pilot-workshop/src/money.rs"
+  click n_close_account "/model/pilot-workshop/src/money.rs#L124" "model/pilot-workshop/src/money.rs"
+  click n_Customer "/model/pilot-workshop/src/resources.rs#L377" "model/pilot-workshop/src/resources.rs"
+  click n_Drill "/model/pilot-workshop/src/resources.rs#L82" "model/pilot-workshop/src/resources.rs"
+  click n_supply_drill "/model/pilot-workshop/src/resources.rs#L430" "model/pilot-workshop/src/resources.rs"
+  click n_DrillBit "/model/pilot-workshop/src/resources.rs#L107" "model/pilot-workshop/src/resources.rs"
+  click n_supply_drill_bit "/model/pilot-workshop/src/resources.rs#L446" "model/pilot-workshop/src/resources.rs"
+  click n_DrillOutcome "/model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
+  click n_outcome_failure "/model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
+  click n_outcome_success "/model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
+  click n_return_outcome "/model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
+  click n_FittedGuard "/model/pilot-workshop/src/resources.rs#L155" "model/pilot-workshop/src/resources.rs"
+  click n_supply_guard "/model/pilot-workshop/src/resources.rs#L460" "model/pilot-workshop/src/resources.rs"
+  click n_Money "/model/pilot-workshop/src/money.rs#L45" "model/pilot-workshop/src/money.rs"
+  click n_Plate "/model/pilot-workshop/src/resources.rs#L47" "model/pilot-workshop/src/resources.rs"
+  click n_supply_plate "/model/pilot-workshop/src/resources.rs#L439" "model/pilot-workshop/src/resources.rs"
+  click n_ScrapYard "/model/pilot-workshop/src/resources.rs#L249" "model/pilot-workshop/src/resources.rs"
+  click n_supply_spare_parts "/model/pilot-workshop/src/resources.rs#L453" "model/pilot-workshop/src/resources.rs"
+  click n_supply_sheet "/model/pilot-workshop/src/resources.rs#L423" "model/pilot-workshop/src/resources.rs"
+  click n_SwarfBin "/model/pilot-workshop/src/resources.rs#L333" "model/pilot-workshop/src/resources.rs"
+  click n_dispose_bin "/model/pilot-workshop/src/resources.rs#L534" "model/pilot-workshop/src/resources.rs"
+  click n_Vendor "/model/pilot-workshop/src/money.rs#L77" "model/pilot-workshop/src/money.rs"
+  click n_BoltBox "/model/pilot-workshop/src/catalogue.rs#L139" "model/pilot-workshop/src/catalogue.rs"
+  click n_full_box "/model/pilot-workshop/src/catalogue.rs#L229" "model/pilot-workshop/src/catalogue.rs"
+  click n_new_vendor "/model/pilot-workshop/src/money.rs#L132" "model/pilot-workshop/src/money.rs"
+  click n_qualify "/model/model-core/src/common.rs#L166" "model/model-core/src/common.rs"
 ```
 
 ## Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_draw_funds` (draw_funds) | process | [model/pilot-workshop/src/money.rs#L173](../../../model/pilot-workshop/src/money.rs#L173) |
-| `n_deposit` (deposit) | process | [model/pilot-workshop/src/money.rs#L181](../../../model/pilot-workshop/src/money.rs#L181) |
-| `n_split_money` (split_money) | process | [model/pilot-workshop/src/money.rs#L200](../../../model/pilot-workshop/src/money.rs#L200) |
-| `n_purchase` (purchase) | process | [model/pilot-workshop/src/money.rs#L243](../../../model/pilot-workshop/src/money.rs#L243) |
-| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L584](../../../model/pilot-workshop/src/resources.rs#L584) |
-| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L601](../../../model/pilot-workshop/src/resources.rs#L601) |
-| `n_remove_guard` (remove_guard) | process | [model/pilot-workshop/src/resources.rs#L609](../../../model/pilot-workshop/src/resources.rs#L609) |
-| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L618](../../../model/pilot-workshop/src/resources.rs#L618) |
-| `n_drill_holes` (drill_holes) | process | [model/pilot-workshop/src/resources.rs#L668](../../../model/pilot-workshop/src/resources.rs#L668) |
-| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L747](../../../model/pilot-workshop/src/resources.rs#L747) |
-| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L799](../../../model/pilot-workshop/src/resources.rs#L799) |
-| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L820](../../../model/pilot-workshop/src/resources.rs#L820) |
-| `n_Account` (Account) | shared resource | [model/pilot-workshop/src/money.rs#L54](../../../model/pilot-workshop/src/money.rs#L54) |
-| `n_open_account` (open_account) | boundary source | [model/pilot-workshop/src/money.rs#L115](../../../model/pilot-workshop/src/money.rs#L115) |
-| `n_close_account` (close_account) | boundary sink | [model/pilot-workshop/src/money.rs#L124](../../../model/pilot-workshop/src/money.rs#L124) |
-| `n_Customer` (Customer) | boundary sink | [model/pilot-workshop/src/resources.rs#L377](../../../model/pilot-workshop/src/resources.rs#L377) |
-| `n_Drill` (Drill) | shared resource | [model/pilot-workshop/src/resources.rs#L82](../../../model/pilot-workshop/src/resources.rs#L82) |
-| `n_supply_drill` (supply_drill) | boundary source | [model/pilot-workshop/src/resources.rs#L430](../../../model/pilot-workshop/src/resources.rs#L430) |
+| `n_draw_funds` (draw_funds) | process | [model/pilot-workshop/src/money.rs#L173](/model/pilot-workshop/src/money.rs#L173) |
+| `n_deposit` (deposit) | process | [model/pilot-workshop/src/money.rs#L181](/model/pilot-workshop/src/money.rs#L181) |
+| `n_split_money` (split_money) | process | [model/pilot-workshop/src/money.rs#L200](/model/pilot-workshop/src/money.rs#L200) |
+| `n_purchase` (purchase) | process | [model/pilot-workshop/src/money.rs#L243](/model/pilot-workshop/src/money.rs#L243) |
+| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L584](/model/pilot-workshop/src/resources.rs#L584) |
+| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L601](/model/pilot-workshop/src/resources.rs#L601) |
+| `n_remove_guard` (remove_guard) | process | [model/pilot-workshop/src/resources.rs#L609](/model/pilot-workshop/src/resources.rs#L609) |
+| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L618](/model/pilot-workshop/src/resources.rs#L618) |
+| `n_drill_holes` (drill_holes) | process | [model/pilot-workshop/src/resources.rs#L668](/model/pilot-workshop/src/resources.rs#L668) |
+| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L747](/model/pilot-workshop/src/resources.rs#L747) |
+| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L799](/model/pilot-workshop/src/resources.rs#L799) |
+| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L820](/model/pilot-workshop/src/resources.rs#L820) |
+| `n_Account` (Account) | shared resource | [model/pilot-workshop/src/money.rs#L54](/model/pilot-workshop/src/money.rs#L54) |
+| `n_open_account` (open_account) | boundary source | [model/pilot-workshop/src/money.rs#L115](/model/pilot-workshop/src/money.rs#L115) |
+| `n_close_account` (close_account) | boundary sink | [model/pilot-workshop/src/money.rs#L124](/model/pilot-workshop/src/money.rs#L124) |
+| `n_Customer` (Customer) | boundary sink | [model/pilot-workshop/src/resources.rs#L377](/model/pilot-workshop/src/resources.rs#L377) |
+| `n_Drill` (Drill) | shared resource | [model/pilot-workshop/src/resources.rs#L82](/model/pilot-workshop/src/resources.rs#L82) |
+| `n_supply_drill` (supply_drill) | boundary source | [model/pilot-workshop/src/resources.rs#L430](/model/pilot-workshop/src/resources.rs#L430) |
 | `n_caller` (caller / flow) | flow input/output | — |
-| `n_DrillBit` (DrillBit) | shared resource | [model/pilot-workshop/src/resources.rs#L107](../../../model/pilot-workshop/src/resources.rs#L107) |
-| `n_supply_drill_bit` (supply_drill_bit) | boundary source | [model/pilot-workshop/src/resources.rs#L446](../../../model/pilot-workshop/src/resources.rs#L446) |
-| `n_DrillOutcome` (DrillOutcome) | shared resource | [model/pilot-workshop/src/resources.rs#L185](../../../model/pilot-workshop/src/resources.rs#L185) |
-| `n_outcome_failure` (outcome_failure) | boundary source | [model/pilot-workshop/src/resources.rs#L185](../../../model/pilot-workshop/src/resources.rs#L185) |
-| `n_outcome_success` (outcome_success) | boundary source | [model/pilot-workshop/src/resources.rs#L185](../../../model/pilot-workshop/src/resources.rs#L185) |
-| `n_return_outcome` (return_outcome) | boundary sink | [model/pilot-workshop/src/resources.rs#L185](../../../model/pilot-workshop/src/resources.rs#L185) |
-| `n_FittedGuard` (FittedGuard) | shared resource | [model/pilot-workshop/src/resources.rs#L155](../../../model/pilot-workshop/src/resources.rs#L155) |
+| `n_DrillBit` (DrillBit) | shared resource | [model/pilot-workshop/src/resources.rs#L107](/model/pilot-workshop/src/resources.rs#L107) |
+| `n_supply_drill_bit` (supply_drill_bit) | boundary source | [model/pilot-workshop/src/resources.rs#L446](/model/pilot-workshop/src/resources.rs#L446) |
+| `n_DrillOutcome` (DrillOutcome) | shared resource | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
+| `n_outcome_failure` (outcome_failure) | boundary source | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
+| `n_outcome_success` (outcome_success) | boundary source | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
+| `n_return_outcome` (return_outcome) | boundary sink | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
+| `n_FittedGuard` (FittedGuard) | shared resource | [model/pilot-workshop/src/resources.rs#L155](/model/pilot-workshop/src/resources.rs#L155) |
 | `n_History` (History — execution record (model-core, R16)) | model-core helper | — |
-| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L460](../../../model/pilot-workshop/src/resources.rs#L460) |
-| `n_Money` (Money) | shared resource | [model/pilot-workshop/src/money.rs#L45](../../../model/pilot-workshop/src/money.rs#L45) |
-| `n_Plate` (Plate) | shared resource | [model/pilot-workshop/src/resources.rs#L47](../../../model/pilot-workshop/src/resources.rs#L47) |
-| `n_supply_plate` (supply_plate) | boundary source | [model/pilot-workshop/src/resources.rs#L439](../../../model/pilot-workshop/src/resources.rs#L439) |
-| `n_ScrapYard` (ScrapYard) | boundary sink | [model/pilot-workshop/src/resources.rs#L249](../../../model/pilot-workshop/src/resources.rs#L249) |
-| `n_supply_spare_parts` (supply_spare_parts) | boundary source | [model/pilot-workshop/src/resources.rs#L453](../../../model/pilot-workshop/src/resources.rs#L453) |
-| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L423](../../../model/pilot-workshop/src/resources.rs#L423) |
-| `n_SwarfBin` (SwarfBin) | boundary sink | [model/pilot-workshop/src/resources.rs#L333](../../../model/pilot-workshop/src/resources.rs#L333) |
-| `n_dispose_bin` (dispose_bin) | boundary sink | [model/pilot-workshop/src/resources.rs#L534](../../../model/pilot-workshop/src/resources.rs#L534) |
-| `n_Vendor` (Vendor) | boundary sink | [model/pilot-workshop/src/money.rs#L77](../../../model/pilot-workshop/src/money.rs#L77) |
-| `n_BoltBox` (BoltBox) | boundary source | [model/pilot-workshop/src/catalogue.rs#L139](../../../model/pilot-workshop/src/catalogue.rs#L139) |
-| `n_full_box` (full_box) | boundary source | [model/pilot-workshop/src/catalogue.rs#L229](../../../model/pilot-workshop/src/catalogue.rs#L229) |
-| `n_new_vendor` (new_vendor) | boundary source | [model/pilot-workshop/src/money.rs#L132](../../../model/pilot-workshop/src/money.rs#L132) |
+| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L460](/model/pilot-workshop/src/resources.rs#L460) |
+| `n_Money` (Money) | shared resource | [model/pilot-workshop/src/money.rs#L45](/model/pilot-workshop/src/money.rs#L45) |
+| `n_Plate` (Plate) | shared resource | [model/pilot-workshop/src/resources.rs#L47](/model/pilot-workshop/src/resources.rs#L47) |
+| `n_supply_plate` (supply_plate) | boundary source | [model/pilot-workshop/src/resources.rs#L439](/model/pilot-workshop/src/resources.rs#L439) |
+| `n_ScrapYard` (ScrapYard) | boundary sink | [model/pilot-workshop/src/resources.rs#L249](/model/pilot-workshop/src/resources.rs#L249) |
+| `n_supply_spare_parts` (supply_spare_parts) | boundary source | [model/pilot-workshop/src/resources.rs#L453](/model/pilot-workshop/src/resources.rs#L453) |
+| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L423](/model/pilot-workshop/src/resources.rs#L423) |
+| `n_SwarfBin` (SwarfBin) | boundary sink | [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333) |
+| `n_dispose_bin` (dispose_bin) | boundary sink | [model/pilot-workshop/src/resources.rs#L534](/model/pilot-workshop/src/resources.rs#L534) |
+| `n_Vendor` (Vendor) | boundary sink | [model/pilot-workshop/src/money.rs#L77](/model/pilot-workshop/src/money.rs#L77) |
+| `n_BoltBox` (BoltBox) | boundary source | [model/pilot-workshop/src/catalogue.rs#L139](/model/pilot-workshop/src/catalogue.rs#L139) |
+| `n_full_box` (full_box) | boundary source | [model/pilot-workshop/src/catalogue.rs#L229](/model/pilot-workshop/src/catalogue.rs#L229) |
+| `n_new_vendor` (new_vendor) | boundary source | [model/pilot-workshop/src/money.rs#L132](/model/pilot-workshop/src/money.rs#L132) |
 | `n_Qualified` (Qualified) | shared resource | — |
-| `n_qualify` (qualify (model-core)) | boundary source | [model/model-core/src/common.rs#L166](../../../model/model-core/src/common.rs#L166) |
+| `n_qualify` (qualify (model-core)) | boundary source | [model/model-core/src/common.rs#L166](/model/model-core/src/common.rs#L166) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
-| `Account` | continuous (container) | pence remaining | [model/pilot-workshop/src/money.rs#L54](../../../model/pilot-workshop/src/money.rs#L54) |
-| `Assembly` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L311](../../../model/pilot-workshop/src/resources.rs#L311) |
-| `Bolt` | discrete (consumable) | — | [model/pilot-workshop/src/catalogue.rs#L91](../../../model/pilot-workshop/src/catalogue.rs#L91) |
-| `BoltBox` | boundary object (placeholder) | — | [model/pilot-workshop/src/catalogue.rs#L139](../../../model/pilot-workshop/src/catalogue.rs#L139) |
-| `BrokenDrillBit` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L117](../../../model/pilot-workshop/src/resources.rs#L117) |
-| `Drill` | reusable | — | [model/pilot-workshop/src/resources.rs#L82](../../../model/pilot-workshop/src/resources.rs#L82) |
-| `DrillBit` | reusable | — | [model/pilot-workshop/src/resources.rs#L107](../../../model/pilot-workshop/src/resources.rs#L107) |
-| `DrillOutcome` | outcome token (R17) | — | [model/pilot-workshop/src/resources.rs#L185](../../../model/pilot-workshop/src/resources.rs#L185) |
-| `DrilledPlate` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L56](../../../model/pilot-workshop/src/resources.rs#L56) |
-| `FittedGuard` | reusable | — | [model/pilot-workshop/src/resources.rs#L155](../../../model/pilot-workshop/src/resources.rs#L155) |
-| `MachineGuard` | reusable | — | [model/pilot-workshop/src/resources.rs#L147](../../../model/pilot-workshop/src/resources.rs#L147) |
-| `Money` | continuous (container) | pence | [model/pilot-workshop/src/money.rs#L45](../../../model/pilot-workshop/src/money.rs#L45) |
-| `Plate` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L47](../../../model/pilot-workshop/src/resources.rs#L47) |
-| `ScrapPlate` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L97](../../../model/pilot-workshop/src/resources.rs#L97) |
-| `SpareParts` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L137](../../../model/pilot-workshop/src/resources.rs#L137) |
-| `SteelSheet` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L39](../../../model/pilot-workshop/src/resources.rs#L39) |
-| `Swarf` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L72](../../../model/pilot-workshop/src/resources.rs#L72) |
-| `SwarfBin` | boundary object (placeholder) | — | [model/pilot-workshop/src/resources.rs#L333](../../../model/pilot-workshop/src/resources.rs#L333) |
-| `Vendor` | reusable (placeholder) | — | [model/pilot-workshop/src/money.rs#L77](../../../model/pilot-workshop/src/money.rs#L77) |
+| `Account` | continuous (container) | pence remaining | [model/pilot-workshop/src/money.rs#L54](/model/pilot-workshop/src/money.rs#L54) |
+| `Assembly` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L311](/model/pilot-workshop/src/resources.rs#L311) |
+| `Bolt` | discrete (consumable) | — | [model/pilot-workshop/src/catalogue.rs#L91](/model/pilot-workshop/src/catalogue.rs#L91) |
+| `BoltBox` | boundary object (placeholder) | — | [model/pilot-workshop/src/catalogue.rs#L139](/model/pilot-workshop/src/catalogue.rs#L139) |
+| `BrokenDrillBit` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L117](/model/pilot-workshop/src/resources.rs#L117) |
+| `Drill` | reusable | — | [model/pilot-workshop/src/resources.rs#L82](/model/pilot-workshop/src/resources.rs#L82) |
+| `DrillBit` | reusable | — | [model/pilot-workshop/src/resources.rs#L107](/model/pilot-workshop/src/resources.rs#L107) |
+| `DrillOutcome` | outcome token (R17) | — | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
+| `DrilledPlate` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L56](/model/pilot-workshop/src/resources.rs#L56) |
+| `FittedGuard` | reusable | — | [model/pilot-workshop/src/resources.rs#L155](/model/pilot-workshop/src/resources.rs#L155) |
+| `MachineGuard` | reusable | — | [model/pilot-workshop/src/resources.rs#L147](/model/pilot-workshop/src/resources.rs#L147) |
+| `Money` | continuous (container) | pence | [model/pilot-workshop/src/money.rs#L45](/model/pilot-workshop/src/money.rs#L45) |
+| `Plate` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L47](/model/pilot-workshop/src/resources.rs#L47) |
+| `ScrapPlate` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L97](/model/pilot-workshop/src/resources.rs#L97) |
+| `SpareParts` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L137](/model/pilot-workshop/src/resources.rs#L137) |
+| `SteelSheet` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L39](/model/pilot-workshop/src/resources.rs#L39) |
+| `Swarf` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L72](/model/pilot-workshop/src/resources.rs#L72) |
+| `SwarfBin` | boundary object (placeholder) | — | [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333) |
+| `Vendor` | reusable (placeholder) | — | [model/pilot-workshop/src/money.rs#L77](/model/pilot-workshop/src/money.rs#L77) |
