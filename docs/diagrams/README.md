@@ -8,7 +8,7 @@ Three GitHub-viewable Mermaid diagrams per model crate, generated from the crate
 - **Top-level** — the first level of processes with their inputs and outputs, linked to each other and to the boundary: the R9 connection graph from the process signatures.
 - **Detailed** — all levels, fully connected: the flow trace with adjacent time draws, History records, internal waste routing and disposal steps, plus the composite fallible flows where the crate has them.
 
-GitHub sandboxes Mermaid `click` directives, so **the legend table under each diagram carries the hyperlinks** from every node into the defining source line; the `click` directives still work in local Mermaid renderers.
+Diagram nodes carry absolute `click` links into the defining source line (GitHub renders Mermaid in an iframe, so only absolute urls survive); **the legend table under each diagram carries the same hyperlinks** as plain markdown; the `click` directives still work in local Mermaid renderers.
 
 | Model crate | Context | Top-level | Detailed |
 |---|---|---|---|
