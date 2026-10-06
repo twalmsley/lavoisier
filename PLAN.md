@@ -62,10 +62,10 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 2 CS-1 model | done (`model/cs1-pot-of-tea`, full gate green) | F-053, F-054 | 2026-10-03: closed — F-053 fixed via template rule (workspace-unique ids at spec time); feedback items 2/3/5/6 folded into SPEC_TEMPLATE |
 | 3 Documentation | done (`docs/modellers-guide.md`, rustdoc pass, README refresh) | — (4 doc bugs found and fixed) | 2026-10-03: closed (proceed approved; step-4 shape set) |
 | 4 Learning materials | done (`docs/tutorials/` 00–06 incl. Rust on-ramp and toast capstone; `learn/` exercises crate, solutions verified) | F-015 extended | 2026-10-06: closed (deck parameters set) |
-| 5 Overview deck | done (`decks/overview.md` + PDF, 12 slides) | — | pending |
-| 6 Technical deck | done (`decks/technical.md` + PDF, 22 slides) | — | pending |
-| 7 White paper | not started | | |
-| 8 Diagram generation (A) | not started | | |
+| 5 Overview deck | done (`decks/overview.md` + PDF, 12 slides) | — | 2026-10-06: approved for now |
+| 6 Technical deck | done (`decks/technical.md` + PDF, 22 slides) | — | 2026-10-06: approved for now |
+| 7 White paper | done (`docs/white-paper.md` v0.1 + PDF, 20 pp) | — (3 doc inconsistencies found; 2 fixed, 1 noted) | pending |
+| 8 Diagram generation (A) | done (`tools/diagram-gen`, `docs/diagrams/` for both crates) | 5 grep-discipline gaps noted (F-021/F-038 territory) | pending |
 | 9 Process docgen (B) | not started | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |

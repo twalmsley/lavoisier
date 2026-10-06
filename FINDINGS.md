@@ -1076,6 +1076,11 @@ attributes too, for direct marker bounds.
 `src/requirements.rs`); corroborated by `model/pilot-workshop/tests/ui/wrong_bolt.stderr`;
 EXP-12 (`tests/ui/purchase_wrong_price.stderr`).
 
+**Clarification (2026-10-06):** the certified-driller message appears as "(REQ-001)" here
+(EXP-11's crate-local numbering) and as "(REQ-004)" in the pilot and the technical deck — both
+are real pinned outputs from different crates, not a contradiction. An F-053-adjacent reminder
+that requirement ids are per-workspace, and experiment crates number independently.
+
 ---
 
 ## F-045 — Per-branch conservation is one const assert per branch, both checked at every instantiation; the cost is doubled const-parameter load

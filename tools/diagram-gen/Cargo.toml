@@ -1,0 +1,21 @@
+# tools/diagram-gen — generates the GitHub-viewable Mermaid diagrams in
+# docs/diagrams/ from the model crates' source (see tools/diagrams.sh).
+#
+# Deliberately OUTSIDE the model/ workspace (like learn/): this is tooling,
+# not a model crate, and nothing in it is gated by model/ci.sh. It is
+# std-only (no syn, no external parsers): the project's R10 grep discipline
+# (bounds and signatures on one line where it matters, conventional
+# boundary/processes module layout, rustfmt formatting) is what makes the
+# line-based parsing in src/main.rs reliable.
+
+[package]
+name = "diagram-gen"
+version = "0.1.0"
+edition = "2024"
+description = "Generates Mermaid context/top-level/detailed diagrams from the model crates' source"
+
+# Standalone on purpose: not a member of the model/ workspace.
+[workspace]
+
+[dependencies]
+# None, deliberately (std-only).

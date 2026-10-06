@@ -33,7 +33,7 @@
 //! |---|---|
 //! | [`nat`] | Peano type-level naturals (`Zero`/`Succ`), `Nat::VALUE`, `Pred`, `Add`, `Lt`; generated aliases `N0`..`N1000` (R12) |
 //! | [`list`] | Type-level lists of real values (`Cons`/`Nil`) with their length as a `Nat` and a `const` (R12, R13) |
-//! | [`quantity`] | The `Unit` kind trait, the eight R7 base units, sealed `Qty<V, U>`, and conserving `split`/`combine` (R3, R7, R8) |
+//! | [`quantity`] | The `Unit` kind trait, the eight library base units (R7; money units are per-currency and live downstream, R19), sealed `Qty<V, U>`, and conserving `split`/`combine` (R3, R7, R8) |
 //! | [`resource`] | The sealing/tripwire kernel: macros defining sealed, conserved resource types, draw processes, and outcome tokens for fallible processes (R1, R15, R17) |
 //! | [`boundary`] | `Supplier` (discrete-only), `Consumer`, recursive `SupplyN`/`ConsumeList`, and the generic access processes (R12) |
 //! | [`common`] | Reusable common types: `Person` (with an R15 time budget), the `Qualified` person wrapper (R18), `Organisation`, `Location`, `Labour` (R11) |
