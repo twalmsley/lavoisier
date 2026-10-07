@@ -5,7 +5,7 @@
 **An empty food-waste bin with `Space` slots enters the model (CS-1:**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L566](/model/cs1-pot-of-tea/src/resources.rs#L566)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L567](/model/cs1-pot-of-tea/src/resources.rs#L567)
 
 ## Who and with what
 

@@ -5,7 +5,7 @@
 **The drinker enters the model (R12).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L580](/model/cs1-pot-of-tea/src/resources.rs#L580)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L581](/model/cs1-pot-of-tea/src/resources.rs#L581)
 
 ## Who and with what
 
@@ -32,4 +32,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `Drinker` — the drinker — pot return is out of scope. ([model/cs1-pot-of-tea/src/resources.rs#L403](/model/cs1-pot-of-tea/src/resources.rs#L403))
+- `Drinker` — the drinker — pot return is out of scope. ([model/cs1-pot-of-tea/src/resources.rs#L404](/model/cs1-pot-of-tea/src/resources.rs#L404))

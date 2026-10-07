@@ -5,7 +5,7 @@
 **Fastens two drilled plates into an [`Assembly`] with four bolts taken from ONE supplier in a single `SupplyN` bound (R12, F-014).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L799](/model/pilot-workshop/src/resources.rs#L799)
+- **Source:** [model/pilot-workshop/src/resources.rs#L800](/model/pilot-workshop/src/resources.rs#L800)
 - **Requirements bound on the signature:** REQ-001, REQ-002
 
 ## Who and with what
@@ -45,8 +45,8 @@ Observed leaving this step in the traced flows: `Assembly 1760`, `EmptyBoltBox`.
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-001 | Fastening bolts must be M8 steel, 15 mm long. | [model/pilot-workshop/src/requirements.rs#L39](/model/pilot-workshop/src/requirements.rs#L39) | `FasteningBolt` | [`fasten_joins_two_drilled_plates_with_four_bolts`](/model/pilot-workshop/src/resources.rs#L1025), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
-| REQ-002 | Plates must be drilled before they are fastened. | [model/pilot-workshop/src/requirements.rs#L46](/model/pilot-workshop/src/requirements.rs#L46) | `DrilledPlate` | [`fasten_joins_two_drilled_plates_with_four_bolts`](/model/pilot-workshop/src/resources.rs#L1025), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
+| REQ-001 | Fastening bolts must be M8 steel, 15 mm long. | [model/pilot-workshop/src/requirements.rs#L39](/model/pilot-workshop/src/requirements.rs#L39) | `FasteningBolt` | [`fasten_joins_two_drilled_plates_with_four_bolts`](/model/pilot-workshop/src/resources.rs#L1026), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
+| REQ-002 | Plates must be drilled before they are fastened. | [model/pilot-workshop/src/requirements.rs#L46](/model/pilot-workshop/src/requirements.rs#L46) | `DrilledPlate` | [`fasten_joins_two_drilled_plates_with_four_bolts`](/model/pilot-workshop/src/resources.rs#L1026), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
 
 This item is doc-tagged `Satisfies: REQ-002`.
 
@@ -95,10 +95,10 @@ flowchart LR
   n_drill_holes -- "DrilledPlate" --> n_fasten
   n_drill_holes_fallible -- "DrilledPlate (on success)" --> n_fasten
   n_BoltBox -- "4 × Bolt" --> n_fasten
-  click n_drill_holes "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L668" "model/pilot-workshop/src/resources.rs"
-  click n_drill_holes_fallible "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L747" "model/pilot-workshop/src/resources.rs"
-  click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L799" "model/pilot-workshop/src/resources.rs"
-  click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L377" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L669" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes_fallible "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L748" "model/pilot-workshop/src/resources.rs"
+  click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L800" "model/pilot-workshop/src/resources.rs"
+  click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L378" "model/pilot-workshop/src/resources.rs"
   click n_BoltBox "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/catalogue.rs#L139" "model/pilot-workshop/src/catalogue.rs"
 ```
 
@@ -106,8 +106,8 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_drill_holes` (drill_holes) | process | [model/pilot-workshop/src/resources.rs#L668](/model/pilot-workshop/src/resources.rs#L668) |
-| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L747](/model/pilot-workshop/src/resources.rs#L747) |
-| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L799](/model/pilot-workshop/src/resources.rs#L799) |
-| `n_Customer` (Customer) | boundary sink | [model/pilot-workshop/src/resources.rs#L377](/model/pilot-workshop/src/resources.rs#L377) |
+| `n_drill_holes` (drill_holes) | process | [model/pilot-workshop/src/resources.rs#L669](/model/pilot-workshop/src/resources.rs#L669) |
+| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L748](/model/pilot-workshop/src/resources.rs#L748) |
+| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L800](/model/pilot-workshop/src/resources.rs#L800) |
+| `n_Customer` (Customer) | boundary sink | [model/pilot-workshop/src/resources.rs#L378](/model/pilot-workshop/src/resources.rs#L378) |
 | `n_BoltBox` (BoltBox) | boundary source | [model/pilot-workshop/src/catalogue.rs#L139](/model/pilot-workshop/src/catalogue.rs#L139) |

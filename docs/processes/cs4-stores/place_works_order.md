@@ -5,7 +5,7 @@
 **The works order for the 25-unit batch enters the model (R12, SPEC §4).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602)
+- **Source:** [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603)
 - **Placeholder:** production planning — one order, quantity fixed by the
 
 ## Who and with what
@@ -58,16 +58,16 @@ flowchart LR
     n_issue_materials["issue_materials"]:::process
   end
   n_place_works_order -- "WorksOrder" --> n_issue_materials
-  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
-  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L602" "model/cs4-stores/src/resources.rs"
+  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L962" "model/cs4-stores/src/resources.rs"
+  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L603" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
-| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
+| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962) |
+| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603) |
 
 ## Open items (`Placeholder:` tags, R12)
 

@@ -5,7 +5,7 @@
 **A repair kit enters the model (R12).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L453](/model/pilot-workshop/src/resources.rs#L453)
+- **Source:** [model/pilot-workshop/src/resources.rs#L454](/model/pilot-workshop/src/resources.rs#L454)
 - **Placeholder:** tool stores — one spare cutter and collet.
 
 ## Who and with what
@@ -54,16 +54,16 @@ flowchart LR
     n_repair_bit["repair_bit"]:::process
   end
   n_supply_spare_parts -- "SpareParts" --> n_repair_bit
-  click n_repair_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L618" "model/pilot-workshop/src/resources.rs"
-  click n_supply_spare_parts "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L453" "model/pilot-workshop/src/resources.rs"
+  click n_repair_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L619" "model/pilot-workshop/src/resources.rs"
+  click n_supply_spare_parts "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L454" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L618](/model/pilot-workshop/src/resources.rs#L618) |
-| `n_supply_spare_parts` (supply_spare_parts) | boundary source | [model/pilot-workshop/src/resources.rs#L453](/model/pilot-workshop/src/resources.rs#L453) |
+| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L619](/model/pilot-workshop/src/resources.rs#L619) |
+| `n_supply_spare_parts` (supply_spare_parts) | boundary source | [model/pilot-workshop/src/resources.rs#L454](/model/pilot-workshop/src/resources.rs#L454) |
 
 ## Open items (`Placeholder:` tags, R12)
 

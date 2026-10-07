@@ -5,7 +5,7 @@
 **The grid socket enters the model (R12).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L475](/model/cs1-pot-of-tea/src/resources.rs#L475)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L476](/model/cs1-pot-of-tea/src/resources.rs#L476)
 - **Placeholder:** grid electricity — assumed unbounded (SPEC.md §7).
 
 ## Who and with what
@@ -53,16 +53,16 @@ flowchart LR
     n_new_grid_socket["new_grid_socket"]:::boundary
   end
   n_new_grid_socket -- "GridSocket" --> n_draw_grid_energy
-  click n_draw_grid_energy "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L492" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_grid_socket "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L475" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_draw_grid_energy "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L493" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_grid_socket "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L476" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_draw_grid_energy` (draw_grid_energy) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L492](/model/cs1-pot-of-tea/src/resources.rs#L492) |
-| `n_new_grid_socket` (new_grid_socket) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L475](/model/cs1-pot-of-tea/src/resources.rs#L475) |
+| `n_draw_grid_energy` (draw_grid_energy) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L493](/model/cs1-pot-of-tea/src/resources.rs#L493) |
+| `n_new_grid_socket` (new_grid_socket) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L476](/model/cs1-pot-of-tea/src/resources.rs#L476) |
 
 ## Open items (`Placeholder:` tags, R12)
 

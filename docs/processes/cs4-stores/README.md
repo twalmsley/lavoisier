@@ -6,21 +6,21 @@ cs4-stores — case study CS-4, the stores subsystem — 15 documented functions
 
 | Document | Kind | Purpose (first rustdoc line) | Source |
 |---|---|---|---|
-| [`place_works_order`](place_works_order.md) | boundary function (R12) | The works order for the 25-unit batch enters the model (R12, SPEC §4). | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
-| [`clock_in`](clock_in.md) | boundary function (R12) | The operator clocks in at shift start with the full | [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610) |
-| [`new_finished_goods`](new_finished_goods.md) | boundary function (R12) | An empty finished-goods store with `Space` slots (REQ-022). Creating | [model/cs4-stores/src/resources.rs#L620](/model/cs4-stores/src/resources.rs#L620) |
-| [`new_disposal`](new_disposal.md) | boundary function (R12) | The disposal stream enters the model (R12). An empty unbounded sink | [model/cs4-stores/src/resources.rs#L629](/model/cs4-stores/src/resources.rs#L629) |
-| [`full_rack`](full_rack.md) | boundary function (R12) | A full 25-sheet rack comes into existence — P1's fill (R1, R12). | [model/cs4-stores/src/resources.rs#L635](/model/cs4-stores/src/resources.rs#L635) |
-| [`full_box`](full_box.md) | boundary function (R12) | A full 100-bolt box comes into existence — P1's fill (R1, R12). | [model/cs4-stores/src/resources.rs#L640](/model/cs4-stores/src/resources.rs#L640) |
-| [`ship_finished_goods`](ship_finished_goods.md) | boundary function (R12) | The stocked finished goods leave the model onward (R12, F-039): the | [model/cs4-stores/src/resources.rs#L688](/model/cs4-stores/src/resources.rs#L688) |
-| [`shear_sheet`](shear_sheet.md) | process (R1) | Shears one sheet into two plate blanks plus cut swarf — the material | [model/cs4-stores/src/resources.rs#L798](/model/cs4-stores/src/resources.rs#L798) |
-| [`bore_blank`](bore_blank.md) | process (R1) | Drills one blank into a drilled plate plus drill swarf — the material | [model/cs4-stores/src/resources.rs#L825](/model/cs4-stores/src/resources.rs#L825) |
-| [`join_assembly`](join_assembly.md) | process (R1) | Joins two drilled plates and four stores-issued bolts into one | [model/cs4-stores/src/resources.rs#L867](/model/cs4-stores/src/resources.rs#L867) |
-| [`draw_effort_30k`](draw_effort_30k.md) | process (R1) | Draws one 30 000 ms quantum from the operator's shift clock (R15): | [model/cs4-stores/src/resources.rs#L905](/model/cs4-stores/src/resources.rs#L905) |
-| [`draw_effort_60k`](draw_effort_60k.md) | process (R1) | Draws two quanta (60 000 ms): the per-sheet cutting spend (SPEC §5). | [model/cs4-stores/src/resources.rs#L918](/model/cs4-stores/src/resources.rs#L918) |
-| [`draw_effort_120k`](draw_effort_120k.md) | process (R1) | Draws four quanta (120 000 ms): the stores-window spend of P1 and P6 | [model/cs4-stores/src/resources.rs#L942](/model/cs4-stores/src/resources.rs#L942) |
-| [`issue_materials`](issue_materials.md) | process (R1) | P1 — issue materials against the works order (SPEC §5). The operator | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
-| [`reconcile`](reconcile.md) | process (R1) | P6 — return and reconcile at batch end (SPEC §5). The operator draws | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
+| [`place_works_order`](place_works_order.md) | boundary function (R12) | The works order for the 25-unit batch enters the model (R12, SPEC §4). | [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603) |
+| [`clock_in`](clock_in.md) | boundary function (R12) | The operator clocks in at shift start with the full | [model/cs4-stores/src/resources.rs#L611](/model/cs4-stores/src/resources.rs#L611) |
+| [`new_finished_goods`](new_finished_goods.md) | boundary function (R12) | An empty finished-goods store with `Space` slots (REQ-022). Creating | [model/cs4-stores/src/resources.rs#L621](/model/cs4-stores/src/resources.rs#L621) |
+| [`new_disposal`](new_disposal.md) | boundary function (R12) | The disposal stream enters the model (R12). An empty unbounded sink | [model/cs4-stores/src/resources.rs#L630](/model/cs4-stores/src/resources.rs#L630) |
+| [`full_rack`](full_rack.md) | boundary function (R12) | A full 25-sheet rack comes into existence — P1's fill (R1, R12). | [model/cs4-stores/src/resources.rs#L636](/model/cs4-stores/src/resources.rs#L636) |
+| [`full_box`](full_box.md) | boundary function (R12) | A full 100-bolt box comes into existence — P1's fill (R1, R12). | [model/cs4-stores/src/resources.rs#L641](/model/cs4-stores/src/resources.rs#L641) |
+| [`ship_finished_goods`](ship_finished_goods.md) | boundary function (R12) | The stocked finished goods leave the model onward (R12, F-039): the | [model/cs4-stores/src/resources.rs#L689](/model/cs4-stores/src/resources.rs#L689) |
+| [`shear_sheet`](shear_sheet.md) | process (R1) | Shears one sheet into two plate blanks plus cut swarf — the material | [model/cs4-stores/src/resources.rs#L799](/model/cs4-stores/src/resources.rs#L799) |
+| [`bore_blank`](bore_blank.md) | process (R1) | Drills one blank into a drilled plate plus drill swarf — the material | [model/cs4-stores/src/resources.rs#L826](/model/cs4-stores/src/resources.rs#L826) |
+| [`join_assembly`](join_assembly.md) | process (R1) | Joins two drilled plates and four stores-issued bolts into one | [model/cs4-stores/src/resources.rs#L868](/model/cs4-stores/src/resources.rs#L868) |
+| [`draw_effort_30k`](draw_effort_30k.md) | process (R1) | Draws one 30 000 ms quantum from the operator's shift clock (R15): | [model/cs4-stores/src/resources.rs#L906](/model/cs4-stores/src/resources.rs#L906) |
+| [`draw_effort_60k`](draw_effort_60k.md) | process (R1) | Draws two quanta (60 000 ms): the per-sheet cutting spend (SPEC §5). | [model/cs4-stores/src/resources.rs#L919](/model/cs4-stores/src/resources.rs#L919) |
+| [`draw_effort_120k`](draw_effort_120k.md) | process (R1) | Draws four quanta (120 000 ms): the stores-window spend of P1 and P6 | [model/cs4-stores/src/resources.rs#L943](/model/cs4-stores/src/resources.rs#L943) |
+| [`issue_materials`](issue_materials.md) | process (R1) | P1 — issue materials against the works order (SPEC §5). The operator | [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962) |
+| [`reconcile`](reconcile.md) | process (R1) | P6 — return and reconcile at batch end (SPEC §5). The operator draws | [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022) |
 
 <!-- WARN (docgen): no flow to trace: no `flow_order_a*` test, no composite flow fn, and no integration test composing 2+ processes -->
 <!-- WARN (docgen): reconcile: unresolved parameter `FB: SwarfReturn` -->

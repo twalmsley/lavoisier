@@ -5,7 +5,7 @@
 **The council food-waste collection enters the model (R12).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L585](/model/cs1-pot-of-tea/src/resources.rs#L585)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L586](/model/cs1-pot-of-tea/src/resources.rs#L586)
 
 ## Who and with what
 
@@ -32,4 +32,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `CouncilCollection` — council food-waste collection — assumed unbounded. ([model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426))
+- `CouncilCollection` — council food-waste collection — assumed unbounded. ([model/cs1-pot-of-tea/src/resources.rs#L427](/model/cs1-pot-of-tea/src/resources.rs#L427))

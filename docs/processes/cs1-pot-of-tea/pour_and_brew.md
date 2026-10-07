@@ -5,7 +5,7 @@
 **P4 — pours the boiling kettle into the loaded pot and brews (SPEC.md P4).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L740](/model/cs1-pot-of-tea/src/resources.rs#L740)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L741](/model/cs1-pot-of-tea/src/resources.rs#L741)
 - **Requirements bound on the signature:** REQ-006, REQ-007, REQ-008, REQ-009
 
 ## Who and with what
@@ -38,8 +38,8 @@ Observed entering this step in the traced flows: `BoilingKettle 1500, 500000 jou
 
 Waste routed **inside** this process (never loose in a flow):
 
-- `bin` is a consumer parameter: **3 × SpentTeabag** is handed to `FoodWasteBin` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332)
-- `air` is a consumer parameter: **WasteHeat** is handed to `KitchenAir` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379)
+- `bin` is a consumer parameter: **3 × SpentTeabag** is handed to `FoodWasteBin` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs1-pot-of-tea/src/resources.rs#L333](/model/cs1-pot-of-tea/src/resources.rs#L333)
+- `air` is a consumer parameter: **WasteHeat** is handed to `KitchenAir` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380)
 
 Observed leaving this step in the traced flows: `FoodWasteBin`, `Kettle`, `KitchenAir`, `Person 250000 ms`, `PotOfTea 1473, 480000 joules`.
 
@@ -57,10 +57,10 @@ Observed leaving this step in the traced flows: `FoodWasteBin`, `Kettle`, `Kitch
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-006 | Tea must be brewed with boiling water (only the boiling state of the kettle can be poured into the pot). | [model/cs1-pot-of-tea/src/requirements.rs#L43](/model/cs1-pot-of-tea/src/requirements.rs#L43) | `KettleAtTheBoil` | [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
-| REQ-007 | The pot must be loaded with exactly 3 teabags before brewing. | [model/cs1-pot-of-tea/src/requirements.rs#L51](/model/cs1-pot-of-tea/src/requirements.rs#L51) | `BrewReadyPot` | [`load_pot_takes_exactly_three_bags_and_returns_the_box_at_37`](/model/cs1-pot-of-tea/src/resources.rs#L934), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
-| REQ-008 | All spent teabags must reach the food-waste bin. | [model/cs1-pot-of-tea/src/requirements.rs#L59](/model/cs1-pot-of-tea/src/requirements.rs#L59) | `FoodWasteBin` | [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`empty_bin_restores_capacity_and_ships_the_waste`](/model/cs1-pot-of-tea/src/resources.rs#L1000), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143), [`fixtures_construct_sealed_resources_for_downstream_tests`](/model/cs1-pot-of-tea/tests/flows.rs#L198), [`abandoned_spent_teabag_trips_the_tripwire_downstream`](/model/cs1-pot-of-tea/tests/flows.rs#L216) |
-| REQ-009 | All waste heat must be accounted to the kitchen-air sink. | [model/cs1-pot-of-tea/src/requirements.rs#L67](/model/cs1-pot-of-tea/src/requirements.rs#L67) | `KitchenAir` | [`vent_heat_accounts_heat_to_the_kitchen_air`](/model/cs1-pot-of-tea/src/resources.rs#L923), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
+| REQ-006 | Tea must be brewed with boiling water (only the boiling state of the kettle can be poured into the pot). | [model/cs1-pot-of-tea/src/requirements.rs#L43](/model/cs1-pot-of-tea/src/requirements.rs#L43) | `KettleAtTheBoil` | [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
+| REQ-007 | The pot must be loaded with exactly 3 teabags before brewing. | [model/cs1-pot-of-tea/src/requirements.rs#L51](/model/cs1-pot-of-tea/src/requirements.rs#L51) | `BrewReadyPot` | [`load_pot_takes_exactly_three_bags_and_returns_the_box_at_37`](/model/cs1-pot-of-tea/src/resources.rs#L935), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
+| REQ-008 | All spent teabags must reach the food-waste bin. | [model/cs1-pot-of-tea/src/requirements.rs#L59](/model/cs1-pot-of-tea/src/requirements.rs#L59) | `FoodWasteBin` | [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`empty_bin_restores_capacity_and_ships_the_waste`](/model/cs1-pot-of-tea/src/resources.rs#L1001), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143), [`fixtures_construct_sealed_resources_for_downstream_tests`](/model/cs1-pot-of-tea/tests/flows.rs#L198), [`abandoned_spent_teabag_trips_the_tripwire_downstream`](/model/cs1-pot-of-tea/tests/flows.rs#L216) |
+| REQ-009 | All waste heat must be accounted to the kitchen-air sink. | [model/cs1-pot-of-tea/src/requirements.rs#L67](/model/cs1-pot-of-tea/src/requirements.rs#L67) | `KitchenAir` | [`vent_heat_accounts_heat_to_the_kitchen_air`](/model/cs1-pot-of-tea/src/resources.rs#L924), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
 
 This item is doc-tagged `Satisfies: REQ-006, REQ-008, REQ-009`.
 
@@ -115,29 +115,29 @@ flowchart LR
   n_pour_and_brew -- "3 × SpentTeabag" --> n_FoodWasteBin
   n_pour_and_brew -- "WasteHeat" --> n_KitchenAir
   n_Person -.- n_pour_and_brew
-  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L623" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L661" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_load_pot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L689" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L740" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_Drinker "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L403" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L332" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L379" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L624" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L662" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_load_pot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L690" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L741" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_Drinker "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L404" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L333" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L380" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L623](/model/cs1-pot-of-tea/src/resources.rs#L623) |
-| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L661](/model/cs1-pot-of-tea/src/resources.rs#L661) |
-| `n_load_pot` (load_pot) | process | [model/cs1-pot-of-tea/src/resources.rs#L689](/model/cs1-pot-of-tea/src/resources.rs#L689) |
-| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L740](/model/cs1-pot-of-tea/src/resources.rs#L740) |
-| `n_Drinker` (Drinker) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L403](/model/cs1-pot-of-tea/src/resources.rs#L403) |
-| `n_FoodWasteBin` (FoodWasteBin) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332) |
-| `n_KitchenAir` (KitchenAir) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379) |
+| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L624](/model/cs1-pot-of-tea/src/resources.rs#L624) |
+| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L662](/model/cs1-pot-of-tea/src/resources.rs#L662) |
+| `n_load_pot` (load_pot) | process | [model/cs1-pot-of-tea/src/resources.rs#L690](/model/cs1-pot-of-tea/src/resources.rs#L690) |
+| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L741](/model/cs1-pot-of-tea/src/resources.rs#L741) |
+| `n_Drinker` (Drinker) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L404](/model/cs1-pot-of-tea/src/resources.rs#L404) |
+| `n_FoodWasteBin` (FoodWasteBin) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L333](/model/cs1-pot-of-tea/src/resources.rs#L333) |
+| `n_KitchenAir` (KitchenAir) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380) |
 | `n_Person` (Person) | shared resource | — |
 
 ## Open items (`Placeholder:` tags, R12)
 
 - `Kettle` — kitchen setup at flow start — one kettle. ([model/cs1-pot-of-tea/src/resources.rs#L87](/model/cs1-pot-of-tea/src/resources.rs#L87))
-- `KitchenAir` — kitchen air — assumed able to absorb all waste heat ([model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379))
+- `KitchenAir` — kitchen air — assumed able to absorb all waste heat ([model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380))

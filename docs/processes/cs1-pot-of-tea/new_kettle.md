@@ -5,7 +5,7 @@
 **The kettle enters the model, empty (R12).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L454](/model/cs1-pot-of-tea/src/resources.rs#L454)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L455](/model/cs1-pot-of-tea/src/resources.rs#L455)
 - **Placeholder:** kitchen setup at flow start — one kettle.
 
 ## Who and with what
@@ -56,16 +56,16 @@ flowchart LR
     n_fill_kettle["fill_kettle"]:::process
   end
   n_new_kettle -- "Kettle" --> n_fill_kettle
-  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L623" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L454" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L624" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L455" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L623](/model/cs1-pot-of-tea/src/resources.rs#L623) |
-| `n_new_kettle` (new_kettle) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L454](/model/cs1-pot-of-tea/src/resources.rs#L454) |
+| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L624](/model/cs1-pot-of-tea/src/resources.rs#L624) |
+| `n_new_kettle` (new_kettle) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L455](/model/cs1-pot-of-tea/src/resources.rs#L455) |
 
 ## Open items (`Placeholder:` tags, R12)
 

@@ -5,7 +5,7 @@
 **Repairs a broken bit with a repair kit (R17): the failure path back to the working state.**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L618](/model/pilot-workshop/src/resources.rs#L618)
+- **Source:** [model/pilot-workshop/src/resources.rs#L619](/model/pilot-workshop/src/resources.rs#L619)
 
 ## Who and with what
 
@@ -67,17 +67,17 @@ flowchart LR
   n_drill_holes_fallible -- "BrokenDrillBit (on failure)" --> n_repair_bit
   n_repair_bit -- "DrillBit" --> n_DrillBit
   n_supply_spare_parts -- "SpareParts" --> n_repair_bit
-  click n_repair_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L618" "model/pilot-workshop/src/resources.rs"
-  click n_drill_holes_fallible "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L747" "model/pilot-workshop/src/resources.rs"
+  click n_repair_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L619" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes_fallible "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L748" "model/pilot-workshop/src/resources.rs"
   click n_DrillBit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L107" "model/pilot-workshop/src/resources.rs"
-  click n_supply_spare_parts "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L453" "model/pilot-workshop/src/resources.rs"
+  click n_supply_spare_parts "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L454" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L618](/model/pilot-workshop/src/resources.rs#L618) |
-| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L747](/model/pilot-workshop/src/resources.rs#L747) |
+| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L619](/model/pilot-workshop/src/resources.rs#L619) |
+| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L748](/model/pilot-workshop/src/resources.rs#L748) |
 | `n_DrillBit` (DrillBit) | shared resource | [model/pilot-workshop/src/resources.rs#L107](/model/pilot-workshop/src/resources.rs#L107) |
-| `n_supply_spare_parts` (supply_spare_parts) | boundary source | [model/pilot-workshop/src/resources.rs#L453](/model/pilot-workshop/src/resources.rs#L453) |
+| `n_supply_spare_parts` (supply_spare_parts) | boundary source | [model/pilot-workshop/src/resources.rs#L454](/model/pilot-workshop/src/resources.rs#L454) |

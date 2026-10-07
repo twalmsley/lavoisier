@@ -20,6 +20,7 @@
 pub mod docgen;
 pub mod emit;
 pub mod flow;
+pub mod lint;
 pub mod scan;
 
 use std::collections::BTreeMap;

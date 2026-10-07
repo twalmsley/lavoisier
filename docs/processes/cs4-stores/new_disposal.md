@@ -5,7 +5,7 @@
 **The disposal stream enters the model (R12).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L629](/model/cs4-stores/src/resources.rs#L629)
+- **Source:** [model/cs4-stores/src/resources.rs#L630](/model/cs4-stores/src/resources.rs#L630)
 
 ## Who and with what
 
@@ -34,4 +34,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `Disposal` — waste-disposal service — assumed able to take any amount. ([model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513))
+- `Disposal` — waste-disposal service — assumed able to take any amount. ([model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514))

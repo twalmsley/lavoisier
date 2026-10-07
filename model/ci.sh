@@ -22,32 +22,37 @@
 #      model-core is infrastructure.)
 #   6. A grep proving the `test-support` feature never appears under any
 #      [dependencies]-like section — [dev-dependencies] only (R1, F-004).
+#   7. The model-analysis gate (PLAN step 11, candidate R21): tools/lint.sh
+#      --check regenerates the linter's reports into a temp dir, diffs them
+#      against the committed docs/analysis/ (stale reports fail), and fails
+#      on any gate-fatal ERROR finding. ERROR-KNOWN (maintainer-acknowledged
+#      true positives), WARN and INFO findings never fail the gate.
 
 set -eu
 cd "$(dirname "$0")"
 
-echo "==> [1/6] cargo build --workspace (full build: post-monomorphization conservation errors fire here, F-001)"
+echo "==> [1/7] cargo build --workspace (full build: post-monomorphization conservation errors fire here, F-001)"
 cargo build --workspace
 
-echo "==> [2/6] cargo test --workspace (tests, trybuild, and compile_fail doc-test regressions)"
+echo "==> [2/7] cargo test --workspace (tests, trybuild, and compile_fail doc-test regressions)"
 cargo test --workspace
 
-echo "==> [3/6] cargo clippy --all-targets, -D warnings + R1 restriction lints (F-007)"
+echo "==> [3/7] cargo clippy --all-targets, -D warnings + R1 restriction lints (F-007)"
 cargo clippy --workspace --all-targets -- \
     -D warnings \
     -D clippy::mem_forget \
     -D clippy::let_underscore_must_use
 
-echo "==> [4/6] plain no-features cargo build of every member's production targets (test-support boundary proof, F-004)"
+echo "==> [4/7] plain no-features cargo build of every member's production targets (test-support boundary proof, F-004)"
 # Deliberately a BUILD, not a check (R4: never gate on `cargo check` alone),
 # and deliberately without features: this is the only step that can prove a
 # production target does not call test-support fixtures.
 cargo build --workspace
 
-echo "==> [5/6] requirements traceability gate (R10): ./trace.sh"
+echo "==> [5/7] requirements traceability gate (R10): ./trace.sh"
 ./trace.sh
 
-echo "==> [6/6] test-support must never appear under [dependencies] (R1, F-004)"
+echo "==> [6/7] test-support must never appear under [dependencies] (R1, F-004)"
 bad=$(find . -path '*/target' -prune -o -type f -name Cargo.toml -print | sort | while read -r f; do
     awk -v file="$f" '
         /^[ \t]*\[/ {
@@ -67,5 +72,8 @@ if [ -n "$bad" ]; then
 fi
 echo "    OK: test-support appears under [dev-dependencies] only."
 
+echo "==> [7/7] model-analysis gate (candidate R21): ../tools/lint.sh --check"
+../tools/lint.sh --check
+
 echo ""
-echo "CI gate passed: build, test, clippy, plain production build, traceability, feature placement."
+echo "CI gate passed: build, test, clippy, plain production build, traceability, feature placement, model analysis."

@@ -5,7 +5,7 @@
 **P3 — boils the kettle (SPEC.md P3): the filled kettle plus `DRAW_J` joules from the grid become the boiling kettle (same water mass `G`, `EMBODIED_J` embodied) plus `HEAT_J` of kettle-loss waste heat.**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L661](/model/cs1-pot-of-tea/src/resources.rs#L661)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L662](/model/cs1-pot-of-tea/src/resources.rs#L662)
 
 ## Who and with what
 
@@ -79,19 +79,19 @@ flowchart LR
   n_draw_grid_energy -- "Electricity" --> n_boil
   n_fill_kettle -- "FilledKettle" --> n_boil
   n_boil -- "WasteHeat" --> n_vent_heat
-  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L623" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L661" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L740" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_vent_heat "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L774" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_draw_grid_energy "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L492" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L624" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L662" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L741" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_vent_heat "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L775" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_draw_grid_energy "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L493" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L623](/model/cs1-pot-of-tea/src/resources.rs#L623) |
-| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L661](/model/cs1-pot-of-tea/src/resources.rs#L661) |
-| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L740](/model/cs1-pot-of-tea/src/resources.rs#L740) |
-| `n_vent_heat` (vent_heat) | process | [model/cs1-pot-of-tea/src/resources.rs#L774](/model/cs1-pot-of-tea/src/resources.rs#L774) |
-| `n_draw_grid_energy` (draw_grid_energy) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L492](/model/cs1-pot-of-tea/src/resources.rs#L492) |
+| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L624](/model/cs1-pot-of-tea/src/resources.rs#L624) |
+| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L662](/model/cs1-pot-of-tea/src/resources.rs#L662) |
+| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L741](/model/cs1-pot-of-tea/src/resources.rs#L741) |
+| `n_vent_heat` (vent_heat) | process | [model/cs1-pot-of-tea/src/resources.rs#L775](/model/cs1-pot-of-tea/src/resources.rs#L775) |
+| `n_draw_grid_energy` (draw_grid_energy) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L493](/model/cs1-pot-of-tea/src/resources.rs#L493) |

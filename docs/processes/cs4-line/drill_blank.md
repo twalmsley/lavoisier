@@ -35,7 +35,7 @@ Waste routed **inside** this process (never loose in a flow):
 
 ## Balances (R1/R3/R15)
 
-- **Inherited by composition:** this step calls [`bore_blank`](/model/cs4-stores/src/resources.rs#L825), whose conservation asserts fire at every instantiation here (F-001):
+- **Inherited by composition:** this step calls [`bore_blank`](/model/cs4-stores/src/resources.rs#L826), whose conservation asserts fire at every instantiation here (F-001):
   - `P + SW == BLANK`
 
 ## Where it fits (R9: needs / feeds)

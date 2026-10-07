@@ -5,7 +5,7 @@
 **The customer enters the model (R12).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L487](/model/pilot-workshop/src/resources.rs#L487)
+- **Source:** [model/pilot-workshop/src/resources.rs#L488](/model/pilot-workshop/src/resources.rs#L488)
 
 ## Who and with what
 
@@ -32,4 +32,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `Customer` — customer — assumed able to take any number of assemblies. ([model/pilot-workshop/src/resources.rs#L377](/model/pilot-workshop/src/resources.rs#L377))
+- `Customer` — customer — assumed able to take any number of assemblies. ([model/pilot-workshop/src/resources.rs#L378](/model/pilot-workshop/src/resources.rs#L378))

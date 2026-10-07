@@ -89,7 +89,8 @@ fn strip_strings(body: &str) -> String {
 
 /// `/// Verifies: REQ-...` tags across a crate's src/ and tests/ top-level
 /// .rs files (the trace.sh discipline, R10 rules 2–3), regenerated here.
-fn collect_verifies(root: &Path, krate: &str) -> BTreeMap<String, Vec<(String, Loc)>> {
+/// Shared with the `modellint` binary (thin-verification INFO check).
+pub(crate) fn collect_verifies(root: &Path, krate: &str) -> BTreeMap<String, Vec<(String, Loc)>> {
     let mut out: BTreeMap<String, Vec<(String, Loc)>> = BTreeMap::new();
     let mut files: Vec<std::path::PathBuf> = Vec::new();
     for sub in ["src", "tests"] {

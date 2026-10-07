@@ -32,13 +32,13 @@ flowchart LR
   n_system -- "DrillSwarf" --> n_Disposal
   n_system -- "Assembly" --> n_FinishedGoods
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/lib.rs#L1" "model/cs4-stores/src/lib.rs"
-  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L610" "model/cs4-stores/src/resources.rs"
-  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L640" "model/cs4-stores/src/resources.rs"
-  click n_full_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L635" "model/cs4-stores/src/resources.rs"
-  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L602" "model/cs4-stores/src/resources.rs"
-  click n_exit_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L688" "model/cs4-stores/src/resources.rs"
-  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
+  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L611" "model/cs4-stores/src/resources.rs"
+  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L641" "model/cs4-stores/src/resources.rs"
+  click n_full_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L636" "model/cs4-stores/src/resources.rs"
+  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L603" "model/cs4-stores/src/resources.rs"
+  click n_exit_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L689" "model/cs4-stores/src/resources.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L514" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
 ```
 
 ## Legend — node → source
@@ -46,13 +46,13 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_system` (cs4-stores — the modelled system) | the system | [model/cs4-stores/src/lib.rs#L1](/model/cs4-stores/src/lib.rs#L1) |
-| `n_clock_in` (clock_in) | external party | [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610) |
-| `n_full_box` (full_box) | external party | [model/cs4-stores/src/resources.rs#L640](/model/cs4-stores/src/resources.rs#L640) |
-| `n_full_rack` (full_rack) | external party | [model/cs4-stores/src/resources.rs#L635](/model/cs4-stores/src/resources.rs#L635) |
-| `n_place_works_order` (place_works_order) | external party | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
-| `n_exit_ship_finished_goods` (ship_finished_goods) | external party | [model/cs4-stores/src/resources.rs#L688](/model/cs4-stores/src/resources.rs#L688) |
-| `n_Disposal` (Disposal) | external party | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
-| `n_FinishedGoods` (FinishedGoods) | external party | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `n_clock_in` (clock_in) | external party | [model/cs4-stores/src/resources.rs#L611](/model/cs4-stores/src/resources.rs#L611) |
+| `n_full_box` (full_box) | external party | [model/cs4-stores/src/resources.rs#L641](/model/cs4-stores/src/resources.rs#L641) |
+| `n_full_rack` (full_rack) | external party | [model/cs4-stores/src/resources.rs#L636](/model/cs4-stores/src/resources.rs#L636) |
+| `n_place_works_order` (place_works_order) | external party | [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603) |
+| `n_exit_ship_finished_goods` (ship_finished_goods) | external party | [model/cs4-stores/src/resources.rs#L689](/model/cs4-stores/src/resources.rs#L689) |
+| `n_Disposal` (Disposal) | external party | [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514) |
+| `n_FinishedGoods` (FinishedGoods) | external party | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 
 ## Resources on the edges
 
@@ -63,7 +63,7 @@ flowchart LR
 | `BoltBox` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |
 | `CutSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L124](/model/cs4-stores/src/resources.rs#L124) |
 | `DrillSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L132](/model/cs4-stores/src/resources.rs#L132) |
-| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `Operator` | boundary object | — | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
 | `Sheet` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L97](/model/cs4-stores/src/resources.rs#L97) |
 | `SheetRack` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L314](/model/cs4-stores/src/resources.rs#L314) |

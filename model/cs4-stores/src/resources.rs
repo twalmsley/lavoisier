@@ -472,6 +472,7 @@ impl<Q: Nat> Operator<Q> {
 /// Placeholder: finished-goods stores — onward delivery out of scope.
 ///
 /// Satisfies: REQ-022
+#[must_use = "FinishedGoods is a resource (R12): pass it on, or return it to the boundary"]
 pub struct FinishedGoods<Space, Contents = Nil> {
     contents: Contents,
     _space: PhantomData<Space>,

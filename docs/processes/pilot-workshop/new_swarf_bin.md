@@ -5,7 +5,7 @@
 **An empty swarf bin with `Space` slots.**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L478](/model/pilot-workshop/src/resources.rs#L478)
+- **Source:** [model/pilot-workshop/src/resources.rs#L479](/model/pilot-workshop/src/resources.rs#L479)
 
 ## Who and with what
 
@@ -32,4 +32,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `SwarfBin` — generic swarf bin — refine to a named scrap-metal stream. ([model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333))
+- `SwarfBin` — generic swarf bin — refine to a named scrap-metal stream. ([model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334))

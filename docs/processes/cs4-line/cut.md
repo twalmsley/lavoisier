@@ -36,7 +36,7 @@ Waste routed **inside** this process (never loose in a flow):
 
 ## Balances (R1/R3/R15)
 
-- **Inherited by composition:** this step calls [`shear_sheet`](/model/cs4-stores/src/resources.rs#L798), whose conservation asserts fire at every instantiation here (F-001):
+- **Inherited by composition:** this step calls [`shear_sheet`](/model/cs4-stores/src/resources.rs#L799), whose conservation asserts fire at every instantiation here (F-001):
   - `A + B + SW == SHEET`
 
 ## Where it fits (R9: needs / feeds)

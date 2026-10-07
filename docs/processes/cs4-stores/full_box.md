@@ -5,7 +5,7 @@
 **A full 100-bolt box comes into existence — P1's fill (R1, R12).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L640](/model/cs4-stores/src/resources.rs#L640)
+- **Source:** [model/cs4-stores/src/resources.rs#L641](/model/cs4-stores/src/resources.rs#L641)
 
 ## Who and with what
 
@@ -51,7 +51,7 @@ flowchart LR
   end
   n_full_box -- "BoltBox" --> n_BoltBox
   click n_BoltBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L347" "model/cs4-stores/src/resources.rs"
-  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L640" "model/cs4-stores/src/resources.rs"
+  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L641" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -59,7 +59,7 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_BoltBox` (BoltBox) | boundary source | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |
-| `n_full_box` (full_box) | boundary source | [model/cs4-stores/src/resources.rs#L640](/model/cs4-stores/src/resources.rs#L640) |
+| `n_full_box` (full_box) | boundary source | [model/cs4-stores/src/resources.rs#L641](/model/cs4-stores/src/resources.rs#L641) |
 
 ## Open items (`Placeholder:` tags, R12)
 

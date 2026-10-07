@@ -5,7 +5,7 @@
 **Drills one blank into a drilled plate plus drill swarf — the material transform inside the line's P3 (R1, R3, R9).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L825](/model/cs4-stores/src/resources.rs#L825)
+- **Source:** [model/cs4-stores/src/resources.rs#L826](/model/cs4-stores/src/resources.rs#L826)
 
 ## Who and with what
 
@@ -73,17 +73,17 @@ flowchart LR
   n_shear_sheet -- "Blank" --> n_bore_blank
   n_bore_blank -- "DrillSwarf" --> n_Disposal
   n_bore_blank -- "DrilledPlate" --> n_join_assembly
-  click n_shear_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L798" "model/cs4-stores/src/resources.rs"
-  click n_bore_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L825" "model/cs4-stores/src/resources.rs"
-  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L867" "model/cs4-stores/src/resources.rs"
-  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
+  click n_shear_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L799" "model/cs4-stores/src/resources.rs"
+  click n_bore_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L826" "model/cs4-stores/src/resources.rs"
+  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L868" "model/cs4-stores/src/resources.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L514" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_shear_sheet` (shear_sheet) | process | [model/cs4-stores/src/resources.rs#L798](/model/cs4-stores/src/resources.rs#L798) |
-| `n_bore_blank` (bore_blank) | process | [model/cs4-stores/src/resources.rs#L825](/model/cs4-stores/src/resources.rs#L825) |
-| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L867](/model/cs4-stores/src/resources.rs#L867) |
-| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
+| `n_shear_sheet` (shear_sheet) | process | [model/cs4-stores/src/resources.rs#L799](/model/cs4-stores/src/resources.rs#L799) |
+| `n_bore_blank` (bore_blank) | process | [model/cs4-stores/src/resources.rs#L826](/model/cs4-stores/src/resources.rs#L826) |
+| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L868](/model/cs4-stores/src/resources.rs#L868) |
+| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514) |

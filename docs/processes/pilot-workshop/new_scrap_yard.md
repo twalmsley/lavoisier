@@ -5,7 +5,7 @@
 **The scrap-metal stream enters the model (R12).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L466](/model/pilot-workshop/src/resources.rs#L466)
+- **Source:** [model/pilot-workshop/src/resources.rs#L467](/model/pilot-workshop/src/resources.rs#L467)
 
 ## Who and with what
 

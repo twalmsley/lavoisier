@@ -59,18 +59,18 @@ flowchart LR
   n_system -- "Labour (expended time)" --> n_history
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/lib.rs#L1" "model/pilot-workshop/src/lib.rs"
   click n_exit_close_account "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/money.rs#L124" "model/pilot-workshop/src/money.rs"
-  click n_exit_dispose_bin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L534" "model/pilot-workshop/src/resources.rs"
+  click n_exit_dispose_bin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L535" "model/pilot-workshop/src/resources.rs"
   click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/catalogue.rs#L229" "model/pilot-workshop/src/catalogue.rs"
   click n_open_account "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/money.rs#L115" "model/pilot-workshop/src/money.rs"
-  click n_supply_drill "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L430" "model/pilot-workshop/src/resources.rs"
-  click n_supply_drill_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L446" "model/pilot-workshop/src/resources.rs"
-  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L460" "model/pilot-workshop/src/resources.rs"
-  click n_supply_plate "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L439" "model/pilot-workshop/src/resources.rs"
-  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L423" "model/pilot-workshop/src/resources.rs"
-  click n_supply_spare_parts "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L453" "model/pilot-workshop/src/resources.rs"
-  click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L377" "model/pilot-workshop/src/resources.rs"
+  click n_supply_drill "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L431" "model/pilot-workshop/src/resources.rs"
+  click n_supply_drill_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L447" "model/pilot-workshop/src/resources.rs"
+  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L461" "model/pilot-workshop/src/resources.rs"
+  click n_supply_plate "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L440" "model/pilot-workshop/src/resources.rs"
+  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L424" "model/pilot-workshop/src/resources.rs"
+  click n_supply_spare_parts "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L454" "model/pilot-workshop/src/resources.rs"
+  click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L378" "model/pilot-workshop/src/resources.rs"
   click n_ScrapYard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L249" "model/pilot-workshop/src/resources.rs"
-  click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L333" "model/pilot-workshop/src/resources.rs"
+  click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L334" "model/pilot-workshop/src/resources.rs"
   click n_ToolStores "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L280" "model/pilot-workshop/src/resources.rs"
   click n_Vendor "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/money.rs#L77" "model/pilot-workshop/src/money.rs"
   click n_env_DrillOutcome "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
@@ -82,18 +82,18 @@ flowchart LR
 |---|---|---|
 | `n_system` (pilot-workshop — the modelled system) | the system | [model/pilot-workshop/src/lib.rs#L1](/model/pilot-workshop/src/lib.rs#L1) |
 | `n_exit_close_account` (close_account) | external party | [model/pilot-workshop/src/money.rs#L124](/model/pilot-workshop/src/money.rs#L124) |
-| `n_exit_dispose_bin` (dispose_bin) | external party | [model/pilot-workshop/src/resources.rs#L534](/model/pilot-workshop/src/resources.rs#L534) |
+| `n_exit_dispose_bin` (dispose_bin) | external party | [model/pilot-workshop/src/resources.rs#L535](/model/pilot-workshop/src/resources.rs#L535) |
 | `n_full_box` (full_box) | external party | [model/pilot-workshop/src/catalogue.rs#L229](/model/pilot-workshop/src/catalogue.rs#L229) |
 | `n_open_account` (open_account) | external party | [model/pilot-workshop/src/money.rs#L115](/model/pilot-workshop/src/money.rs#L115) |
-| `n_supply_drill` (supply_drill) | external party | [model/pilot-workshop/src/resources.rs#L430](/model/pilot-workshop/src/resources.rs#L430) |
-| `n_supply_drill_bit` (supply_drill_bit) | external party | [model/pilot-workshop/src/resources.rs#L446](/model/pilot-workshop/src/resources.rs#L446) |
-| `n_supply_guard` (supply_guard) | external party | [model/pilot-workshop/src/resources.rs#L460](/model/pilot-workshop/src/resources.rs#L460) |
-| `n_supply_plate` (supply_plate) | external party | [model/pilot-workshop/src/resources.rs#L439](/model/pilot-workshop/src/resources.rs#L439) |
-| `n_supply_sheet` (supply_sheet) | external party | [model/pilot-workshop/src/resources.rs#L423](/model/pilot-workshop/src/resources.rs#L423) |
-| `n_supply_spare_parts` (supply_spare_parts) | external party | [model/pilot-workshop/src/resources.rs#L453](/model/pilot-workshop/src/resources.rs#L453) |
-| `n_Customer` (Customer) | external party | [model/pilot-workshop/src/resources.rs#L377](/model/pilot-workshop/src/resources.rs#L377) |
+| `n_supply_drill` (supply_drill) | external party | [model/pilot-workshop/src/resources.rs#L431](/model/pilot-workshop/src/resources.rs#L431) |
+| `n_supply_drill_bit` (supply_drill_bit) | external party | [model/pilot-workshop/src/resources.rs#L447](/model/pilot-workshop/src/resources.rs#L447) |
+| `n_supply_guard` (supply_guard) | external party | [model/pilot-workshop/src/resources.rs#L461](/model/pilot-workshop/src/resources.rs#L461) |
+| `n_supply_plate` (supply_plate) | external party | [model/pilot-workshop/src/resources.rs#L440](/model/pilot-workshop/src/resources.rs#L440) |
+| `n_supply_sheet` (supply_sheet) | external party | [model/pilot-workshop/src/resources.rs#L424](/model/pilot-workshop/src/resources.rs#L424) |
+| `n_supply_spare_parts` (supply_spare_parts) | external party | [model/pilot-workshop/src/resources.rs#L454](/model/pilot-workshop/src/resources.rs#L454) |
+| `n_Customer` (Customer) | external party | [model/pilot-workshop/src/resources.rs#L378](/model/pilot-workshop/src/resources.rs#L378) |
 | `n_ScrapYard` (ScrapYard) | external party | [model/pilot-workshop/src/resources.rs#L249](/model/pilot-workshop/src/resources.rs#L249) |
-| `n_SwarfBin` (SwarfBin) | external party | [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333) |
+| `n_SwarfBin` (SwarfBin) | external party | [model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334) |
 | `n_ToolStores` (ToolStores) | external party | [model/pilot-workshop/src/resources.rs#L280](/model/pilot-workshop/src/resources.rs#L280) |
 | `n_Vendor` (Vendor) | external party | [model/pilot-workshop/src/money.rs#L77](/model/pilot-workshop/src/money.rs#L77) |
 | `n_env_DrillOutcome` (environment — DrillOutcome trials) | external party | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
@@ -120,4 +120,4 @@ flowchart LR
 | `SpareParts` | discrete (consumable) | — | [model/pilot-workshop/src/resources.rs#L137](/model/pilot-workshop/src/resources.rs#L137) |
 | `SteelSheet` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L39](/model/pilot-workshop/src/resources.rs#L39) |
 | `Swarf` | continuous (container) | grams | [model/pilot-workshop/src/resources.rs#L72](/model/pilot-workshop/src/resources.rs#L72) |
-| `SwarfBin` | boundary object (placeholder) | — | [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333) |
+| `SwarfBin` | boundary object (placeholder) | — | [model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334) |

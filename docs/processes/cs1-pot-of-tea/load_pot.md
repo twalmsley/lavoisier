@@ -5,7 +5,7 @@
 **P2 — loads the pot with **exactly 3** teabags, taken one at a time from the box in a single `SupplyN<N3>` bound (R12, F-014; SPEC.md P2:**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L689](/model/cs1-pot-of-tea/src/resources.rs#L689)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L690](/model/cs1-pot-of-tea/src/resources.rs#L690)
 - **Requirements bound on the signature:** REQ-007
 
 ## Who and with what
@@ -46,7 +46,7 @@ Observed leaving this step in the traced flows: `LoadedPot`, `Person 270000 ms`,
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-007 | The pot must be loaded with exactly 3 teabags before brewing. | [model/cs1-pot-of-tea/src/requirements.rs#L51](/model/cs1-pot-of-tea/src/requirements.rs#L51) | `BrewReadyPot` | [`load_pot_takes_exactly_three_bags_and_returns_the_box_at_37`](/model/cs1-pot-of-tea/src/resources.rs#L934), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
+| REQ-007 | The pot must be loaded with exactly 3 teabags before brewing. | [model/cs1-pot-of-tea/src/requirements.rs#L51](/model/cs1-pot-of-tea/src/requirements.rs#L51) | `BrewReadyPot` | [`load_pot_takes_exactly_three_bags_and_returns_the_box_at_37`](/model/cs1-pot-of-tea/src/resources.rs#L935), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
 
 This item is doc-tagged `Satisfies: REQ-007`.
 
@@ -92,9 +92,9 @@ flowchart LR
   n_new_teapot -- "Teapot" --> n_load_pot
   n_TeabagBox -- "3 × DryTeabag" --> n_load_pot
   n_Person -.- n_load_pot
-  click n_load_pot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L689" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L740" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L461" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_load_pot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L690" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L741" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L462" "model/cs1-pot-of-tea/src/resources.rs"
   click n_TeabagBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L296" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
@@ -102,9 +102,9 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_load_pot` (load_pot) | process | [model/cs1-pot-of-tea/src/resources.rs#L689](/model/cs1-pot-of-tea/src/resources.rs#L689) |
-| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L740](/model/cs1-pot-of-tea/src/resources.rs#L740) |
-| `n_new_teapot` (new_teapot) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L461](/model/cs1-pot-of-tea/src/resources.rs#L461) |
+| `n_load_pot` (load_pot) | process | [model/cs1-pot-of-tea/src/resources.rs#L690](/model/cs1-pot-of-tea/src/resources.rs#L690) |
+| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L741](/model/cs1-pot-of-tea/src/resources.rs#L741) |
+| `n_new_teapot` (new_teapot) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L462](/model/cs1-pot-of-tea/src/resources.rs#L462) |
 | `n_TeabagBox` (TeabagBox) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L296](/model/cs1-pot-of-tea/src/resources.rs#L296) |
 | `n_Person` (Person) | shared resource | — |
 

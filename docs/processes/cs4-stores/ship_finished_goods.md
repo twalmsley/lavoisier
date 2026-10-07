@@ -5,7 +5,7 @@
 **The stocked finished goods leave the model onward (R12, F-039): the only place kept assemblies are defused, which is what makes the tripwires on abandoned assemblies trustworthy (R1, F-008).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L688](/model/cs4-stores/src/resources.rs#L688)
+- **Source:** [model/cs4-stores/src/resources.rs#L689](/model/cs4-stores/src/resources.rs#L689)
 - **Placeholder:** onward delivery from finished goods — out of scope
 
 ## Who and with what
@@ -14,7 +14,7 @@ No person in this signature: any time cost is drawn by an **adjacent** draw proc
 
 Boundary objects used:
 
-- `store`: `FinishedGoods` (boundary object (R12)), threaded by value (R2) — [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475)
+- `store`: `FinishedGoods` (boundary object (R12)), threaded by value (R2) — [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476)
 
 ## Inputs
 
@@ -58,18 +58,18 @@ flowchart LR
     n_ship_finished_goods["ship_finished_goods"]:::sink
   end
   n_FinishedGoods -- "FinishedGoods" --> n_ship_finished_goods
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
-  click n_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L688" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
+  click n_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L689" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
-| `n_ship_finished_goods` (ship_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L688](/model/cs4-stores/src/resources.rs#L688) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
+| `n_ship_finished_goods` (ship_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L689](/model/cs4-stores/src/resources.rs#L689) |
 
 ## Open items (`Placeholder:` tags, R12)
 
 - this function is itself a placeholder (see the header above)
-- `FinishedGoods` — finished-goods stores — onward delivery out of scope. ([model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475))
+- `FinishedGoods` — finished-goods stores — onward delivery out of scope. ([model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476))

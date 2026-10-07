@@ -329,6 +329,7 @@ impl<Items: Len> TeabagBox<Items> {
 /// [`processes::empty_bin`], the sealed disposal path (F-039).
 ///
 /// Satisfies: REQ-008
+#[must_use = "FoodWasteBin is a resource (R12): pass it on, or return it to the boundary"]
 pub struct FoodWasteBin<Space, Contents = Nil> {
     contents: Contents,
     _space: PhantomData<Space>,

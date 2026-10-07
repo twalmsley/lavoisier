@@ -5,7 +5,7 @@
 **The tool stores enter the model (R12).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L471](/model/pilot-workshop/src/resources.rs#L471)
+- **Source:** [model/pilot-workshop/src/resources.rs#L472](/model/pilot-workshop/src/resources.rs#L472)
 
 ## Who and with what
 

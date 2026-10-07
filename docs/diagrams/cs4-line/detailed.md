@@ -68,17 +68,17 @@ flowchart LR
   n_stand_down -- "Operator" --> n_reconcile
   n_stand_down -- "History" --> n_reconcile
   click n_new_history "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L264" "model/model-core/src/history.rs"
-  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L602" "model/cs4-stores/src/resources.rs"
-  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L610" "model/cs4-stores/src/resources.rs"
-  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
+  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L603" "model/cs4-stores/src/resources.rs"
+  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L611" "model/cs4-stores/src/resources.rs"
+  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L962" "model/cs4-stores/src/resources.rs"
   click n_tool_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L128" "model/cs4-line/src/resources.rs"
   click n_new_swarf_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L136" "model/cs4-line/src/resources.rs"
   click n_rig_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L80" "model/cs4-line/src/batch.rs"
   click n_build_batch "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L133" "model/cs4-line/src/batch.rs"
   click n_stand_down "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L99" "model/cs4-line/src/batch.rs"
-  click n_new_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L620" "model/cs4-stores/src/resources.rs"
-  click n_new_disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L629" "model/cs4-stores/src/resources.rs"
-  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
+  click n_new_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L621" "model/cs4-stores/src/resources.rs"
+  click n_new_disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L630" "model/cs4-stores/src/resources.rs"
+  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1022" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -86,25 +86,25 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_new_history` (new_history) | model-core helper | [model/model-core/src/history.rs#L264](/model/model-core/src/history.rs#L264) |
-| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
-| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610) |
-| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
+| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603) |
+| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L611](/model/cs4-stores/src/resources.rs#L611) |
+| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962) |
 | `n_tool_up` (tool_up) | boundary source | [model/cs4-line/src/resources.rs#L128](/model/cs4-line/src/resources.rs#L128) |
 | `n_new_swarf_bin` (new_swarf_bin) | boundary sink | [model/cs4-line/src/resources.rs#L136](/model/cs4-line/src/resources.rs#L136) |
 | `n_rig_up` (rig_up) | model-core helper | [model/cs4-line/src/batch.rs#L80](/model/cs4-line/src/batch.rs#L80) |
 | `n_build_batch` (build_batch) | process | [model/cs4-line/src/batch.rs#L133](/model/cs4-line/src/batch.rs#L133) |
 | `n_stand_down` (stand_down) | model-core helper | [model/cs4-line/src/batch.rs#L99](/model/cs4-line/src/batch.rs#L99) |
-| `n_new_finished_goods` (new_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L620](/model/cs4-stores/src/resources.rs#L620) |
-| `n_new_disposal` (new_disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L629](/model/cs4-stores/src/resources.rs#L629) |
-| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
+| `n_new_finished_goods` (new_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L621](/model/cs4-stores/src/resources.rs#L621) |
+| `n_new_disposal` (new_disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L630](/model/cs4-stores/src/resources.rs#L630) |
+| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
 | `BatchRig` | boundary object | — | [model/cs4-line/src/batch.rs#L63](/model/cs4-line/src/batch.rs#L63) |
-| `Disposal` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
-| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `Disposal` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514) |
+| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `IssueNote` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L216](/model/cs4-stores/src/resources.rs#L216) |
 | `Operator` | boundary object | — | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
 | `PillarDrill` | reusable | — | [model/cs4-line/src/resources.rs#L31](/model/cs4-line/src/resources.rs#L31) |

@@ -5,7 +5,7 @@
 **A plate blank of `GRAMS` grams enters the model directly (R12), bypassing the cutting step — the provisioning path for fallible drilling and its rework reserves (R17/F-050).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L439](/model/pilot-workshop/src/resources.rs#L439)
+- **Source:** [model/pilot-workshop/src/resources.rs#L440](/model/pilot-workshop/src/resources.rs#L440)
 - **Placeholder:** plate stockholder — blanks bought in pre-cut.
 
 ## Who and with what
@@ -52,7 +52,7 @@ flowchart LR
   n_Plate["Plate"]:::resource
   n_supply_plate -- "Plate" --> n_Plate
   click n_Plate "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L47" "model/pilot-workshop/src/resources.rs"
-  click n_supply_plate "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L439" "model/pilot-workshop/src/resources.rs"
+  click n_supply_plate "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L440" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -60,7 +60,7 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_Plate` (Plate) | shared resource | [model/pilot-workshop/src/resources.rs#L47](/model/pilot-workshop/src/resources.rs#L47) |
-| `n_supply_plate` (supply_plate) | boundary source | [model/pilot-workshop/src/resources.rs#L439](/model/pilot-workshop/src/resources.rs#L439) |
+| `n_supply_plate` (supply_plate) | boundary source | [model/pilot-workshop/src/resources.rs#L440](/model/pilot-workshop/src/resources.rs#L440) |
 
 ## Open items (`Placeholder:` tags, R12)
 

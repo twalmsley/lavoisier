@@ -5,7 +5,7 @@
 **A steel sheet of `GRAMS` grams enters the model (R12).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L423](/model/pilot-workshop/src/resources.rs#L423)
+- **Source:** [model/pilot-workshop/src/resources.rs#L424](/model/pilot-workshop/src/resources.rs#L424)
 - **Placeholder:** steel stockholder — assumed able to deliver any sheet.
 
 ## Who and with what
@@ -56,16 +56,16 @@ flowchart LR
     n_cut["cut"]:::process
   end
   n_supply_sheet -- "SteelSheet" --> n_cut
-  click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L584" "model/pilot-workshop/src/resources.rs"
-  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L423" "model/pilot-workshop/src/resources.rs"
+  click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L585" "model/pilot-workshop/src/resources.rs"
+  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L424" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L584](/model/pilot-workshop/src/resources.rs#L584) |
-| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L423](/model/pilot-workshop/src/resources.rs#L423) |
+| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L585](/model/pilot-workshop/src/resources.rs#L585) |
+| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L424](/model/pilot-workshop/src/resources.rs#L424) |
 
 ## Open items (`Placeholder:` tags, R12)
 

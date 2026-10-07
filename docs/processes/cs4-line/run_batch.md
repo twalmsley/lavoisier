@@ -24,7 +24,7 @@ No person in this signature: any time cost is drawn by an **adjacent** draw proc
 
 ## Balances (R1/R3/R15)
 
-- **Inherited by composition:** this step calls [`reconcile`](/model/cs4-stores/src/resources.rs#L1021), whose conservation asserts fire at every instantiation here (F-001):
+- **Inherited by composition:** this step calls [`reconcile`](/model/cs4-stores/src/resources.rs#L1022), whose conservation asserts fire at every instantiation here (F-001):
   - `<FB::Contents as SwarfLoad>::GRAMS == SWARF_G`
   - `<FB::Contents as SwarfLoad>::PIECES == SWARF_PIECES`
 

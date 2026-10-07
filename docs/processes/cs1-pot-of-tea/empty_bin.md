@@ -5,7 +5,7 @@
 **P5 — empties the bin (SPEC.md P5, the F-039 pattern): the bin's kept contents (CS-1: 3 spent bags, 36 g) are released only through this sealed disposal path — their tripwires are defused inside the privacy boundary and their mass continues as one [`FoodWaste`] handed to the council collection.**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L836](/model/cs1-pot-of-tea/src/resources.rs#L836)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L837](/model/cs1-pot-of-tea/src/resources.rs#L837)
 - **Requirements bound on the signature:** REQ-008
 
 ## Who and with what
@@ -16,8 +16,8 @@
 
 Boundary objects used:
 
-- `bin`: `FoodWasteBin` (boundary object (R12)), threaded by value (R2) — [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332)
-- `council`: `CouncilCollection` (boundary object (R12)), threaded by value (R2) — [model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426)
+- `bin`: `FoodWasteBin` (boundary object (R12)), threaded by value (R2) — [model/cs1-pot-of-tea/src/resources.rs#L333](/model/cs1-pot-of-tea/src/resources.rs#L333)
+- `council`: `CouncilCollection` (boundary object (R12)), threaded by value (R2) — [model/cs1-pot-of-tea/src/resources.rs#L427](/model/cs1-pot-of-tea/src/resources.rs#L427)
 
 ## Inputs
 
@@ -50,7 +50,7 @@ Observed leaving this step in the traced flows: `CouncilCollection`, `FoodWasteB
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-008 | All spent teabags must reach the food-waste bin. | [model/cs1-pot-of-tea/src/requirements.rs#L59](/model/cs1-pot-of-tea/src/requirements.rs#L59) | `FoodWasteBin` | [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`empty_bin_restores_capacity_and_ships_the_waste`](/model/cs1-pot-of-tea/src/resources.rs#L1000), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143), [`fixtures_construct_sealed_resources_for_downstream_tests`](/model/cs1-pot-of-tea/tests/flows.rs#L198), [`abandoned_spent_teabag_trips_the_tripwire_downstream`](/model/cs1-pot-of-tea/tests/flows.rs#L216) |
+| REQ-008 | All spent teabags must reach the food-waste bin. | [model/cs1-pot-of-tea/src/requirements.rs#L59](/model/cs1-pot-of-tea/src/requirements.rs#L59) | `FoodWasteBin` | [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`empty_bin_restores_capacity_and_ships_the_waste`](/model/cs1-pot-of-tea/src/resources.rs#L1001), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143), [`fixtures_construct_sealed_resources_for_downstream_tests`](/model/cs1-pot-of-tea/tests/flows.rs#L198), [`abandoned_spent_teabag_trips_the_tripwire_downstream`](/model/cs1-pot-of-tea/tests/flows.rs#L216) |
 
 This item is doc-tagged `Satisfies: REQ-008`.
 
@@ -90,20 +90,20 @@ flowchart LR
   n_CouncilCollection -.- n_empty_bin
   n_FoodWasteBin -.- n_empty_bin
   n_Person -.- n_empty_bin
-  click n_empty_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L836" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L332" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_CouncilCollection "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L426" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_empty_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L837" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L333" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_CouncilCollection "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L427" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_empty_bin` (empty_bin) | process | [model/cs1-pot-of-tea/src/resources.rs#L836](/model/cs1-pot-of-tea/src/resources.rs#L836) |
-| `n_FoodWasteBin` (FoodWasteBin) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332) |
-| `n_CouncilCollection` (CouncilCollection) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426) |
+| `n_empty_bin` (empty_bin) | process | [model/cs1-pot-of-tea/src/resources.rs#L837](/model/cs1-pot-of-tea/src/resources.rs#L837) |
+| `n_FoodWasteBin` (FoodWasteBin) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L333](/model/cs1-pot-of-tea/src/resources.rs#L333) |
+| `n_CouncilCollection` (CouncilCollection) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L427](/model/cs1-pot-of-tea/src/resources.rs#L427) |
 | `n_Person` (Person) | shared resource | — |
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `CouncilCollection` — council food-waste collection — assumed unbounded. ([model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426))
+- `CouncilCollection` — council food-waste collection — assumed unbounded. ([model/cs1-pot-of-tea/src/resources.rs#L427](/model/cs1-pot-of-tea/src/resources.rs#L427))

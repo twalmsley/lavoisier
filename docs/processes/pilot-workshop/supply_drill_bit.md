@@ -5,7 +5,7 @@
 **A working drill bit enters the model (R12).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L446](/model/pilot-workshop/src/resources.rs#L446)
+- **Source:** [model/pilot-workshop/src/resources.rs#L447](/model/pilot-workshop/src/resources.rs#L447)
 - **Placeholder:** tool stores — one bit.
 
 ## Who and with what
@@ -52,7 +52,7 @@ flowchart LR
   n_DrillBit["DrillBit"]:::resource
   n_supply_drill_bit -- "DrillBit" --> n_DrillBit
   click n_DrillBit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L107" "model/pilot-workshop/src/resources.rs"
-  click n_supply_drill_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L446" "model/pilot-workshop/src/resources.rs"
+  click n_supply_drill_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L447" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -60,7 +60,7 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_DrillBit` (DrillBit) | shared resource | [model/pilot-workshop/src/resources.rs#L107](/model/pilot-workshop/src/resources.rs#L107) |
-| `n_supply_drill_bit` (supply_drill_bit) | boundary source | [model/pilot-workshop/src/resources.rs#L446](/model/pilot-workshop/src/resources.rs#L446) |
+| `n_supply_drill_bit` (supply_drill_bit) | boundary source | [model/pilot-workshop/src/resources.rs#L447](/model/pilot-workshop/src/resources.rs#L447) |
 
 ## Open items (`Placeholder:` tags, R12)
 

@@ -68,24 +68,24 @@ flowchart LR
   n_Person -.- n_load_pot
   n_Person -.- n_pour_and_brew
   n_new_person -- "Person" --> n_Person
-  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L623" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L661" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_load_pot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L689" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L740" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_vent_heat "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L774" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_empty_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L836" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_draw_cold_water "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L484" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_draw_grid_energy "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L492" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_grid_socket "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L475" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L454" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_mains_tap "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L468" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_Drinker "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L403" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L461" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L332" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L379" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_fill_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L624" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L662" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_load_pot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L690" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_pour_and_brew "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L741" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_vent_heat "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L775" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_empty_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L837" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_draw_cold_water "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L485" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_draw_grid_energy "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L493" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_grid_socket "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L476" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L455" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_mains_tap "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L469" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_Drinker "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L404" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L462" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L333" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L380" "model/cs1-pot-of-tea/src/resources.rs"
   click n_TeabagBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L296" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_full_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L555" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_CouncilCollection "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L426" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_full_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L556" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_CouncilCollection "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L427" "model/cs1-pot-of-tea/src/resources.rs"
   click n_new_person "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L152" "model/model-core/src/common.rs"
 ```
 
@@ -93,24 +93,24 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L623](/model/cs1-pot-of-tea/src/resources.rs#L623) |
-| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L661](/model/cs1-pot-of-tea/src/resources.rs#L661) |
-| `n_load_pot` (load_pot) | process | [model/cs1-pot-of-tea/src/resources.rs#L689](/model/cs1-pot-of-tea/src/resources.rs#L689) |
-| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L740](/model/cs1-pot-of-tea/src/resources.rs#L740) |
-| `n_vent_heat` (vent_heat) | process | [model/cs1-pot-of-tea/src/resources.rs#L774](/model/cs1-pot-of-tea/src/resources.rs#L774) |
-| `n_empty_bin` (empty_bin) | process | [model/cs1-pot-of-tea/src/resources.rs#L836](/model/cs1-pot-of-tea/src/resources.rs#L836) |
-| `n_draw_cold_water` (draw_cold_water) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L484](/model/cs1-pot-of-tea/src/resources.rs#L484) |
-| `n_draw_grid_energy` (draw_grid_energy) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L492](/model/cs1-pot-of-tea/src/resources.rs#L492) |
-| `n_new_grid_socket` (new_grid_socket) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L475](/model/cs1-pot-of-tea/src/resources.rs#L475) |
-| `n_new_kettle` (new_kettle) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L454](/model/cs1-pot-of-tea/src/resources.rs#L454) |
-| `n_new_mains_tap` (new_mains_tap) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L468](/model/cs1-pot-of-tea/src/resources.rs#L468) |
-| `n_Drinker` (Drinker) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L403](/model/cs1-pot-of-tea/src/resources.rs#L403) |
-| `n_new_teapot` (new_teapot) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L461](/model/cs1-pot-of-tea/src/resources.rs#L461) |
-| `n_FoodWasteBin` (FoodWasteBin) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332) |
-| `n_KitchenAir` (KitchenAir) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379) |
+| `n_fill_kettle` (fill_kettle) | process | [model/cs1-pot-of-tea/src/resources.rs#L624](/model/cs1-pot-of-tea/src/resources.rs#L624) |
+| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L662](/model/cs1-pot-of-tea/src/resources.rs#L662) |
+| `n_load_pot` (load_pot) | process | [model/cs1-pot-of-tea/src/resources.rs#L690](/model/cs1-pot-of-tea/src/resources.rs#L690) |
+| `n_pour_and_brew` (pour_and_brew) | process | [model/cs1-pot-of-tea/src/resources.rs#L741](/model/cs1-pot-of-tea/src/resources.rs#L741) |
+| `n_vent_heat` (vent_heat) | process | [model/cs1-pot-of-tea/src/resources.rs#L775](/model/cs1-pot-of-tea/src/resources.rs#L775) |
+| `n_empty_bin` (empty_bin) | process | [model/cs1-pot-of-tea/src/resources.rs#L837](/model/cs1-pot-of-tea/src/resources.rs#L837) |
+| `n_draw_cold_water` (draw_cold_water) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L485](/model/cs1-pot-of-tea/src/resources.rs#L485) |
+| `n_draw_grid_energy` (draw_grid_energy) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L493](/model/cs1-pot-of-tea/src/resources.rs#L493) |
+| `n_new_grid_socket` (new_grid_socket) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L476](/model/cs1-pot-of-tea/src/resources.rs#L476) |
+| `n_new_kettle` (new_kettle) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L455](/model/cs1-pot-of-tea/src/resources.rs#L455) |
+| `n_new_mains_tap` (new_mains_tap) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L469](/model/cs1-pot-of-tea/src/resources.rs#L469) |
+| `n_Drinker` (Drinker) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L404](/model/cs1-pot-of-tea/src/resources.rs#L404) |
+| `n_new_teapot` (new_teapot) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L462](/model/cs1-pot-of-tea/src/resources.rs#L462) |
+| `n_FoodWasteBin` (FoodWasteBin) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L333](/model/cs1-pot-of-tea/src/resources.rs#L333) |
+| `n_KitchenAir` (KitchenAir) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380) |
 | `n_TeabagBox` (TeabagBox) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L296](/model/cs1-pot-of-tea/src/resources.rs#L296) |
-| `n_full_teabag_box` (full_teabag_box) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L555](/model/cs1-pot-of-tea/src/resources.rs#L555) |
-| `n_CouncilCollection` (CouncilCollection) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426) |
+| `n_full_teabag_box` (full_teabag_box) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L556](/model/cs1-pot-of-tea/src/resources.rs#L556) |
+| `n_CouncilCollection` (CouncilCollection) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L427](/model/cs1-pot-of-tea/src/resources.rs#L427) |
 | `n_Person` (Person) | shared resource | — |
 | `n_new_person` (new_person (model-core)) | boundary source | [model/model-core/src/common.rs#L152](/model/model-core/src/common.rs#L152) |
 

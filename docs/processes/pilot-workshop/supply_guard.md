@@ -5,7 +5,7 @@
 **A machine guard enters the model, unfitted (R18).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L460](/model/pilot-workshop/src/resources.rs#L460)
+- **Source:** [model/pilot-workshop/src/resources.rs#L461](/model/pilot-workshop/src/resources.rs#L461)
 - **Placeholder:** stores — one guard off the shelf.
 
 ## Who and with what
@@ -56,16 +56,16 @@ flowchart LR
     n_fit_guard["fit_guard"]:::process
   end
   n_supply_guard -- "MachineGuard" --> n_fit_guard
-  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L601" "model/pilot-workshop/src/resources.rs"
-  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L460" "model/pilot-workshop/src/resources.rs"
+  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L602" "model/pilot-workshop/src/resources.rs"
+  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L461" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L601](/model/pilot-workshop/src/resources.rs#L601) |
-| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L460](/model/pilot-workshop/src/resources.rs#L460) |
+| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L602](/model/pilot-workshop/src/resources.rs#L602) |
+| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L461](/model/pilot-workshop/src/resources.rs#L461) |
 
 ## Open items (`Placeholder:` tags, R12)
 

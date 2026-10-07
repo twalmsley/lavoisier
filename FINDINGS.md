@@ -13,7 +13,7 @@ the learning-materials build; F-055 added 2026-10-06 by the diagram-generator bu
 resolved 2026-10-07 by the CS-2 build; F-041 and F-055 extended 2026-10-07 by the CS-3 build; F-056 added and F-001/F-010/F-011/F-055
 extended 2026-10-07 by the CS-4 build; F-057 added and F-054 extended 2026-10-07 by the CS-5
 build; F-055 gaps 1 and 7 (and the flow-naming WARN) resolved 2026-10-07 by the step-9
-extraction work.
+extraction work; F-058…F-059 added 2026-10-07 by the step-11 model-analysis build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1474,4 +1474,45 @@ fell 42 → 6. Still open, by design or pending: the multi-type non-REQ bound (c
 omission), gap 6's convention (match on the call), a downstream-implemented trait bound seen
 from the upstream crate, the F-056 quantum clock not recognized as an actor, recursion
 internals shown as one step, and associated-const asserts restated symbolically only.
+
+---
+
+## F-058 — The one ungated sealing rule was the one broken: `#[must_use]` on hand-written contents-keeping bins
+
+**What couldn't be expressed:** nothing — this is a process finding. R1's sealing rules held
+across all ten crates on their first mechanical audit, with exactly one systematic exception:
+every contents-keeping bin written before CS-5 (`FoodWasteBin`, `FinishedGoods`, `SwarfBin`)
+lacked `#[must_use]`, while CS-5's `Bin` carried it. A bin is a consumer and a consumer is a
+resource (R12); without the attribute, whole-value discard of an **empty** bin was caught by
+nothing (the kept contents' tripwires cover only a non-empty one, F-032).
+
+**What it cost:** three latent layer-1 gaps that nine CI steps, 206 tests and five case-study
+reviews never surfaced — R1's own text said "enforce with a lint script", and `must_use` was
+the one rule no grep gated until step 11's linter (E-SEAL-MUSTUSE) ran.
+
+**Workaround adopted:** the three structs fixed (one attribute each) the day the linter found
+them; the linter's ERROR-KNOWN mechanism exists for any future true positive — named in the
+tool's `KNOWN` list with justification, listed first, non-fatal, never silently retuned.
+
+**Evidence:** `docs/analysis/` first-run reports; the fix commit; `tools/diagram-gen/src/lint.rs`.
+
+---
+
+## F-059 — Sink-coverage analysis must resolve through bounds (extends F-055)
+
+**What couldn't be expressed:** a name-level answer to "does every tripwired type have a
+production consumer?" (the F-035 audit). The R10/R12 bounds-first discipline hides literal
+types: a kettle is consumed as `K: Req006…`, bolts as `Taken = FourOf<B>`, a drink via a
+sealed slot-trait impl, labour via `impl Recordable` (which model-core documents as "History
+may consume this").
+
+**What it cost:** a naive name-level grep reported 13 orphaned types; resolving consumption
+through requirement satisfaction, supplier `Taken` lists, local trait impls and `Recordable`
+impls found **zero** real orphans. Any F-035 audit — human or tool — that does not follow the
+bounds reports false positives.
+
+**Workaround adopted:** step 11's I-NO-SINK check resolves through the four bound paths above
+(INFO-graded: downstream crates outside the workspace may legitimately be the consumer).
+
+**Evidence:** `tools/diagram-gen/src/lint.rs` (sink resolution); `docs/analysis/README.md`.
 

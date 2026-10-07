@@ -5,7 +5,7 @@
 **Removes the guard (R18): the conserving inverse of [`fit_guard`], returning the unfitted state.**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L609](/model/pilot-workshop/src/resources.rs#L609)
+- **Source:** [model/pilot-workshop/src/resources.rs#L610](/model/pilot-workshop/src/resources.rs#L610)
 
 ## Who and with what
 
@@ -60,8 +60,8 @@ flowchart LR
   n_FittedGuard["FittedGuard"]:::resource
   n_FittedGuard -- "FittedGuard" --> n_remove_guard
   n_remove_guard -- "MachineGuard" --> n_fit_guard
-  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L601" "model/pilot-workshop/src/resources.rs"
-  click n_remove_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L609" "model/pilot-workshop/src/resources.rs"
+  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L602" "model/pilot-workshop/src/resources.rs"
+  click n_remove_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L610" "model/pilot-workshop/src/resources.rs"
   click n_FittedGuard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L155" "model/pilot-workshop/src/resources.rs"
 ```
 
@@ -69,6 +69,6 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L601](/model/pilot-workshop/src/resources.rs#L601) |
-| `n_remove_guard` (remove_guard) | process | [model/pilot-workshop/src/resources.rs#L609](/model/pilot-workshop/src/resources.rs#L609) |
+| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L602](/model/pilot-workshop/src/resources.rs#L602) |
+| `n_remove_guard` (remove_guard) | process | [model/pilot-workshop/src/resources.rs#L610](/model/pilot-workshop/src/resources.rs#L610) |
 | `n_FittedGuard` (FittedGuard) | shared resource | [model/pilot-workshop/src/resources.rs#L155](/model/pilot-workshop/src/resources.rs#L155) |

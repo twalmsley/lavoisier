@@ -6,20 +6,20 @@ cs1-pot-of-tea — case study CS-1: making a pot of tea — 17 documented functi
 
 | Document | Kind | Purpose (first rustdoc line) | Source |
 |---|---|---|---|
-| [`new_kettle`](new_kettle.md) | boundary function (R12) | The kettle enters the model, empty (R12). | [model/cs1-pot-of-tea/src/resources.rs#L454](/model/cs1-pot-of-tea/src/resources.rs#L454) |
-| [`new_teapot`](new_teapot.md) | boundary function (R12) | The teapot enters the model, empty (R12). | [model/cs1-pot-of-tea/src/resources.rs#L461](/model/cs1-pot-of-tea/src/resources.rs#L461) |
-| [`new_mains_tap`](new_mains_tap.md) | boundary function (R12) | The mains tap enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L468](/model/cs1-pot-of-tea/src/resources.rs#L468) |
-| [`new_grid_socket`](new_grid_socket.md) | boundary function (R12) | The grid socket enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L475](/model/cs1-pot-of-tea/src/resources.rs#L475) |
-| [`draw_cold_water`](draw_cold_water.md) | boundary function (R12) | Draws `TAKE` grams of cold water from the mains (R15: an unbounded | [model/cs1-pot-of-tea/src/resources.rs#L484](/model/cs1-pot-of-tea/src/resources.rs#L484) |
-| [`draw_grid_energy`](draw_grid_energy.md) | boundary function (R12) | Draws `TAKE` joules from the grid (R15, F-028). The socket is | [model/cs1-pot-of-tea/src/resources.rs#L492](/model/cs1-pot-of-tea/src/resources.rs#L492) |
-| [`full_teabag_box`](full_teabag_box.md) | boundary function (R12) | The fill function (R12): a full box of `N` real dry teabags enters | [model/cs1-pot-of-tea/src/resources.rs#L555](/model/cs1-pot-of-tea/src/resources.rs#L555) |
-| [`new_food_waste_bin`](new_food_waste_bin.md) | boundary function (R12) | An empty food-waste bin with `Space` slots enters the model (CS-1: | [model/cs1-pot-of-tea/src/resources.rs#L566](/model/cs1-pot-of-tea/src/resources.rs#L566) |
-| [`new_kitchen_air`](new_kitchen_air.md) | boundary function (R12) | The kitchen air enters the model (R12). An empty unbounded sink holds | [model/cs1-pot-of-tea/src/resources.rs#L575](/model/cs1-pot-of-tea/src/resources.rs#L575) |
-| [`new_drinker`](new_drinker.md) | boundary function (R12) | The drinker enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L580](/model/cs1-pot-of-tea/src/resources.rs#L580) |
-| [`new_council_collection`](new_council_collection.md) | boundary function (R12) | The council food-waste collection enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L585](/model/cs1-pot-of-tea/src/resources.rs#L585) |
-| [`fill_kettle`](fill_kettle.md) | process (R1) | P1 — fills the kettle with the drawn cold water (SPEC.md P1). The | [model/cs1-pot-of-tea/src/resources.rs#L623](/model/cs1-pot-of-tea/src/resources.rs#L623) |
-| [`boil`](boil.md) | process (R1) | P3 — boils the kettle (SPEC.md P3): the filled kettle plus `DRAW_J` | [model/cs1-pot-of-tea/src/resources.rs#L661](/model/cs1-pot-of-tea/src/resources.rs#L661) |
-| [`load_pot`](load_pot.md) | process (R1) | P2 — loads the pot with **exactly 3** teabags, taken one at a time | [model/cs1-pot-of-tea/src/resources.rs#L689](/model/cs1-pot-of-tea/src/resources.rs#L689) |
-| [`pour_and_brew`](pour_and_brew.md) | process (R1) | P4 — pours the boiling kettle into the loaded pot and brews | [model/cs1-pot-of-tea/src/resources.rs#L740](/model/cs1-pot-of-tea/src/resources.rs#L740) |
-| [`vent_heat`](vent_heat.md) | process (R1) | Hands one quantity of waste heat to the kitchen-air sink — the only | [model/cs1-pot-of-tea/src/resources.rs#L774](/model/cs1-pot-of-tea/src/resources.rs#L774) |
-| [`empty_bin`](empty_bin.md) | process (R1) | P5 — empties the bin (SPEC.md P5, the F-039 pattern): the bin's kept | [model/cs1-pot-of-tea/src/resources.rs#L836](/model/cs1-pot-of-tea/src/resources.rs#L836) |
+| [`new_kettle`](new_kettle.md) | boundary function (R12) | The kettle enters the model, empty (R12). | [model/cs1-pot-of-tea/src/resources.rs#L455](/model/cs1-pot-of-tea/src/resources.rs#L455) |
+| [`new_teapot`](new_teapot.md) | boundary function (R12) | The teapot enters the model, empty (R12). | [model/cs1-pot-of-tea/src/resources.rs#L462](/model/cs1-pot-of-tea/src/resources.rs#L462) |
+| [`new_mains_tap`](new_mains_tap.md) | boundary function (R12) | The mains tap enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L469](/model/cs1-pot-of-tea/src/resources.rs#L469) |
+| [`new_grid_socket`](new_grid_socket.md) | boundary function (R12) | The grid socket enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L476](/model/cs1-pot-of-tea/src/resources.rs#L476) |
+| [`draw_cold_water`](draw_cold_water.md) | boundary function (R12) | Draws `TAKE` grams of cold water from the mains (R15: an unbounded | [model/cs1-pot-of-tea/src/resources.rs#L485](/model/cs1-pot-of-tea/src/resources.rs#L485) |
+| [`draw_grid_energy`](draw_grid_energy.md) | boundary function (R12) | Draws `TAKE` joules from the grid (R15, F-028). The socket is | [model/cs1-pot-of-tea/src/resources.rs#L493](/model/cs1-pot-of-tea/src/resources.rs#L493) |
+| [`full_teabag_box`](full_teabag_box.md) | boundary function (R12) | The fill function (R12): a full box of `N` real dry teabags enters | [model/cs1-pot-of-tea/src/resources.rs#L556](/model/cs1-pot-of-tea/src/resources.rs#L556) |
+| [`new_food_waste_bin`](new_food_waste_bin.md) | boundary function (R12) | An empty food-waste bin with `Space` slots enters the model (CS-1: | [model/cs1-pot-of-tea/src/resources.rs#L567](/model/cs1-pot-of-tea/src/resources.rs#L567) |
+| [`new_kitchen_air`](new_kitchen_air.md) | boundary function (R12) | The kitchen air enters the model (R12). An empty unbounded sink holds | [model/cs1-pot-of-tea/src/resources.rs#L576](/model/cs1-pot-of-tea/src/resources.rs#L576) |
+| [`new_drinker`](new_drinker.md) | boundary function (R12) | The drinker enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L581](/model/cs1-pot-of-tea/src/resources.rs#L581) |
+| [`new_council_collection`](new_council_collection.md) | boundary function (R12) | The council food-waste collection enters the model (R12). | [model/cs1-pot-of-tea/src/resources.rs#L586](/model/cs1-pot-of-tea/src/resources.rs#L586) |
+| [`fill_kettle`](fill_kettle.md) | process (R1) | P1 — fills the kettle with the drawn cold water (SPEC.md P1). The | [model/cs1-pot-of-tea/src/resources.rs#L624](/model/cs1-pot-of-tea/src/resources.rs#L624) |
+| [`boil`](boil.md) | process (R1) | P3 — boils the kettle (SPEC.md P3): the filled kettle plus `DRAW_J` | [model/cs1-pot-of-tea/src/resources.rs#L662](/model/cs1-pot-of-tea/src/resources.rs#L662) |
+| [`load_pot`](load_pot.md) | process (R1) | P2 — loads the pot with **exactly 3** teabags, taken one at a time | [model/cs1-pot-of-tea/src/resources.rs#L690](/model/cs1-pot-of-tea/src/resources.rs#L690) |
+| [`pour_and_brew`](pour_and_brew.md) | process (R1) | P4 — pours the boiling kettle into the loaded pot and brews | [model/cs1-pot-of-tea/src/resources.rs#L741](/model/cs1-pot-of-tea/src/resources.rs#L741) |
+| [`vent_heat`](vent_heat.md) | process (R1) | Hands one quantity of waste heat to the kitchen-air sink — the only | [model/cs1-pot-of-tea/src/resources.rs#L775](/model/cs1-pot-of-tea/src/resources.rs#L775) |
+| [`empty_bin`](empty_bin.md) | process (R1) | P5 — empties the bin (SPEC.md P5, the F-039 pattern): the bin's kept | [model/cs1-pot-of-tea/src/resources.rs#L837](/model/cs1-pot-of-tea/src/resources.rs#L837) |

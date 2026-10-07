@@ -5,7 +5,7 @@
 **Hands one quantity of waste heat to the kitchen-air sink — the only sanctioned route for waste heat out of a flow, and the process form of REQ-009 (SPEC.md P3's kettle losses go through it; P4's steeping losses are vented inside `pour_and_brew`).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L774](/model/cs1-pot-of-tea/src/resources.rs#L774)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L775](/model/cs1-pot-of-tea/src/resources.rs#L775)
 - **Requirements bound on the signature:** REQ-009
 
 ## Who and with what
@@ -29,7 +29,7 @@ Observed entering this step in the traced flows: `KitchenAir`, `WasteHeat 50000 
 
 Waste routed **inside** this process (never loose in a flow):
 
-- `sink` is a consumer parameter: **WasteHeat** is handed to `KitchenAir` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379)
+- `sink` is a consumer parameter: **WasteHeat** is handed to `KitchenAir` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380)
 
 Observed leaving this step in the traced flows: `KitchenAir`.
 
@@ -37,7 +37,7 @@ Observed leaving this step in the traced flows: `KitchenAir`.
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-009 | All waste heat must be accounted to the kitchen-air sink. | [model/cs1-pot-of-tea/src/requirements.rs#L67](/model/cs1-pot-of-tea/src/requirements.rs#L67) | `KitchenAir` | [`vent_heat_accounts_heat_to_the_kitchen_air`](/model/cs1-pot-of-tea/src/resources.rs#L923), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L967), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
+| REQ-009 | All waste heat must be accounted to the kitchen-air sink. | [model/cs1-pot-of-tea/src/requirements.rs#L67](/model/cs1-pot-of-tea/src/requirements.rs#L67) | `KitchenAir` | [`vent_heat_accounts_heat_to_the_kitchen_air`](/model/cs1-pot-of-tea/src/resources.rs#L924), [`pour_and_brew_balances_mass_and_energy`](/model/cs1-pot-of-tea/src/resources.rs#L968), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L79), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/cs1-pot-of-tea/tests/flows.rs#L143) |
 
 This item is doc-tagged `Satisfies: REQ-009`.
 
@@ -77,19 +77,19 @@ flowchart LR
   end
   n_boil -- "WasteHeat" --> n_vent_heat
   n_vent_heat -- "WasteHeat" --> n_KitchenAir
-  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L661" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_vent_heat "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L774" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L379" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_boil "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L662" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_vent_heat "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L775" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L380" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L661](/model/cs1-pot-of-tea/src/resources.rs#L661) |
-| `n_vent_heat` (vent_heat) | process | [model/cs1-pot-of-tea/src/resources.rs#L774](/model/cs1-pot-of-tea/src/resources.rs#L774) |
-| `n_KitchenAir` (KitchenAir) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379) |
+| `n_boil` (boil) | process | [model/cs1-pot-of-tea/src/resources.rs#L662](/model/cs1-pot-of-tea/src/resources.rs#L662) |
+| `n_vent_heat` (vent_heat) | process | [model/cs1-pot-of-tea/src/resources.rs#L775](/model/cs1-pot-of-tea/src/resources.rs#L775) |
+| `n_KitchenAir` (KitchenAir) | boundary sink | [model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380) |
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `KitchenAir` — kitchen air — assumed able to absorb all waste heat ([model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379))
+- `KitchenAir` — kitchen air — assumed able to absorb all waste heat ([model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380))

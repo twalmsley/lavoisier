@@ -5,7 +5,7 @@
 **Joins two drilled plates and four stores-issued bolts into one assembly — the material transform inside the line's P4 (R1, R3, R13).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L867](/model/cs4-stores/src/resources.rs#L867)
+- **Source:** [model/cs4-stores/src/resources.rs#L868](/model/cs4-stores/src/resources.rs#L868)
 - **Requirements bound on the signature:** REQ-019
 
 ## Who and with what
@@ -36,7 +36,7 @@ No person in this signature: any time cost is drawn by an **adjacent** draw proc
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-019 | Assemblies may be built only from stores-issued materials (provenance: the line cannot mint or source materials itself - enforced by the crate boundary). | [model/cs4-stores/src/requirements.rs#L36](/model/cs4-stores/src/requirements.rs#L36) | `IssuedBolt` | [`join_conserves_and_finished_goods_keeps_the_assembly`](/model/cs4-stores/src/resources.rs#L1146), [`issue_materials_issues_the_batch_stock`](/model/cs4-stores/src/resources.rs#L1194) |
+| REQ-019 | Assemblies may be built only from stores-issued materials (provenance: the line cannot mint or source materials itself - enforced by the crate boundary). | [model/cs4-stores/src/requirements.rs#L36](/model/cs4-stores/src/requirements.rs#L36) | `IssuedBolt` | [`join_conserves_and_finished_goods_keeps_the_assembly`](/model/cs4-stores/src/resources.rs#L1147), [`issue_materials_issues_the_batch_stock`](/model/cs4-stores/src/resources.rs#L1195) |
 
 This item is doc-tagged `Satisfies: REQ-019`.
 
@@ -80,16 +80,16 @@ flowchart LR
   n_join_assembly -- "Assembly" --> n_reconcile
   n_caller -- "Cons" --> n_join_assembly
   n_bore_blank -- "DrilledPlate" --> n_join_assembly
-  click n_bore_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L825" "model/cs4-stores/src/resources.rs"
-  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L867" "model/cs4-stores/src/resources.rs"
-  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
+  click n_bore_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L826" "model/cs4-stores/src/resources.rs"
+  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L868" "model/cs4-stores/src/resources.rs"
+  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1022" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_bore_blank` (bore_blank) | process | [model/cs4-stores/src/resources.rs#L825](/model/cs4-stores/src/resources.rs#L825) |
-| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L867](/model/cs4-stores/src/resources.rs#L867) |
-| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
+| `n_bore_blank` (bore_blank) | process | [model/cs4-stores/src/resources.rs#L826](/model/cs4-stores/src/resources.rs#L826) |
+| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L868](/model/cs4-stores/src/resources.rs#L868) |
+| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022) |
 | `n_caller` (caller / flow) | flow input/output | — |

@@ -5,7 +5,7 @@
 **The fill function (R12): a full box of `N` real dry teabags enters the model here — CS-1's box is `full_teabag_box::<N40>()` (SPEC.md §4: capacity 40).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L555](/model/cs1-pot-of-tea/src/resources.rs#L555)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L556](/model/cs1-pot-of-tea/src/resources.rs#L556)
 - **Placeholder:** teabag box — brand/vendor not modelled.
 
 ## Who and with what
@@ -54,7 +54,7 @@ flowchart LR
   end
   n_full_teabag_box -- "TeabagBox" --> n_TeabagBox
   click n_TeabagBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L296" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_full_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L555" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_full_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L556" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -62,7 +62,7 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_TeabagBox` (TeabagBox) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L296](/model/cs1-pot-of-tea/src/resources.rs#L296) |
-| `n_full_teabag_box` (full_teabag_box) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L555](/model/cs1-pot-of-tea/src/resources.rs#L555) |
+| `n_full_teabag_box` (full_teabag_box) | boundary source | [model/cs1-pot-of-tea/src/resources.rs#L556](/model/cs1-pot-of-tea/src/resources.rs#L556) |
 
 ## Open items (`Placeholder:` tags, R12)
 

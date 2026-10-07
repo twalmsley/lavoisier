@@ -30,8 +30,8 @@ flowchart LR
   n_system -- "DrillSwarf" --> n_SwarfBin
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/lib.rs#L1" "model/cs4-line/src/lib.rs"
   click n_tool_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L128" "model/cs4-line/src/resources.rs"
-  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L514" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
   click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L57" "model/cs4-line/src/resources.rs"
 ```
 
@@ -41,8 +41,8 @@ flowchart LR
 |---|---|---|
 | `n_system` (cs4-line — the modelled system) | the system | [model/cs4-line/src/lib.rs#L1](/model/cs4-line/src/lib.rs#L1) |
 | `n_tool_up` (tool_up) | external party | [model/cs4-line/src/resources.rs#L128](/model/cs4-line/src/resources.rs#L128) |
-| `n_Disposal` (Disposal) | external party | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
-| `n_FinishedGoods` (FinishedGoods) | external party | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `n_Disposal` (Disposal) | external party | [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514) |
+| `n_FinishedGoods` (FinishedGoods) | external party | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `n_SwarfBin` (SwarfBin) | external party | [model/cs4-line/src/resources.rs#L57](/model/cs4-line/src/resources.rs#L57) |
 
 ## Resources on the edges

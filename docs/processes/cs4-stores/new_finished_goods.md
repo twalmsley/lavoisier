@@ -5,7 +5,7 @@
 **An empty finished-goods store with `Space` slots (REQ-022).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L620](/model/cs4-stores/src/resources.rs#L620)
+- **Source:** [model/cs4-stores/src/resources.rs#L621](/model/cs4-stores/src/resources.rs#L621)
 
 ## Who and with what
 
@@ -34,4 +34,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `FinishedGoods` — finished-goods stores — onward delivery out of scope. ([model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475))
+- `FinishedGoods` — finished-goods stores — onward delivery out of scope. ([model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476))

@@ -5,7 +5,7 @@
 **A bin — in any fill state — leaves the model to waste disposal (R12):**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L534](/model/pilot-workshop/src/resources.rs#L534)
+- **Source:** [model/pilot-workshop/src/resources.rs#L535](/model/pilot-workshop/src/resources.rs#L535)
 - **Placeholder:** waste-disposal service — assumed able to take any bin.
 
 ## Who and with what
@@ -14,7 +14,7 @@ No person in this signature: any time cost is drawn by an **adjacent** draw proc
 
 Boundary objects used:
 
-- `bin`: `SwarfBin` (boundary object (R12)), threaded by value (R2) — [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333)
+- `bin`: `SwarfBin` (boundary object (R12)), threaded by value (R2) — [model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334)
 
 ## Inputs
 
@@ -56,18 +56,18 @@ flowchart LR
     n_dispose_bin["dispose_bin"]:::sink
   end
   n_SwarfBin -- "SwarfBin" --> n_dispose_bin
-  click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L333" "model/pilot-workshop/src/resources.rs"
-  click n_dispose_bin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L534" "model/pilot-workshop/src/resources.rs"
+  click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L334" "model/pilot-workshop/src/resources.rs"
+  click n_dispose_bin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L535" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_SwarfBin` (SwarfBin) | boundary sink | [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333) |
-| `n_dispose_bin` (dispose_bin) | boundary sink | [model/pilot-workshop/src/resources.rs#L534](/model/pilot-workshop/src/resources.rs#L534) |
+| `n_SwarfBin` (SwarfBin) | boundary sink | [model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334) |
+| `n_dispose_bin` (dispose_bin) | boundary sink | [model/pilot-workshop/src/resources.rs#L535](/model/pilot-workshop/src/resources.rs#L535) |
 
 ## Open items (`Placeholder:` tags, R12)
 
 - this function is itself a placeholder (see the header above)
-- `SwarfBin` — generic swarf bin — refine to a named scrap-metal stream. ([model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333))
+- `SwarfBin` — generic swarf bin — refine to a named scrap-metal stream. ([model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334))

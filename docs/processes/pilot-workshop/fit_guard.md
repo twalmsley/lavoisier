@@ -5,7 +5,7 @@
 **Fits the guard to the pillar drill (R18): fitting is a process, and the fitted state is its own type (R9/F-023) — only [`FittedGuard`] carries the `Fitted` characteristic REQ-005 requires.**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L601](/model/pilot-workshop/src/resources.rs#L601)
+- **Source:** [model/pilot-workshop/src/resources.rs#L602](/model/pilot-workshop/src/resources.rs#L602)
 
 ## Who and with what
 
@@ -66,17 +66,17 @@ flowchart LR
   n_fit_guard -- "FittedGuard" --> n_FittedGuard
   n_remove_guard -- "MachineGuard" --> n_fit_guard
   n_supply_guard -- "MachineGuard" --> n_fit_guard
-  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L601" "model/pilot-workshop/src/resources.rs"
-  click n_remove_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L609" "model/pilot-workshop/src/resources.rs"
+  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L602" "model/pilot-workshop/src/resources.rs"
+  click n_remove_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L610" "model/pilot-workshop/src/resources.rs"
   click n_FittedGuard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L155" "model/pilot-workshop/src/resources.rs"
-  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L460" "model/pilot-workshop/src/resources.rs"
+  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L461" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L601](/model/pilot-workshop/src/resources.rs#L601) |
-| `n_remove_guard` (remove_guard) | process | [model/pilot-workshop/src/resources.rs#L609](/model/pilot-workshop/src/resources.rs#L609) |
+| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L602](/model/pilot-workshop/src/resources.rs#L602) |
+| `n_remove_guard` (remove_guard) | process | [model/pilot-workshop/src/resources.rs#L610](/model/pilot-workshop/src/resources.rs#L610) |
 | `n_FittedGuard` (FittedGuard) | shared resource | [model/pilot-workshop/src/resources.rs#L155](/model/pilot-workshop/src/resources.rs#L155) |
-| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L460](/model/pilot-workshop/src/resources.rs#L460) |
+| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L461](/model/pilot-workshop/src/resources.rs#L461) |

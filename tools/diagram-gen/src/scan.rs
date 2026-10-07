@@ -14,7 +14,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 /// Strip a `//` comment (incl. `///`) outside string literals.
-fn code_part(line: &str) -> String {
+pub(crate) fn code_part(line: &str) -> String {
     let mut out = String::new();
     let mut in_str = false;
     let mut prev = '\0';
@@ -1233,7 +1233,7 @@ fn scan_impl(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String]) -> usi
 
 /// First top-level `" for "` in an impl header (outside any brackets):
 /// splits the implemented-trait side from the self-type side.
-fn impl_for_split(header: &str) -> Option<(String, String)> {
+pub(crate) fn impl_for_split(header: &str) -> Option<(String, String)> {
     let b = header.as_bytes();
     let mut depth = 0i64;
     let mut k = 0usize;

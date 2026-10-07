@@ -77,4 +77,4 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 Post-ladder increments | done (white paper v0.2 25 pp; decks refreshed in place; guide §3.7 multi-crate; README) | — | 2026-10-07: verified |
 | 9 Process docgen (B) | done (`docgen` bin + `tools/docgen.sh`; 166 process docs across all crates; F-055 gaps 1/7 fixed in the shared scanner) | F-055 part-resolved | 2026-10-07: closed — R20 applied; cs5-works naming fixed |
 | 10 DSL (C) | not started | | |
-| 11 Model analysis (D) | not started | | |
+| 11 Model analysis (D) | done (`modellint` + `tools/lint.sh`; 22 checks; ci.sh step 7 with staleness gate; 3 real R1 gaps found and fixed) | F-058, F-059 | pending: R21 wording + R20 conv.-1 clarification to agree |

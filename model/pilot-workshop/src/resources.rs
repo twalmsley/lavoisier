@@ -330,6 +330,7 @@ impl<B, const PLATE_G: u64> Assembly<B, PLATE_G> {
 /// Placeholder: generic swarf bin — refine to a named scrap-metal stream.
 ///
 /// Satisfies: REQ-003
+#[must_use = "SwarfBin is a resource (R12): pass it on, or return it to the boundary"]
 pub struct SwarfBin<Space, Contents = Nil> {
     contents: Contents,
     _space: PhantomData<Space>,

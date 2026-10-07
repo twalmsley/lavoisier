@@ -5,7 +5,7 @@
 **Drills one plate **fallibly** (R17): returns `Ok` with the success bundle or `Err` with the failure bundle, and **both arms conserve the same inputs** — the operator and the guard come back in both arms, the plate's mass continues either as drilled-plate-plus-swarf or as scrap-plus-swarf, and the bit comes back working or broken (one type per state, R9).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L747](/model/pilot-workshop/src/resources.rs#L747)
+- **Source:** [model/pilot-workshop/src/resources.rs#L748](/model/pilot-workshop/src/resources.rs#L748)
 - **Requirements bound on the signature:** REQ-004, REQ-005
 
 ## Who and with what
@@ -62,8 +62,8 @@ Observed leaving this step in the traced flows: `BrokenDrillBit`, `DrillBit`, `D
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-004 | Drilling must be performed by an operator certified for drilling. | [model/pilot-workshop/src/requirements.rs#L60](/model/pilot-workshop/src/requirements.rs#L60) | `DrillingOperator` | [`drill_holes_conserves_mass_and_draws_time`](/model/pilot-workshop/src/resources.rs#L882), [`fallible_success_arm_conserves_mass`](/model/pilot-workshop/src/resources.rs#L919), [`fallible_failure_arm_conserves_the_same_inputs`](/model/pilot-workshop/src/resources.rs#L951), [`converging_flow_success_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L37), [`converging_flow_failure_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L68), [`retry_flow_first_try_success_returns_the_reserves`](/model/pilot-workshop/tests/fallible_flows.rs#L95), [`retry_flow_fail_then_success_recovers`](/model/pilot-workshop/tests/fallible_flows.rs#L141), [`retry_flow_gives_up_after_the_bounded_rework`](/model/pilot-workshop/tests/fallible_flows.rs#L181), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
-| REQ-005 | Drilling must happen behind a machine guard fitted to the drill. | [model/pilot-workshop/src/requirements.rs#L67](/model/pilot-workshop/src/requirements.rs#L67) | `DrillReadyGuard` | [`drill_holes_conserves_mass_and_draws_time`](/model/pilot-workshop/src/resources.rs#L882), [`fallible_success_arm_conserves_mass`](/model/pilot-workshop/src/resources.rs#L919), [`fallible_failure_arm_conserves_the_same_inputs`](/model/pilot-workshop/src/resources.rs#L951), [`converging_flow_success_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L37), [`converging_flow_failure_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L68), [`retry_flow_first_try_success_returns_the_reserves`](/model/pilot-workshop/tests/fallible_flows.rs#L95), [`retry_flow_fail_then_success_recovers`](/model/pilot-workshop/tests/fallible_flows.rs#L141), [`retry_flow_gives_up_after_the_bounded_rework`](/model/pilot-workshop/tests/fallible_flows.rs#L181), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
+| REQ-004 | Drilling must be performed by an operator certified for drilling. | [model/pilot-workshop/src/requirements.rs#L60](/model/pilot-workshop/src/requirements.rs#L60) | `DrillingOperator` | [`drill_holes_conserves_mass_and_draws_time`](/model/pilot-workshop/src/resources.rs#L883), [`fallible_success_arm_conserves_mass`](/model/pilot-workshop/src/resources.rs#L920), [`fallible_failure_arm_conserves_the_same_inputs`](/model/pilot-workshop/src/resources.rs#L952), [`converging_flow_success_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L37), [`converging_flow_failure_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L68), [`retry_flow_first_try_success_returns_the_reserves`](/model/pilot-workshop/tests/fallible_flows.rs#L95), [`retry_flow_fail_then_success_recovers`](/model/pilot-workshop/tests/fallible_flows.rs#L141), [`retry_flow_gives_up_after_the_bounded_rework`](/model/pilot-workshop/tests/fallible_flows.rs#L181), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
+| REQ-005 | Drilling must happen behind a machine guard fitted to the drill. | [model/pilot-workshop/src/requirements.rs#L67](/model/pilot-workshop/src/requirements.rs#L67) | `DrillReadyGuard` | [`drill_holes_conserves_mass_and_draws_time`](/model/pilot-workshop/src/resources.rs#L883), [`fallible_success_arm_conserves_mass`](/model/pilot-workshop/src/resources.rs#L920), [`fallible_failure_arm_conserves_the_same_inputs`](/model/pilot-workshop/src/resources.rs#L952), [`converging_flow_success_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L37), [`converging_flow_failure_arm`](/model/pilot-workshop/tests/fallible_flows.rs#L68), [`retry_flow_first_try_success_returns_the_reserves`](/model/pilot-workshop/tests/fallible_flows.rs#L95), [`retry_flow_fail_then_success_recovers`](/model/pilot-workshop/tests/fallible_flows.rs#L141), [`retry_flow_gives_up_after_the_bounded_rework`](/model/pilot-workshop/tests/fallible_flows.rs#L181), [`flow_order_a_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L55), [`flow_order_b_type_checks_and_accounts_for_everything`](/model/pilot-workshop/tests/flows.rs#L136) |
 
 This item is doc-tagged `Satisfies: REQ-004, REQ-005`.
 
@@ -124,10 +124,10 @@ flowchart LR
   n_DrillBit -.- n_drill_holes_fallible
   n_FittedGuard -.- n_drill_holes_fallible
   n_Qualified -.- n_drill_holes_fallible
-  click n_repair_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L618" "model/pilot-workshop/src/resources.rs"
-  click n_drill_holes_fallible "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L747" "model/pilot-workshop/src/resources.rs"
-  click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L799" "model/pilot-workshop/src/resources.rs"
-  click n_discard_swarf "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
+  click n_repair_bit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L619" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes_fallible "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L748" "model/pilot-workshop/src/resources.rs"
+  click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L800" "model/pilot-workshop/src/resources.rs"
+  click n_discard_swarf "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L821" "model/pilot-workshop/src/resources.rs"
   click n_DrillBit "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L107" "model/pilot-workshop/src/resources.rs"
   click n_DrillOutcome "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L185" "model/pilot-workshop/src/resources.rs"
   click n_FittedGuard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L155" "model/pilot-workshop/src/resources.rs"
@@ -139,10 +139,10 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L618](/model/pilot-workshop/src/resources.rs#L618) |
-| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L747](/model/pilot-workshop/src/resources.rs#L747) |
-| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L799](/model/pilot-workshop/src/resources.rs#L799) |
-| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L820](/model/pilot-workshop/src/resources.rs#L820) |
+| `n_repair_bit` (repair_bit) | process | [model/pilot-workshop/src/resources.rs#L619](/model/pilot-workshop/src/resources.rs#L619) |
+| `n_drill_holes_fallible` (drill_holes_fallible) | process | [model/pilot-workshop/src/resources.rs#L748](/model/pilot-workshop/src/resources.rs#L748) |
+| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L800](/model/pilot-workshop/src/resources.rs#L800) |
+| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L821](/model/pilot-workshop/src/resources.rs#L821) |
 | `n_DrillBit` (DrillBit) | shared resource | [model/pilot-workshop/src/resources.rs#L107](/model/pilot-workshop/src/resources.rs#L107) |
 | `n_DrillOutcome` (DrillOutcome) | shared resource | [model/pilot-workshop/src/resources.rs#L185](/model/pilot-workshop/src/resources.rs#L185) |
 | `n_FittedGuard` (FittedGuard) | shared resource | [model/pilot-workshop/src/resources.rs#L155](/model/pilot-workshop/src/resources.rs#L155) |

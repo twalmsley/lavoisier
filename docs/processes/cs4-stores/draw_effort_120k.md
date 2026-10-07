@@ -5,7 +5,7 @@
 **Draws four quanta (120 000 ms): the stores-window spend of P1 and P6 (SPEC §5).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L942](/model/cs4-stores/src/resources.rs#L942)
+- **Source:** [model/cs4-stores/src/resources.rs#L943](/model/cs4-stores/src/resources.rs#L943)
 
 ## Who and with what
 
@@ -61,7 +61,7 @@ flowchart LR
   n_Operator["Operator"]:::resource
   n_draw_effort_120k -- "Effort" --> n_caller
   n_Operator -.- n_draw_effort_120k
-  click n_draw_effort_120k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L942" "model/cs4-stores/src/resources.rs"
+  click n_draw_effort_120k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L943" "model/cs4-stores/src/resources.rs"
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
 ```
 
@@ -69,6 +69,6 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_draw_effort_120k` (draw_effort_120k) | process | [model/cs4-stores/src/resources.rs#L942](/model/cs4-stores/src/resources.rs#L942) |
+| `n_draw_effort_120k` (draw_effort_120k) | process | [model/cs4-stores/src/resources.rs#L943](/model/cs4-stores/src/resources.rs#L943) |
 | `n_caller` (caller / flow) | flow input/output | — |
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |

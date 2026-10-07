@@ -5,7 +5,7 @@
 **P1 — issue materials against the works order (SPEC §5).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961)
+- **Source:** [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962)
 
 ## Who and with what
 
@@ -94,11 +94,11 @@ flowchart LR
   n_issue_materials -- "SheetRack" --> n_SheetRack
   n_issue_materials -- "BoltBox" --> n_BoltBox
   n_Operator -.- n_issue_materials
-  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
-  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
+  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L962" "model/cs4-stores/src/resources.rs"
+  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1022" "model/cs4-stores/src/resources.rs"
   click n_History "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L158" "model/model-core/src/history.rs"
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
-  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L602" "model/cs4-stores/src/resources.rs"
+  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L603" "model/cs4-stores/src/resources.rs"
   click n_SheetRack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L314" "model/cs4-stores/src/resources.rs"
   click n_BoltBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L347" "model/cs4-stores/src/resources.rs"
 ```
@@ -107,11 +107,11 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
-| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
+| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962) |
+| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022) |
 | `n_History` (History) | shared resource | [model/model-core/src/history.rs#L158](/model/model-core/src/history.rs#L158) |
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
-| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
+| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603) |
 | `n_SheetRack` (SheetRack) | boundary source | [model/cs4-stores/src/resources.rs#L314](/model/cs4-stores/src/resources.rs#L314) |
 | `n_BoltBox` (BoltBox) | boundary source | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |
 

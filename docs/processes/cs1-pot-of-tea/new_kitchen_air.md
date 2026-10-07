@@ -5,7 +5,7 @@
 **The kitchen air enters the model (R12).**
 
 - **Crate / subsystem:** `cs1-pot-of-tea` — case study CS-1: making a pot of tea
-- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L575](/model/cs1-pot-of-tea/src/resources.rs#L575)
+- **Source:** [model/cs1-pot-of-tea/src/resources.rs#L576](/model/cs1-pot-of-tea/src/resources.rs#L576)
 
 ## Who and with what
 
@@ -32,4 +32,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 
 ## Open items (`Placeholder:` tags, R12)
 
-- `KitchenAir` — kitchen air — assumed able to absorb all waste heat ([model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379))
+- `KitchenAir` — kitchen air — assumed able to absorb all waste heat ([model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380))

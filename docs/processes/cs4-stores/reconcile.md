@@ -5,7 +5,7 @@
 **P6 — return and reconcile at batch end (SPEC §5).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021)
+- **Source:** [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022)
 - **Requirements bound on the signature:** REQ-020, REQ-021, REQ-022
 
 ## Who and with what
@@ -45,8 +45,8 @@ Boundary objects used:
 
 Waste routed **inside** this process (never loose in a flow):
 
-- `finished_goods` is a consumer parameter: **Assembly** is handed to `FinishedGoods` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475)
-- `disposal` is a consumer parameter: **CutSwarf / DrillSwarf** is handed to `Disposal` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513)
+- `finished_goods` is a consumer parameter: **Assembly** is handed to `FinishedGoods` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476)
+- `disposal` is a consumer parameter: **CutSwarf / DrillSwarf** is handed to `Disposal` **inside this process** (Consumer/ConsumeList bound, R12) — [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514)
 
 ## Balances (R1/R3/R15)
 
@@ -61,9 +61,9 @@ Waste routed **inside** this process (never loose in a flow):
 
 | Requirement | Statement | Defined at | Satisfied by | Verified by |
 |---|---|---|---|---|
-| REQ-020 | All swarf from a batch must be collected in the line's bin and returned to stores' disposal at batch end. | [model/cs4-stores/src/requirements.rs#L43](/model/cs4-stores/src/requirements.rs#L43) | `Disposal` | [`reconcile_accounts_for_everything_returned`](/model/cs4-stores/src/resources.rs#L1220), [`disposal_accepts_both_swarf_kinds`](/model/cs4-stores/src/resources.rs#L1251) |
-| REQ-021 | The line may operate only against a current stores issue note (the subsystem interface evidence, threaded through the batch and reconciled at the end). | [model/cs4-stores/src/requirements.rs#L50](/model/cs4-stores/src/requirements.rs#L50) | `CurrentIssueNote` | [`issue_materials_issues_the_batch_stock`](/model/cs4-stores/src/resources.rs#L1194), [`reconcile_accounts_for_everything_returned`](/model/cs4-stores/src/resources.rs#L1220) |
-| REQ-022 | Completed assemblies must be delivered to finished-goods stores. | [model/cs4-stores/src/requirements.rs#L57](/model/cs4-stores/src/requirements.rs#L57) | `FinishedGoods` | [`join_conserves_and_finished_goods_keeps_the_assembly`](/model/cs4-stores/src/resources.rs#L1146), [`reconcile_accounts_for_everything_returned`](/model/cs4-stores/src/resources.rs#L1220) |
+| REQ-020 | All swarf from a batch must be collected in the line's bin and returned to stores' disposal at batch end. | [model/cs4-stores/src/requirements.rs#L43](/model/cs4-stores/src/requirements.rs#L43) | `Disposal` | [`reconcile_accounts_for_everything_returned`](/model/cs4-stores/src/resources.rs#L1221), [`disposal_accepts_both_swarf_kinds`](/model/cs4-stores/src/resources.rs#L1252) |
+| REQ-021 | The line may operate only against a current stores issue note (the subsystem interface evidence, threaded through the batch and reconciled at the end). | [model/cs4-stores/src/requirements.rs#L50](/model/cs4-stores/src/requirements.rs#L50) | `CurrentIssueNote` | [`issue_materials_issues_the_batch_stock`](/model/cs4-stores/src/resources.rs#L1195), [`reconcile_accounts_for_everything_returned`](/model/cs4-stores/src/resources.rs#L1221) |
+| REQ-022 | Completed assemblies must be delivered to finished-goods stores. | [model/cs4-stores/src/requirements.rs#L57](/model/cs4-stores/src/requirements.rs#L57) | `FinishedGoods` | [`join_conserves_and_finished_goods_keeps_the_assembly`](/model/cs4-stores/src/resources.rs#L1147), [`reconcile_accounts_for_everything_returned`](/model/cs4-stores/src/resources.rs#L1221) |
 
 This item is doc-tagged `Satisfies: REQ-020, REQ-021, REQ-022`.
 
@@ -133,11 +133,11 @@ flowchart LR
   n_BoltBox -.- n_reconcile
   n_Operator -.- n_reconcile
   n_SheetRack -.- n_reconcile
-  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L867" "model/cs4-stores/src/resources.rs"
-  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
-  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
-  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
+  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L868" "model/cs4-stores/src/resources.rs"
+  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L962" "model/cs4-stores/src/resources.rs"
+  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1022" "model/cs4-stores/src/resources.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L514" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
   click n_History "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L158" "model/model-core/src/history.rs"
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
   click n_SheetRack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L314" "model/cs4-stores/src/resources.rs"
@@ -148,12 +148,12 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L867](/model/cs4-stores/src/resources.rs#L867) |
-| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
-| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
+| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L868](/model/cs4-stores/src/resources.rs#L868) |
+| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962) |
+| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022) |
 | `n_caller` (caller / flow) | flow input/output | — |
-| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
-| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `n_History` (History) | shared resource | [model/model-core/src/history.rs#L158](/model/model-core/src/history.rs#L158) |
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
 | `n_SheetRack` (SheetRack) | boundary source | [model/cs4-stores/src/resources.rs#L314](/model/cs4-stores/src/resources.rs#L314) |
@@ -162,8 +162,8 @@ flowchart LR
 ## Open items (`Placeholder:` tags, R12)
 
 - `BoltBox` — stores fastener stock — goods-in out of scope (SPEC §1). ([model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347))
-- `Disposal` — waste-disposal service — assumed able to take any amount. ([model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513))
-- `FinishedGoods` — finished-goods stores — onward delivery out of scope. ([model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475))
+- `Disposal` — waste-disposal service — assumed able to take any amount. ([model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514))
+- `FinishedGoods` — finished-goods stores — onward delivery out of scope. ([model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476))
 - `SheetRack` — stores sheet stock — goods-in and procurement are out of ([model/cs4-stores/src/resources.rs#L314](/model/cs4-stores/src/resources.rs#L314))
 
 <!-- WARN (docgen): `reconcile`: parameter `bin` not resolved (FB: SwarfReturn) -->

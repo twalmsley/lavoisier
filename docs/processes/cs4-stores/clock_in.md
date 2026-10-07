@@ -5,7 +5,7 @@
 **The operator clocks in at shift start with the full [`super::SHIFT_QUANTA`]-quantum budget (R12, R15; SPEC §4).**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610)
+- **Source:** [model/cs4-stores/src/resources.rs#L611](/model/cs4-stores/src/resources.rs#L611)
 - **Placeholder:** workforce — one operator, one 75-minute shift.
 
 ## Who and with what
@@ -56,7 +56,7 @@ flowchart LR
   n_Operator["Operator"]:::resource
   n_clock_in -- "Operator" --> n_Operator
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
-  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L610" "model/cs4-stores/src/resources.rs"
+  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L611" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -64,7 +64,7 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
-| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610) |
+| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L611](/model/cs4-stores/src/resources.rs#L611) |
 
 ## Open items (`Placeholder:` tags, R12)
 

@@ -77,51 +77,51 @@ flowchart LR
   n_BoltBox -.- n_reconcile
   n_Operator -.- n_reconcile
   n_SheetRack -.- n_reconcile
-  click n_shear_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L798" "model/cs4-stores/src/resources.rs"
-  click n_bore_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L825" "model/cs4-stores/src/resources.rs"
-  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L867" "model/cs4-stores/src/resources.rs"
-  click n_draw_effort_30k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L905" "model/cs4-stores/src/resources.rs"
-  click n_draw_effort_60k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L918" "model/cs4-stores/src/resources.rs"
-  click n_draw_effort_120k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L942" "model/cs4-stores/src/resources.rs"
-  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
-  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
-  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
-  click n_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L688" "model/cs4-stores/src/resources.rs"
+  click n_shear_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L799" "model/cs4-stores/src/resources.rs"
+  click n_bore_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L826" "model/cs4-stores/src/resources.rs"
+  click n_join_assembly "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L868" "model/cs4-stores/src/resources.rs"
+  click n_draw_effort_30k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L906" "model/cs4-stores/src/resources.rs"
+  click n_draw_effort_60k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L919" "model/cs4-stores/src/resources.rs"
+  click n_draw_effort_120k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L943" "model/cs4-stores/src/resources.rs"
+  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L962" "model/cs4-stores/src/resources.rs"
+  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1022" "model/cs4-stores/src/resources.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L514" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
+  click n_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L689" "model/cs4-stores/src/resources.rs"
   click n_History "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L158" "model/model-core/src/history.rs"
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
-  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L610" "model/cs4-stores/src/resources.rs"
-  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L602" "model/cs4-stores/src/resources.rs"
+  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L611" "model/cs4-stores/src/resources.rs"
+  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L603" "model/cs4-stores/src/resources.rs"
   click n_SheetRack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L314" "model/cs4-stores/src/resources.rs"
   click n_BoltBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L347" "model/cs4-stores/src/resources.rs"
-  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L640" "model/cs4-stores/src/resources.rs"
-  click n_full_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L635" "model/cs4-stores/src/resources.rs"
+  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L641" "model/cs4-stores/src/resources.rs"
+  click n_full_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L636" "model/cs4-stores/src/resources.rs"
 ```
 
 ## Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_shear_sheet` (shear_sheet) | process | [model/cs4-stores/src/resources.rs#L798](/model/cs4-stores/src/resources.rs#L798) |
-| `n_bore_blank` (bore_blank) | process | [model/cs4-stores/src/resources.rs#L825](/model/cs4-stores/src/resources.rs#L825) |
-| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L867](/model/cs4-stores/src/resources.rs#L867) |
-| `n_draw_effort_30k` (draw_effort_30k) | process | [model/cs4-stores/src/resources.rs#L905](/model/cs4-stores/src/resources.rs#L905) |
-| `n_draw_effort_60k` (draw_effort_60k) | process | [model/cs4-stores/src/resources.rs#L918](/model/cs4-stores/src/resources.rs#L918) |
-| `n_draw_effort_120k` (draw_effort_120k) | process | [model/cs4-stores/src/resources.rs#L942](/model/cs4-stores/src/resources.rs#L942) |
-| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
-| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
+| `n_shear_sheet` (shear_sheet) | process | [model/cs4-stores/src/resources.rs#L799](/model/cs4-stores/src/resources.rs#L799) |
+| `n_bore_blank` (bore_blank) | process | [model/cs4-stores/src/resources.rs#L826](/model/cs4-stores/src/resources.rs#L826) |
+| `n_join_assembly` (join_assembly) | process | [model/cs4-stores/src/resources.rs#L868](/model/cs4-stores/src/resources.rs#L868) |
+| `n_draw_effort_30k` (draw_effort_30k) | process | [model/cs4-stores/src/resources.rs#L906](/model/cs4-stores/src/resources.rs#L906) |
+| `n_draw_effort_60k` (draw_effort_60k) | process | [model/cs4-stores/src/resources.rs#L919](/model/cs4-stores/src/resources.rs#L919) |
+| `n_draw_effort_120k` (draw_effort_120k) | process | [model/cs4-stores/src/resources.rs#L943](/model/cs4-stores/src/resources.rs#L943) |
+| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L962](/model/cs4-stores/src/resources.rs#L962) |
+| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1022](/model/cs4-stores/src/resources.rs#L1022) |
 | `n_caller` (caller / flow) | flow input/output | — |
-| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
-| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
-| `n_ship_finished_goods` (ship_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L688](/model/cs4-stores/src/resources.rs#L688) |
+| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L514](/model/cs4-stores/src/resources.rs#L514) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
+| `n_ship_finished_goods` (ship_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L689](/model/cs4-stores/src/resources.rs#L689) |
 | `n_History` (History) | shared resource | [model/model-core/src/history.rs#L158](/model/model-core/src/history.rs#L158) |
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
-| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610) |
-| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
+| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L611](/model/cs4-stores/src/resources.rs#L611) |
+| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L603](/model/cs4-stores/src/resources.rs#L603) |
 | `n_SheetRack` (SheetRack) | boundary source | [model/cs4-stores/src/resources.rs#L314](/model/cs4-stores/src/resources.rs#L314) |
 | `n_BoltBox` (BoltBox) | boundary source | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |
-| `n_full_box` (full_box) | boundary source | [model/cs4-stores/src/resources.rs#L640](/model/cs4-stores/src/resources.rs#L640) |
-| `n_full_rack` (full_rack) | boundary source | [model/cs4-stores/src/resources.rs#L635](/model/cs4-stores/src/resources.rs#L635) |
+| `n_full_box` (full_box) | boundary source | [model/cs4-stores/src/resources.rs#L641](/model/cs4-stores/src/resources.rs#L641) |
+| `n_full_rack` (full_rack) | boundary source | [model/cs4-stores/src/resources.rs#L636](/model/cs4-stores/src/resources.rs#L636) |
 
 ## Resources on the edges
 
@@ -134,7 +134,7 @@ flowchart LR
 | `DrillSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L132](/model/cs4-stores/src/resources.rs#L132) |
 | `DrilledPlate` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L114](/model/cs4-stores/src/resources.rs#L114) |
 | `Effort` | continuous (container) | person-milliseconds | [model/cs4-stores/src/resources.rs#L243](/model/cs4-stores/src/resources.rs#L243) |
-| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `IssueNote` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L216](/model/cs4-stores/src/resources.rs#L216) |
 | `Operator` | boundary object | — | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
 | `ReconciledNote` | reusable | — | [model/cs4-stores/src/resources.rs#L232](/model/cs4-stores/src/resources.rs#L232) |

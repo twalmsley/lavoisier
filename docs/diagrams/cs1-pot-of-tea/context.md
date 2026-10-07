@@ -41,13 +41,13 @@ flowchart LR
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/lib.rs#L1" "model/cs1-pot-of-tea/src/lib.rs"
   click n_MainsTap "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L265" "model/cs1-pot-of-tea/src/resources.rs"
   click n_GridSocket "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L274" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_full_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L555" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L454" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L461" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_CouncilCollection "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L426" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_Drinker "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L403" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L332" "model/cs1-pot-of-tea/src/resources.rs"
-  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L379" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_full_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L556" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_kettle "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L455" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L462" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_CouncilCollection "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L427" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_Drinker "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L404" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_FoodWasteBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L333" "model/cs1-pot-of-tea/src/resources.rs"
+  click n_KitchenAir "https://github.com/twalmsley/lavoisier/blob/main/model/cs1-pot-of-tea/src/resources.rs#L380" "model/cs1-pot-of-tea/src/resources.rs"
 ```
 
 ## Legend — node → source
@@ -57,13 +57,13 @@ flowchart LR
 | `n_system` (cs1-pot-of-tea — the modelled system) | the system | [model/cs1-pot-of-tea/src/lib.rs#L1](/model/cs1-pot-of-tea/src/lib.rs#L1) |
 | `n_MainsTap` (MainsTap) | external party | [model/cs1-pot-of-tea/src/resources.rs#L265](/model/cs1-pot-of-tea/src/resources.rs#L265) |
 | `n_GridSocket` (GridSocket) | external party | [model/cs1-pot-of-tea/src/resources.rs#L274](/model/cs1-pot-of-tea/src/resources.rs#L274) |
-| `n_full_teabag_box` (full_teabag_box) | external party | [model/cs1-pot-of-tea/src/resources.rs#L555](/model/cs1-pot-of-tea/src/resources.rs#L555) |
-| `n_new_kettle` (new_kettle) | external party | [model/cs1-pot-of-tea/src/resources.rs#L454](/model/cs1-pot-of-tea/src/resources.rs#L454) |
-| `n_new_teapot` (new_teapot) | external party | [model/cs1-pot-of-tea/src/resources.rs#L461](/model/cs1-pot-of-tea/src/resources.rs#L461) |
-| `n_CouncilCollection` (CouncilCollection) | external party | [model/cs1-pot-of-tea/src/resources.rs#L426](/model/cs1-pot-of-tea/src/resources.rs#L426) |
-| `n_Drinker` (Drinker) | external party | [model/cs1-pot-of-tea/src/resources.rs#L403](/model/cs1-pot-of-tea/src/resources.rs#L403) |
-| `n_FoodWasteBin` (FoodWasteBin) | external party | [model/cs1-pot-of-tea/src/resources.rs#L332](/model/cs1-pot-of-tea/src/resources.rs#L332) |
-| `n_KitchenAir` (KitchenAir) | external party | [model/cs1-pot-of-tea/src/resources.rs#L379](/model/cs1-pot-of-tea/src/resources.rs#L379) |
+| `n_full_teabag_box` (full_teabag_box) | external party | [model/cs1-pot-of-tea/src/resources.rs#L556](/model/cs1-pot-of-tea/src/resources.rs#L556) |
+| `n_new_kettle` (new_kettle) | external party | [model/cs1-pot-of-tea/src/resources.rs#L455](/model/cs1-pot-of-tea/src/resources.rs#L455) |
+| `n_new_teapot` (new_teapot) | external party | [model/cs1-pot-of-tea/src/resources.rs#L462](/model/cs1-pot-of-tea/src/resources.rs#L462) |
+| `n_CouncilCollection` (CouncilCollection) | external party | [model/cs1-pot-of-tea/src/resources.rs#L427](/model/cs1-pot-of-tea/src/resources.rs#L427) |
+| `n_Drinker` (Drinker) | external party | [model/cs1-pot-of-tea/src/resources.rs#L404](/model/cs1-pot-of-tea/src/resources.rs#L404) |
+| `n_FoodWasteBin` (FoodWasteBin) | external party | [model/cs1-pot-of-tea/src/resources.rs#L333](/model/cs1-pot-of-tea/src/resources.rs#L333) |
+| `n_KitchenAir` (KitchenAir) | external party | [model/cs1-pot-of-tea/src/resources.rs#L380](/model/cs1-pot-of-tea/src/resources.rs#L380) |
 | `n_person` (person (model-core boundary)) | external party | — |
 | `n_history` (History — the execution record (R16)) | external party | — |
 

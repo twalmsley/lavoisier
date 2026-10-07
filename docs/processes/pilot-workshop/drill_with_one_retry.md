@@ -16,7 +16,7 @@
 Boundary objects used:
 
 - `yard`: `ScrapYard` (boundary object (R12)), threaded by value (R2) — [model/pilot-workshop/src/resources.rs#L249](/model/pilot-workshop/src/resources.rs#L249)
-- `bin`: `SwarfBin` (boundary object (R12)), threaded by value (R2) — [model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333)
+- `bin`: `SwarfBin` (boundary object (R12)), threaded by value (R2) — [model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334)
 
 ## Inputs
 
@@ -44,7 +44,7 @@ Boundary objects used:
 
 ## Balances (R1/R3/R15)
 
-- **Inherited by composition:** this step calls [`drill_holes_fallible`](/model/pilot-workshop/src/resources.rs#L747), whose conservation asserts fire at every instantiation here (F-001):
+- **Inherited by composition:** this step calls [`drill_holes_fallible`](/model/pilot-workshop/src/resources.rs#L748), whose conservation asserts fire at every instantiation here (F-001):
   - `P_LEFT + SW == PLATE`
   - `SCRAP + FSW == PLATE`
 
@@ -57,4 +57,4 @@ This function does not appear in the crate's top-level connection graph (boundar
 ## Open items (`Placeholder:` tags, R12)
 
 - `ScrapYard` — scrap-metal merchant — assumed able to take any amount. ([model/pilot-workshop/src/resources.rs#L249](/model/pilot-workshop/src/resources.rs#L249))
-- `SwarfBin` — generic swarf bin — refine to a named scrap-metal stream. ([model/pilot-workshop/src/resources.rs#L333](/model/pilot-workshop/src/resources.rs#L333))
+- `SwarfBin` — generic swarf bin — refine to a named scrap-metal stream. ([model/pilot-workshop/src/resources.rs#L334](/model/pilot-workshop/src/resources.rs#L334))

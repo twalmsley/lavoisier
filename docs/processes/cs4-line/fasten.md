@@ -39,7 +39,7 @@ Boundary objects used:
 
 ## Balances (R1/R3/R15)
 
-- **Inherited by composition:** this step calls [`join_assembly`](/model/cs4-stores/src/resources.rs#L867), whose conservation asserts fire at every instantiation here (F-001):
+- **Inherited by composition:** this step calls [`join_assembly`](/model/cs4-stores/src/resources.rs#L868), whose conservation asserts fire at every instantiation here (F-001):
   - `PA + PB + 4 * BOLT_G == OUT`
 
 ## Requirements (R10 — the compliance matrix)
@@ -98,7 +98,7 @@ flowchart LR
   n_Workbench -.- n_fasten
   click n_drill_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L48" "model/cs4-line/src/processes.rs"
   click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L69" "model/cs4-line/src/processes.rs"
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
   click n_Workbench "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L38" "model/cs4-line/src/resources.rs"
   click n_BoltBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L347" "model/cs4-stores/src/resources.rs"
 ```
@@ -109,6 +109,6 @@ flowchart LR
 |---|---|---|
 | `n_drill_blank` (drill_blank) | process | [model/cs4-line/src/processes.rs#L48](/model/cs4-line/src/processes.rs#L48) |
 | `n_fasten` (fasten) | process | [model/cs4-line/src/processes.rs#L69](/model/cs4-line/src/processes.rs#L69) |
-| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `n_Workbench` (Workbench) | shared resource | [model/cs4-line/src/resources.rs#L38](/model/cs4-line/src/resources.rs#L38) |
 | `n_BoltBox` (BoltBox) | boundary source | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |

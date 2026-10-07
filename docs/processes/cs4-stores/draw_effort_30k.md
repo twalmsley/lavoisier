@@ -5,7 +5,7 @@
 **Draws one 30 000 ms quantum from the operator's shift clock (R15):**
 
 - **Crate / subsystem:** `cs4-stores` — case study CS-4, the stores subsystem
-- **Source:** [model/cs4-stores/src/resources.rs#L905](/model/cs4-stores/src/resources.rs#L905)
+- **Source:** [model/cs4-stores/src/resources.rs#L906](/model/cs4-stores/src/resources.rs#L906)
 
 ## Who and with what
 
@@ -61,7 +61,7 @@ flowchart LR
   n_Operator["Operator"]:::resource
   n_draw_effort_30k -- "Effort" --> n_caller
   n_Operator -.- n_draw_effort_30k
-  click n_draw_effort_30k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L905" "model/cs4-stores/src/resources.rs"
+  click n_draw_effort_30k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L906" "model/cs4-stores/src/resources.rs"
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
 ```
 
@@ -69,6 +69,6 @@ flowchart LR
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_draw_effort_30k` (draw_effort_30k) | process | [model/cs4-stores/src/resources.rs#L905](/model/cs4-stores/src/resources.rs#L905) |
+| `n_draw_effort_30k` (draw_effort_30k) | process | [model/cs4-stores/src/resources.rs#L906](/model/cs4-stores/src/resources.rs#L906) |
 | `n_caller` (caller / flow) | flow input/output | — |
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |

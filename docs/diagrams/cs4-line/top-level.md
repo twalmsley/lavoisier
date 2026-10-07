@@ -54,7 +54,7 @@ flowchart LR
   click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L34" "model/cs4-line/src/processes.rs"
   click n_drill_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L48" "model/cs4-line/src/processes.rs"
   click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L69" "model/cs4-line/src/processes.rs"
-  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L476" "model/cs4-stores/src/resources.rs"
   click n_PillarDrill "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L31" "model/cs4-line/src/resources.rs"
   click n_tool_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L128" "model/cs4-line/src/resources.rs"
   click n_Saw "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L24" "model/cs4-line/src/resources.rs"
@@ -70,7 +70,7 @@ flowchart LR
 | `n_cut` (cut) | process | [model/cs4-line/src/processes.rs#L34](/model/cs4-line/src/processes.rs#L34) |
 | `n_drill_blank` (drill_blank) | process | [model/cs4-line/src/processes.rs#L48](/model/cs4-line/src/processes.rs#L48) |
 | `n_fasten` (fasten) | process | [model/cs4-line/src/processes.rs#L69](/model/cs4-line/src/processes.rs#L69) |
-| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L476](/model/cs4-stores/src/resources.rs#L476) |
 | `n_PillarDrill` (PillarDrill) | shared resource | [model/cs4-line/src/resources.rs#L31](/model/cs4-line/src/resources.rs#L31) |
 | `n_tool_up` (tool_up) | boundary source | [model/cs4-line/src/resources.rs#L128](/model/cs4-line/src/resources.rs#L128) |
 | `n_caller` (caller / flow) | flow input/output | — |

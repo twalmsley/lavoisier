@@ -5,7 +5,7 @@
 **Cuts a steel sheet into two plate blanks plus swarf (R1, R3).**
 
 - **Crate / subsystem:** `pilot-workshop` — the downstream pilot model
-- **Source:** [model/pilot-workshop/src/resources.rs#L584](/model/pilot-workshop/src/resources.rs#L584)
+- **Source:** [model/pilot-workshop/src/resources.rs#L585](/model/pilot-workshop/src/resources.rs#L585)
 
 ## Who and with what
 
@@ -75,17 +75,17 @@ flowchart LR
   n_cut -- "Plate" --> n_Plate
   n_supply_sheet -- "SteelSheet" --> n_cut
   n_cut -- "Swarf" --> n_discard_swarf
-  click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L584" "model/pilot-workshop/src/resources.rs"
-  click n_discard_swarf "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
+  click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L585" "model/pilot-workshop/src/resources.rs"
+  click n_discard_swarf "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L821" "model/pilot-workshop/src/resources.rs"
   click n_Plate "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L47" "model/pilot-workshop/src/resources.rs"
-  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L423" "model/pilot-workshop/src/resources.rs"
+  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L424" "model/pilot-workshop/src/resources.rs"
 ```
 
 ### Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
-| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L584](/model/pilot-workshop/src/resources.rs#L584) |
-| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L820](/model/pilot-workshop/src/resources.rs#L820) |
+| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L585](/model/pilot-workshop/src/resources.rs#L585) |
+| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L821](/model/pilot-workshop/src/resources.rs#L821) |
 | `n_Plate` (Plate) | shared resource | [model/pilot-workshop/src/resources.rs#L47](/model/pilot-workshop/src/resources.rs#L47) |
-| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L423](/model/pilot-workshop/src/resources.rs#L423) |
+| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L424](/model/pilot-workshop/src/resources.rs#L424) |
