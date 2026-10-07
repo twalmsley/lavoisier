@@ -75,13 +75,13 @@ fn fulfilment_with_early_housing_and_early_bin_accounts_for_everything() {
     assert_everything_accounted(
         fulfil_order(),
         [
-            ("exchange_currency", 120_000),
-            ("consign_courier", 60_000),
-            ("receive_goods", 60_000),
-            ("goods_in_inspection", 60_000),
+            ("exchange", 120_000),
+            ("consign", 60_000),
+            ("hand_over", 60_000),
+            ("inspect", 60_000),
             ("empty_bin", 30_000),
-            ("assemble_instrument", 180_000),
-            ("deliver_and_take_payment", 120_000),
+            ("assemble", 180_000),
+            ("deliver", 120_000),
         ],
     );
 }
@@ -96,12 +96,12 @@ fn fulfilment_with_late_housing_and_late_bin_reaches_the_same_end_state() {
     assert_everything_accounted(
         fulfil_order_bin_last(),
         [
-            ("exchange_currency", 120_000),
-            ("consign_courier", 60_000),
-            ("receive_goods", 60_000),
-            ("goods_in_inspection", 60_000),
-            ("assemble_instrument", 180_000),
-            ("deliver_and_take_payment", 120_000),
+            ("exchange", 120_000),
+            ("consign", 60_000),
+            ("hand_over", 60_000),
+            ("inspect", 60_000),
+            ("assemble", 180_000),
+            ("deliver", 120_000),
             ("empty_bin", 30_000),
         ],
     );

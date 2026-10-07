@@ -103,13 +103,13 @@ pub fn fulfil_order() -> FulfilmentComplete {
     // P1 — exchange currency at the bureau (REQ-024): 120 000 ms, 2000 p
     // drawn (5000 → 3000, assert), 2340 ec minted at the stated rate.
     let (labour, operator) = draw_time::<120_000, 1_080_000, 1_200_000>(operator);
-    let history = record(history, "exchange_currency", labour);
+    let history = record(history, "exchange", labour);
     let (sterling, account): (Money<2000>, Account<3000>) = draw_cash(account);
     let (euro_cents, bureau): (Euros<2340>, _) = cs5_supply::resources::processes::exchange(bureau, sterling);
 
     // P2 — consign the courier (REQ-027): 60 000 ms; only the order travels.
     let (labour, operator) = draw_time::<60_000, 1_020_000, 1_080_000>(operator);
-    let history = record(history, "consign_courier", labour);
+    let history = record(history, "consign", labour);
     let purchase_order = place_purchase_order();
     let courier = consign(courier, purchase_order);
 
@@ -121,13 +121,13 @@ pub fn fulfil_order() -> FulfilmentComplete {
 
     // P4 — receive at the works: 60 000 ms; courier home for reuse.
     let (labour, operator) = draw_time::<60_000, 960_000, 1_020_000>(operator);
-    let history = record(history, "receive_goods", labour);
+    let history = record(history, "hand_over", labour);
     let (boxed, courier) = hand_over(courier);
 
     // P5 — goods-in inspection (REQ-025): 60 000 ms; 450 = 400 + 50
     // (assert); packaging fed to the bin inside the process.
     let (labour, operator) = draw_time::<60_000, 900_000, 960_000>(operator);
-    let history = record(history, "goods_in_inspection", labour);
+    let history = record(history, "inspect", labour);
     let (component, bin) = inspect::<50, _>(boxed, bin);
 
     // Ordering freedom, choice 2: P8 runs straight after P5 — empty the bin
@@ -139,13 +139,13 @@ pub fn fulfil_order() -> FulfilmentComplete {
     // P6 — assemble the instrument (REQ-025): 180 000 ms; 600 + 400 = 1000
     // (assert).
     let (labour, operator) = draw_time::<180_000, 690_000, 870_000>(operator);
-    let history = record(history, "assemble_instrument", labour);
+    let history = record(history, "assemble", labour);
     let instrument: Instrument<InspectedComponent, INSTRUMENT_G> = assemble(housing, component);
 
     // P7 — deliver against the order token with payment taken (REQ-026):
     // 120 000 ms; account 3000 → 12 000 (assert).
     let (labour, operator) = draw_time::<120_000, 570_000, 690_000>(operator);
-    let history = record(history, "deliver_and_take_payment", labour);
+    let history = record(history, "deliver", labour);
     let (payment, customer) = present_payment(customer);
     let (account, customer): (Account<CLOSING_BALANCE_PENCE>, Customer) =
         deliver(instrument, order_token, payment, customer, account);
@@ -184,13 +184,13 @@ pub fn fulfil_order_bin_last() -> FulfilmentComplete {
 
     // P1 (120 000 ms; 5000 → 3000; 2000 p → 2340 ec).
     let (labour, operator) = draw_time::<120_000, 1_080_000, 1_200_000>(operator);
-    let history = record(history, "exchange_currency", labour);
+    let history = record(history, "exchange", labour);
     let (sterling, account): (Money<2000>, Account<3000>) = draw_cash(account);
     let (euro_cents, bureau): (Euros<2340>, _) = cs5_supply::resources::processes::exchange(bureau, sterling);
 
     // P2 (60 000 ms).
     let (labour, operator) = draw_time::<60_000, 1_020_000, 1_080_000>(operator);
-    let history = record(history, "consign_courier", labour);
+    let history = record(history, "consign", labour);
     let courier = consign(courier, place_purchase_order());
 
     // P3 (no draw).
@@ -199,12 +199,12 @@ pub fn fulfil_order_bin_last() -> FulfilmentComplete {
 
     // P4 (60 000 ms).
     let (labour, operator) = draw_time::<60_000, 960_000, 1_020_000>(operator);
-    let history = record(history, "receive_goods", labour);
+    let history = record(history, "hand_over", labour);
     let (boxed, courier) = hand_over(courier);
 
     // P5 (60 000 ms; 450 = 400 + 50; packaging to the bin inside).
     let (labour, operator) = draw_time::<60_000, 900_000, 960_000>(operator);
-    let history = record(history, "goods_in_inspection", labour);
+    let history = record(history, "inspect", labour);
     let (component, bin) = inspect::<50, _>(boxed, bin);
 
     // Ordering freedom, choice 1 (late): the housing comes off the rack
@@ -213,12 +213,12 @@ pub fn fulfil_order_bin_last() -> FulfilmentComplete {
 
     // P6 (180 000 ms; 600 + 400 = 1000).
     let (labour, operator) = draw_time::<180_000, 720_000, 900_000>(operator);
-    let history = record(history, "assemble_instrument", labour);
+    let history = record(history, "assemble", labour);
     let instrument: Instrument<InspectedComponent, INSTRUMENT_G> = assemble(housing, component);
 
     // P7 (120 000 ms; 3000 → 12 000).
     let (labour, operator) = draw_time::<120_000, 600_000, 720_000>(operator);
-    let history = record(history, "deliver_and_take_payment", labour);
+    let history = record(history, "deliver", labour);
     let (payment, customer) = present_payment(customer);
     let (account, customer): (Account<CLOSING_BALANCE_PENCE>, Customer) =
         deliver(instrument, order_token, payment, customer, account);

@@ -10,6 +10,7 @@
 ## Who and with what
 
 No person in this signature: any time cost is drawn by an **adjacent** draw process in the flow (R15/F-048), or the step needs no actor.
+Adjacent draw observed in the traced flows for this step: **60000 ms**.
 
 ## Inputs
 

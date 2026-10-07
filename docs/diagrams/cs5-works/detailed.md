@@ -51,19 +51,19 @@ flowchart LR
     n_new_history["new_history"]:::helper
     n_take_one["take_one"]:::helper
     n_draw_time["draw_time"]:::helper
-    n_record["record exchange_currency"]:::helper
+    n_record["record exchange"]:::helper
     n_draw_time_2["draw_time (2)"]:::helper
-    n_record_2["record consign_courier (2)"]:::helper
+    n_record_2["record consign (2)"]:::helper
     n_draw_time_3["draw_time (3)"]:::helper
-    n_record_3["record receive_goods (3)"]:::helper
+    n_record_3["record hand_over (3)"]:::helper
     n_draw_time_4["draw_time (4)"]:::helper
-    n_record_4["record goods_in_inspection (4)"]:::helper
+    n_record_4["record inspect (4)"]:::helper
     n_draw_time_5["draw_time (5)"]:::helper
     n_record_5["record empty_bin (5)"]:::helper
     n_draw_time_6["draw_time (6)"]:::helper
-    n_record_6["record assemble_instrument (6)"]:::helper
+    n_record_6["record assemble (6)"]:::helper
     n_draw_time_7["draw_time (7)"]:::helper
-    n_record_7["record deliver_and_take_payment (7)"]:::helper
+    n_record_7["record deliver (7)"]:::helper
   end
   subgraph sg_sinks["System boundary — sinks"]
     direction TB
@@ -172,29 +172,29 @@ flowchart LR
 | `n_place_order` (place_order) | boundary source | [model/cs5-works/src/resources.rs#L329](/model/cs5-works/src/resources.rs#L329) |
 | `n_take_one` (take_one) | model-core helper | [model/model-core/src/boundary.rs#L173](/model/model-core/src/boundary.rs#L173) |
 | `n_draw_time` (draw_time) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record` (record exchange_currency) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record` (record exchange) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_draw_cash` (draw_cash) | process | [model/cs5-works/src/resources.rs#L391](/model/cs5-works/src/resources.rs#L391) |
 | `n_exchange` (exchange) | process | [model/cs5-supply/src/resources.rs#L607](/model/cs5-supply/src/resources.rs#L607) |
 | `n_draw_time_2` (draw_time (2)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_2` (record consign_courier (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_2` (record consign (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_place_purchase_order` (place_purchase_order) | boundary source | [model/cs5-supply/src/resources.rs#L409](/model/cs5-supply/src/resources.rs#L409) |
 | `n_consign` (consign) | process | [model/cs5-logistics/src/resources.rs#L132](/model/cs5-logistics/src/resources.rs#L132) |
 | `n_carry_to_vendor` (carry_to_vendor) | process | [model/cs5-logistics/src/resources.rs#L142](/model/cs5-logistics/src/resources.rs#L142) |
 | `n_purchase_at_vendor` (purchase_at_vendor) | process | [model/cs5-logistics/src/resources.rs#L159](/model/cs5-logistics/src/resources.rs#L159) |
 | `n_draw_time_3` (draw_time (3)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_3` (record receive_goods (3)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_3` (record hand_over (3)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_hand_over` (hand_over) | process | [model/cs5-logistics/src/resources.rs#L171](/model/cs5-logistics/src/resources.rs#L171) |
 | `n_draw_time_4` (draw_time (4)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_4` (record goods_in_inspection (4)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_4` (record inspect (4)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_inspect` (inspect) | process | [model/cs5-works/src/resources.rs#L417](/model/cs5-works/src/resources.rs#L417) |
 | `n_draw_time_5` (draw_time (5)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_5` (record empty_bin (5)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_empty_bin` (empty_bin) | process | [model/cs5-works/src/resources.rs#L537](/model/cs5-works/src/resources.rs#L537) |
 | `n_draw_time_6` (draw_time (6)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_6` (record assemble_instrument (6)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_6` (record assemble (6)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_assemble` (assemble) | process | [model/cs5-works/src/resources.rs#L447](/model/cs5-works/src/resources.rs#L447) |
 | `n_draw_time_7` (draw_time (7)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_7` (record deliver_and_take_payment (7)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_7` (record deliver (7)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_present_payment` (present_payment) | boundary source | [model/cs5-works/src/resources.rs#L336](/model/cs5-works/src/resources.rs#L336) |
 | `n_deliver` (deliver) | process | [model/cs5-works/src/resources.rs#L488](/model/cs5-works/src/resources.rs#L488) |
 
@@ -243,18 +243,18 @@ flowchart LR
     direction TB
     n_new_history["new_history"]:::helper
     n_draw_time["draw_time"]:::helper
-    n_record["record exchange_currency"]:::helper
+    n_record["record exchange"]:::helper
     n_draw_time_2["draw_time (2)"]:::helper
-    n_record_2["record consign_courier (2)"]:::helper
+    n_record_2["record consign (2)"]:::helper
     n_draw_time_3["draw_time (3)"]:::helper
-    n_record_3["record receive_goods (3)"]:::helper
+    n_record_3["record hand_over (3)"]:::helper
     n_draw_time_4["draw_time (4)"]:::helper
-    n_record_4["record goods_in_inspection (4)"]:::helper
+    n_record_4["record inspect (4)"]:::helper
     n_take_one["take_one"]:::helper
     n_draw_time_5["draw_time (5)"]:::helper
-    n_record_5["record assemble_instrument (5)"]:::helper
+    n_record_5["record assemble (5)"]:::helper
     n_draw_time_6["draw_time (6)"]:::helper
-    n_record_6["record deliver_and_take_payment (6)"]:::helper
+    n_record_6["record deliver (6)"]:::helper
     n_draw_time_7["draw_time (7)"]:::helper
     n_record_7["record empty_bin (7)"]:::helper
   end
@@ -364,27 +364,27 @@ flowchart LR
 | `n_new_packaging_disposal` (new_packaging_disposal) | boundary sink | [model/cs5-supply/src/resources.rs#L489](/model/cs5-supply/src/resources.rs#L489) |
 | `n_place_order` (place_order) | boundary source | [model/cs5-works/src/resources.rs#L329](/model/cs5-works/src/resources.rs#L329) |
 | `n_draw_time` (draw_time) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record` (record exchange_currency) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record` (record exchange) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_draw_cash` (draw_cash) | process | [model/cs5-works/src/resources.rs#L391](/model/cs5-works/src/resources.rs#L391) |
 | `n_exchange` (exchange) | process | [model/cs5-supply/src/resources.rs#L607](/model/cs5-supply/src/resources.rs#L607) |
 | `n_draw_time_2` (draw_time (2)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_2` (record consign_courier (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_2` (record consign (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_place_purchase_order` (place_purchase_order) | boundary source | [model/cs5-supply/src/resources.rs#L409](/model/cs5-supply/src/resources.rs#L409) |
 | `n_consign` (consign) | process | [model/cs5-logistics/src/resources.rs#L132](/model/cs5-logistics/src/resources.rs#L132) |
 | `n_carry_to_vendor` (carry_to_vendor) | process | [model/cs5-logistics/src/resources.rs#L142](/model/cs5-logistics/src/resources.rs#L142) |
 | `n_purchase_at_vendor` (purchase_at_vendor) | process | [model/cs5-logistics/src/resources.rs#L159](/model/cs5-logistics/src/resources.rs#L159) |
 | `n_draw_time_3` (draw_time (3)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_3` (record receive_goods (3)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_3` (record hand_over (3)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_hand_over` (hand_over) | process | [model/cs5-logistics/src/resources.rs#L171](/model/cs5-logistics/src/resources.rs#L171) |
 | `n_draw_time_4` (draw_time (4)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_4` (record goods_in_inspection (4)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_4` (record inspect (4)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_inspect` (inspect) | process | [model/cs5-works/src/resources.rs#L417](/model/cs5-works/src/resources.rs#L417) |
 | `n_take_one` (take_one) | model-core helper | [model/model-core/src/boundary.rs#L173](/model/model-core/src/boundary.rs#L173) |
 | `n_draw_time_5` (draw_time (5)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_5` (record assemble_instrument (5)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_5` (record assemble (5)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_assemble` (assemble) | process | [model/cs5-works/src/resources.rs#L447](/model/cs5-works/src/resources.rs#L447) |
 | `n_draw_time_6` (draw_time (6)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
-| `n_record_6` (record deliver_and_take_payment (6)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_record_6` (record deliver (6)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_present_payment` (present_payment) | boundary source | [model/cs5-works/src/resources.rs#L336](/model/cs5-works/src/resources.rs#L336) |
 | `n_deliver` (deliver) | process | [model/cs5-works/src/resources.rs#L488](/model/cs5-works/src/resources.rs#L488) |
 | `n_draw_time_7` (draw_time (7)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
