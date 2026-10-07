@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Specification version | v0.1 |
+| Specification version | v0.2 |
 | Date | 2026-10-07 |
-| Author | Tony (drafted by Claude for review) |
-| Status | draft |
+| Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
+| Status | agreed |
 
 ## 1. Purpose and scope
 
@@ -109,10 +109,10 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
   outcome tokens are provisioned, so **at most two attempts** are expressible (R17/F-050).
 
 ### P4. Check the patch
-- **Actor(s) and reusables:** member (draw folded into P3's attempt figure — see §8 Q5), pump — returned.
+- **Actor(s) and reusables:** member (draws 60 000 ms), pump — returned.
 - **Consumes:** patched tube (183 g).
 - **Produces:** checked, ready tube (183 g) — the `Airtight` patched state (REQ-012).
-- **Balances:** mass 183 = 183 (structural).
+- **Balances:** mass 183 = 183 (structural); time → History (structural).
 - **Satisfies:** — (enables REQ-012).
 
 ### P5. Buy a spare tube — path 3 only (R19)
@@ -138,12 +138,13 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
 - **Three paths** (the flow returns a `#[must_use]` outcome grouping, one variant per path,
   per R17/F-050 — the paths end with *different* wheel masses and wallet states, so the
   variants carry different types):
-  1. **Patched first try:** P1 P2 P3(Ok) P4 P6 — 840 000 ms drawn; wallet 1000 p; 1 spare
-     patch and 1 untried token returned to kit/boundary; 29 g cement left.
-  2. **Patched on retry:** P1 P2 P3(Fail) P3(Ok) P4 P6 — 960 000 ms; 1 spent patch (3 g) in
-     the waste stream; kit empty of patches; 28 g cement left.
-  3. **Spare fitted:** P1 P2 P3(Fail) P3(Fail) P5 P6 — 1 080 000 ms; 6 g waste; dead tube
-     (180 g) to recycling; wallet 350 p; wheel 2080 g.
+  1. **Patched first try:** P1 P2 P3(Ok) P4 P6 — 900 000 ms drawn (5 attributed events);
+     wallet 1000 p; 1 spare patch and 1 untried token returned to kit/boundary; 29 g cement
+     left.
+  2. **Patched on retry:** P1 P2 P3(Fail) P3(Ok) P4 P6 — 1 020 000 ms (6 events); 1 spent
+     patch (3 g) in the waste stream; kit empty of patches; 28 g cement left.
+  3. **Spare fitted:** P1 P2 P3(Fail) P3(Fail) P5 P6 — 1 080 000 ms (6 events); 6 g waste;
+     dead tube (180 g) to recycling; wallet 350 p; wheel 2080 g.
 - **Ordering freedom is deliberately minimal here** (one actor, a linear repair): the only
   freedoms are trivia such as when the wallet is readied. That is expected — CS-2's stress is
   fallibility, not concurrency, which remains CS-3's job. Both statically expressible
@@ -165,6 +166,14 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
   inexpressible.
 
 ## 8. Open questions for the author
+
+Review decisions (2026-10-07): questions 1–4, 6 and 7 — **agreed as proposed** (induction
+framing; unbounded waste stream with no disposal step; single History; per-path end states as
+outcome-grouping variants; the round quantities; REQ-012 stays multi-type). Question 5 —
+**changed:** P4 gets its own 60 000 ms draw (path totals updated above to 900 000 /
+1 020 000 / 1 080 000 ms).
+
+Original questions, for the record:
 
 1. **Qualification framing:** R18 is exercised as *workshop induction* gating the workstand
    (REQ-010) — honest for a community workshop, and avoids pretending home repairs need
