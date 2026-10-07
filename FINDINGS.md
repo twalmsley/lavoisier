@@ -10,7 +10,8 @@ through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model
 with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
 R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build; F-015 extended 2026-10-03 by
 the learning-materials build; F-055 added 2026-10-06 by the diagram-generator build; F-050 extended and F-055 point 3
-resolved 2026-10-07 by the CS-2 build; F-041 and F-055 extended 2026-10-07 by the CS-3 build.
+resolved 2026-10-07 by the CS-2 build; F-041 and F-055 extended 2026-10-07 by the CS-3 build; F-056 added and F-001/F-010/F-011/F-055
+extended 2026-10-07 by the CS-4 build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -57,6 +58,13 @@ literal; type-level (Peano) bounds also check at type-check time but do not scal
 
 **Evidence:** EXP-04 (`experiments/exp04-quantity-conservation/RESULTS.md`, technique table
 and criterion 2; `tests/ui-postmono-not-caught-by-trybuild/`, `src/lib.rs` doc-tests).
+
+**Extended (2026-10-07, CS-4 build):** two refinements at multi-crate scale. (1) Change impact
+arrives in **per-crate waves**: cargo stops at the first failing crate, so a workspace-wide
+blast radius is enumerated crate by crate, not in one list. (2) A **top-level
+`const _: () = assert!(…)` item** (CS-4's batch-arithmetic check) IS visible to `cargo check`
+— the post-monomorphization blindness applies to asserts inside *generic* functions, and
+hoisting whole-model arithmetic into concrete const items recovers editor visibility.
 
 ---
 
@@ -332,6 +340,12 @@ builds in ~2.6 s.
 **Evidence:** EXP-01 (`experiments/exp01-type-level-numbers/RESULTS.md`, measurement table,
 error 4); EXP-02 (`experiments/exp02-supplier-consumer/RESULTS.md`, criterion 1c, error 6).
 
+**Extended (2026-10-07, CS-4 build):** measured minima at scale — cs4-stores needs
+`recursion_limit` ≈ 151 (a 100-item supplier *plus its fill machinery* now exceeds the default
+128), cs4-line ≈ 143, and the integration-test crate itself needed the attribute (it overflowed
+at default merely naming the end-state alias). The mandated 2048 leaves ≈ 13× headroom; no
+SIGBUS, no cliff.
+
 ---
 
 ## F-011 — Type-level (unary) naturals are the only route to check-time conservation, but magnitudes are unusable; compile time goes superlinear past N≈500
@@ -354,6 +368,11 @@ is built out with comparison.
 
 **Evidence:** EXP-04 (`experiments/exp04-quantity-conservation/RESULTS.md`, technique 6,
 error (e)); EXP-01 (measurement table, F3).
+
+**Extended (2026-10-07, CS-4 build):** composite-depth cost measured — the full 25-cycle
+batch unroll (≈ 100 threaded steps, a 100-bolt box, a 75-item bin) compiles in ~1.0 s;
+whole-workspace cold gate 44.9 s → 45.5 s (+1.4 %) when the two CS-4 crates joined. The flat
+region holds at real composite depth.
 
 ---
 
@@ -1380,4 +1399,35 @@ later is skipped by the flow tracer as an "assertion-only match". Convention ado
 directly on the fallible call expression. Also noted: a multi-type *non-requirement* bound
 (CS-3's sealed two-type order slot) is omitted from the top-level graph with a WARN — the
 conservative F-055 behaviour working as designed.
+**Extended (2026-10-07, CS-4 build):** a seventh gap — the generator scans **per crate**, so
+cross-crate flows are invisible: cs4-line's top-level diagram collapsed to 2 nodes (its types
+are defined upstream in cs4-stores) and the traced batch flow WARNs on every stores-defined
+callee. Multi-crate models (the R1 subsystem pattern) need the generator to resolve across a
+dependency, or a merged-workspace mode — queue for step 9.
+
+
+---
+
+## F-056 — A const budget cannot descend through type-level recursion; the quantum-clock encoding
+
+**What couldn't be expressed:** threading `Person<const BUDGET_MS>` through a recursive batch
+trait with the budget descending per cycle — `BUDGET_MS − 150_000` in the recursive impl's
+associated types needs `generic_const_exprs` (nightly), and introducing the decremented value
+as an inferred impl const is E0207 (the F-028 shape again, now on the consumer side of
+recursion).
+
+**What it cost:** CS-4's operator is a **type-level quantum clock** instead:
+`Operator<Q: Nat>` holding time as 150 quanta of 30 000 ms, decremented structurally
+(`Succ<Q> → Q`) per fixed-size draw, each draw minting a conserved `Effort<MS>` in real
+milliseconds recorded to the History. Costs: draws come in fixed quanta (fine for a
+fixed-cadence batch; wrong for ad-hoc draws), the ~40-line F-043 parallel-labour fork
+(model-core's `Labour::mint` is crate-private), and overdraw errors become trait-resolution
+failures at check time rather than the R15 E0080 (arguably an upgrade — editor-visible).
+
+**Workaround adopted:** the quantum clock for recursion-threaded budgets; plain
+`Person<BUDGET>` with caller-stated remainders everywhere else. Candidate convention: models
+choose per actor — ad-hoc draws (R15 style) or recursion-compatible quanta — and say which.
+
+**Evidence:** `model/cs4-line/src/batch.rs` (`Operator`, `BuildBatch`),
+`case-studies/cs4-batch-run/CHANGE-IMPACT.md` §6.
 

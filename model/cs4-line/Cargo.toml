@@ -1,0 +1,37 @@
+# CS-4: small-batch production run — the SCALE AND STRUCTURE case study. This
+# crate is the LINE subsystem: the processes (cut, drill, fasten, the
+# 25-cycle type-level batch recursion), the swarf bin and the operator's
+# flow. It depends on cs4-stores and may create NOTHING material — the crate
+# edge is REQ-019 (EXP-08/F-006), proved by tests/ui/.
+# Built from the agreed specification ../../case-studies/cs4-batch-run/SPEC.md
+# (v0.2, agreed).
+
+[package]
+name = "cs4-line"
+version = "0.1.0"
+edition = "2024"
+description = "Case study CS-4, line subsystem: the production processes P2-P4, the 80-piece swarf bin, and P5 - the 25-cycle batch as a recursive type-level BuildBatch trait threading rack, box, bin, note, tools, operator and History with their types evolving; downstream of cs4-stores, whose crate edge is REQ-019"
+
+[features]
+# Declared so the model-core kernel macros' feature-gated fixtures compile
+# cleanly (unexpected_cfgs); enabled ONLY via the [dev-dependencies]
+# re-declarations below (R1, FINDINGS.md F-004).
+test-support = []
+
+[dependencies]
+# Production dependencies: NO features (the plain `cargo build` in ci.sh is
+# what proves production code cannot reach fixture constructors, F-004).
+model-core = { path = "../model-core" }
+cs4-stores = { path = "../cs4-stores" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../model-core", features = ["test-support"] }
+cs4-stores = { path = "../cs4-stores", features = ["test-support"] }
+cs4-line = { path = ".", features = ["test-support"] }
+# trybuild is the one allowed dev-dependency (R4), used ONLY for
+# type-check-time compile-fail cases (the crate-edge privacy probe and the
+# requirement/capacity bound probes); conservation violations are
+# post-monomorphization (F-001, F-003) and live as rustdoc `compile_fail`
+# doc-tests instead.
+trybuild = "1"

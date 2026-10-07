@@ -1,0 +1,38 @@
+# CS-4: small-batch production run — the SCALE AND STRUCTURE case study, and
+# the first multi-crate model. This crate is the STORES subsystem: it owns all
+# material types and their seals, the stock (sheet rack, bolt box), the
+# issue/reconcile processes, the finished-goods and disposal consumers, and
+# the issue note. The LINE subsystem is the sibling crate `cs4-line`, which
+# depends on this one: the crate edge IS REQ-019 (provenance — the line
+# physically cannot mint materials; EXP-08/F-006).
+# Built from the agreed specification ../../case-studies/cs4-batch-run/SPEC.md
+# (v0.2, agreed), following instructions.md and the cs3-cafe-orders layout.
+
+[package]
+name = "cs4-stores"
+version = "0.1.0"
+edition = "2024"
+description = "Case study CS-4, stores subsystem: sealed materials (sheet, blank, drilled plate, bolt catalogue, swarf), the 25-sheet rack and 100-bolt box as type-level stock, the issue note, issue/reconcile processes, finished goods and disposal - the upstream crate of the first two-crate model, with the crate edge as REQ-019"
+
+[features]
+# Downstream-test fixtures (R1, FINDINGS.md F-004): the model-core resource
+# kernel macros expand `test_fixture()` constructors behind the INVOKING
+# crate's `test-support` feature, so this crate declares the feature too. It
+# is enabled ONLY via [dev-dependencies] re-declarations (cs4-line's, and the
+# self re-declaration below); ci.sh polices that it never appears under any
+# [dependencies]-like section.
+test-support = []
+
+[dependencies]
+# Production dependency: NO features (the plain `cargo build` in ci.sh is
+# what proves production code cannot reach fixture constructors, F-004).
+model-core = { path = "../model-core" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../model-core", features = ["test-support"] }
+cs4-stores = { path = ".", features = ["test-support"] }
+# No trybuild here: CS-4's type-check-time compile-fail cases all probe the
+# crate edge and the line's bounds, so they live in cs4-line/tests/ui (R4);
+# this crate's conservation regressions are rustdoc `compile_fail` doc-tests
+# (F-001, F-003).

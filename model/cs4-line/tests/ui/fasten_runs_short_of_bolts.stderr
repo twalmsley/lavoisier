@@ -1,0 +1,38 @@
+error[E0277]: `cs4_stores::resources::BoltBox<Nil>` cannot supply anything: it is exhausted, or it is not a supplier of discrete items
+  --> tests/ui/fasten_runs_short_of_bolts.rs:18:33
+   |
+18 |     let r = fasten(bench, a, b, fixture_box::<N3>(), note);
+   |             ------              ^^^^^^^^^^^^^^^^^^^ this supplier has nothing left to supply
+   |             |
+   |             required by a bound introduced by this call
+   |
+   = help: the trait `Supplier` is not implemented for `cs4_stores::resources::BoltBox<Nil>`
+   = note: a supplier with items left is e.g. `BoltBox<Cons<..>>`; its empty state (`BoltBox<Nil>`) is a distinct resource that cannot supply (R12)
+   = note: `Supplier` is discrete-only (F-028): continuous material is drawn by a draw process (R15), not supplied through this trait
+help: the trait `Supplier` is implemented for `cs4_stores::resources::BoltBox<Cons<H, T>>`
+  --> $WORKSPACE/cs4-stores/src/resources.rs
+   |
+   | impl<H, T> Supplier for BoltBox<Cons<H, T>> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `cs4_stores::resources::BoltBox<Nil>` to implement `SupplyN<Succ<model_core::nat::Zero>>`
+note: required by a bound in `fasten`
+  --> src/processes.rs
+   |
+   | ...d + SteelMade + Len15, S: SupplyN<N4, Taken = FourOf<B>>, PN: Req021CurrentIssueNote>(bench: Workbench, a: DrilledPlate<PLATE_G>...
+   |                                          ^^^^^^^^^^^^^^^^^ required by this bound in `fasten`
+
+error[E0277]: `cs4_stores::resources::BoltBox<Nil>` cannot supply anything: it is exhausted, or it is not a supplier of discrete items
+  --> tests/ui/fasten_runs_short_of_bolts.rs:18:13
+   |
+18 |     let r = fasten(bench, a, b, fixture_box::<N3>(), note);
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this supplier has nothing left to supply
+   |
+   = help: the trait `Supplier` is not implemented for `cs4_stores::resources::BoltBox<Nil>`
+   = note: a supplier with items left is e.g. `BoltBox<Cons<..>>`; its empty state (`BoltBox<Nil>`) is a distinct resource that cannot supply (R12)
+   = note: `Supplier` is discrete-only (F-028): continuous material is drawn by a draw process (R15), not supplied through this trait
+help: the trait `Supplier` is implemented for `cs4_stores::resources::BoltBox<Cons<H, T>>`
+  --> $WORKSPACE/cs4-stores/src/resources.rs
+   |
+   | impl<H, T> Supplier for BoltBox<Cons<H, T>> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `cs4_stores::resources::BoltBox<Nil>` to implement `SupplyN<Succ<model_core::nat::Zero>>`

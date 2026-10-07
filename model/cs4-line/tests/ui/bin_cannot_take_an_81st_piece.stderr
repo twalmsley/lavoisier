@@ -1,0 +1,40 @@
+error[E0277]: `SwarfBin<model_core::nat::Zero>` cannot consume a `_`: it is full, or it does not accept this kind of resource
+  --> tests/ui/bin_cannot_take_an_81st_piece.rs:15:23
+   |
+15 |     let bin = send_to(full_bin, CutSwarf::<500>::test_fixture());
+   |               ------- ^^^^^^^^ this consumer has no space left for this resource
+   |               |
+   |               required by a bound introduced by this call
+   |
+   = help: the trait `Consumer<_>` is not implemented for `SwarfBin<model_core::nat::Zero>`
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: `SwarfBin<Succ<S>, C>` implements trait `Consumer<In>`
+  --> src/resources.rs
+   |
+   | impl<S, C, const G: u64> Consumer<CutSwarf<G>> for SwarfBin<Succ<S>, C> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<CutSwarf<G>>`
+...
+   | impl<S, C, const G: u64> Consumer<DrillSwarf<G>> for SwarfBin<Succ<S>, C> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<DrillSwarf<G>>`
+note: required by a bound in `send_to`
+  --> $WORKSPACE/model-core/src/boundary.rs
+   |
+   | pub fn send_to<I, C: Consumer<I>>(consumer: C, item: I) -> C::Next {
+   |                      ^^^^^^^^^^^ required by this bound in `send_to`
+
+error[E0277]: `SwarfBin<model_core::nat::Zero>` cannot consume a `CutSwarf<500>`: it is full, or it does not accept this kind of resource
+  --> tests/ui/bin_cannot_take_an_81st_piece.rs:15:15
+   |
+15 |     let bin = send_to(full_bin, CutSwarf::<500>::test_fixture());
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this consumer has no space left for this resource
+   |
+   = help: the trait `Consumer<CutSwarf<500>>` is not implemented for `SwarfBin<model_core::nat::Zero>`
+   = note: a consumer with space left is e.g. `WasteBag<Succ<..>, _>`; its full state (`WasteBag<Zero, _>`) is a distinct resource that cannot consume (R12)
+help: `SwarfBin<Succ<S>, C>` implements trait `Consumer<In>`
+  --> src/resources.rs
+   |
+   | impl<S, C, const G: u64> Consumer<CutSwarf<G>> for SwarfBin<Succ<S>, C> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<CutSwarf<G>>`
+...
+   | impl<S, C, const G: u64> Consumer<DrillSwarf<G>> for SwarfBin<Succ<S>, C> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Consumer<DrillSwarf<G>>`

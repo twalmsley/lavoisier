@@ -1,0 +1,21 @@
+error[E0277]: the line may not operate here: `WorksOrder` is not a current stores issue note (REQ-021)
+  --> tests/ui/fasten_without_the_note.rs:19:54
+   |
+19 |     let r = fasten(bench, a, b, fixture_box::<N4>(), not_a_note);
+   |             ------                                   ^^^^^^^^^^ REQ-021: the line may operate only against a current stores issue note
+   |             |
+   |             required by a bound introduced by this call
+   |
+   = help: the trait `ProofOfIssue` is not implemented for `WorksOrder`
+   = note: the note is minted only by P1 (`issue_materials`), threaded through every batch cycle by `fasten`, and reconciled by P6 (`reconcile`); a flow that never drew materials from stores has nothing to put here
+help: the trait `ProofOfIssue` is implemented for `IssueNote`
+  --> $WORKSPACE/cs4-stores/src/resources.rs
+   |
+   | impl crate::characteristics::ProofOfIssue for IssueNote {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `WorksOrder` to implement `Req021CurrentIssueNote`
+note: required by a bound in `fasten`
+  --> src/processes.rs
+   |
+   | ...upplyN<N4, Taken = FourOf<B>>, PN: Req021CurrentIssueNote>(bench: Workbench, a: DrilledPlate<PLATE_G>, b: DrilledPlate<PLATE_G>,...
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `fasten`

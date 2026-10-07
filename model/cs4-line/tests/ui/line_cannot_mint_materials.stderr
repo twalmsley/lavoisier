@@ -1,0 +1,13 @@
+warning: unused variable: `note`
+  --> tests/ui/line_cannot_mint_materials.rs:14:9
+   |
+14 |     let note = IssueNote { _seal: () };
+   |         ^^^^ help: if this is intentional, prefix it with an underscore: `_note`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+error[E0451]: field `_seal` of struct `IssueNote` is private
+  --> tests/ui/line_cannot_mint_materials.rs:14:28
+   |
+14 |     let note = IssueNote { _seal: () };
+   |                            ^^^^^ private field

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.2 |
+| Specification version | v0.3 (implemented) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -177,6 +177,16 @@ batch encoding; the two-crate split and ownership table; the two change-impact p
 (reverted, documented in CHANGE-IMPACT.md); the scale targets and §8 measurements as drafted
 (25 units, not 50); the quantities and budgets; totals-plus-spot-checks for the ~102-event
 History.
+
+Implementation round-trip feedback (2026-10-07):
+1. **The operator's budget cannot descend through the recursion** (F-056): implemented as the
+   type-level quantum clock (`Operator<Q>`, 150 × 30 000 ms quanta; draws mint conserved
+   `Effort` in real ms). §5's "budget descending" should name an encoding next time; the R15
+   deviation is documented in both crates.
+2. **"Catalogue every error" meets per-crate waves** (F-001 extension): cargo stops at the
+   first failing crate, so the §7 method should read "iterate wave by wave".
+3. Everything else in §§3–6 was achieved exactly as specified; REQ-019..022 continued the
+   workspace sequence with no mapping needed.
 
 Original questions, for the record:
 

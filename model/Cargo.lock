@@ -30,6 +30,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "cs4-line"
+version = "0.1.0"
+dependencies = [
+ "cs4-line",
+ "cs4-stores",
+ "model-core",
+ "trybuild",
+]
+
+[[package]]
+name = "cs4-stores"
+version = "0.1.0"
+dependencies = [
+ "cs4-stores",
+ "model-core",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

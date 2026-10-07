@@ -518,6 +518,8 @@ fn main() {
             "cs1-pot-of-tea".to_string(),
             "cs2-puncture-repair".to_string(),
             "cs3-cafe-orders".to_string(),
+            "cs4-stores".to_string(),
+            "cs4-line".to_string(),
             "pilot-workshop".to_string(),
         ];
     }
