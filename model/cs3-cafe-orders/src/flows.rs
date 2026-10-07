@@ -22,8 +22,8 @@
 //! resource is already in use by another process.
 //!
 //! **Per-branch histories (R16), exercised for real at last:** `h_a` records
-//! the barista's draws (and path 3's drained-shot disposal), `h_b` the
-//! server's, each under its process name; `hand_over` merges them into one
+//! the barista's draws (P8's drain of the stranded shot included, path 3),
+//! `h_b` the server's, each under its process name; `hand_over` merges them into one
 //! `Entry::Join` — a partial order claiming **no interleaving between the
 //! branches**, which is the truthful record: the model never said which
 //! branch's steps ran first, and neither does the history.
@@ -50,10 +50,9 @@
 //!    the boundary (`return_steam_outcome`).
 
 use crate::characteristics::MachineTraining;
-use crate::resources::boundary::restack_cup;
 use crate::resources::processes::{
-    brew_tea, build_flat_white, draw_grounds, draw_milk, draw_urn_water, draw_water, hand_over,
-    pull_espresso, refund_flat_white, steam_milk, take_payment,
+    brew_tea, build_flat_white, drain_stranded_shot, draw_grounds, draw_milk, draw_urn_water,
+    draw_water, hand_over, pull_espresso, refund_flat_white, steam_milk, take_payment,
 };
 use crate::resources::{
     Cup, Customer, Drain, EspressoMachine, FreshTeabagBox, Hopper, KnockBox, MilkBottle,
@@ -125,14 +124,15 @@ pub enum OrderOutcome {
         till: Till<700>,
     },
     /// Path 3 — tea served, flat white refunded (SPEC.md §6): both steams
-    /// fail — barista 210 000 ms, no P3 (4 events on `h_a`: three draws plus
-    /// the drained stranded shot, 36 g); server 240 000 ms (4 on `h_b`: P7
-    /// runs); 300 g of burnt milk in the drain; the shot's cup restacked;
-    /// the till at 320 p after the 380 p refund, which left **on the tray**
-    /// in the flat white's slot; the customer also holds their 300 p change.
+    /// fail — barista 240 000 ms, P8 in place of P3 (4 events on `h_a`, all
+    /// time draws: 90k + 60k + 60k + 30k); server 240 000 ms (4 on `h_b`: P7
+    /// runs); 300 g of burnt milk **and the stranded 36 g shot** in the drain
+    /// (P8), with the shot's cup restacked; the till at 320 p after the 380 p
+    /// refund, which left **on the tray** in the flat white's slot; the
+    /// customer also holds their 300 p change.
     TeaServedFlatWhiteRefunded {
-        /// The barista after 210 000 ms.
-        barista: Qualified<MachineTraining, 390_000>,
+        /// The barista after 240 000 ms.
+        barista: Qualified<MachineTraining, 360_000>,
         /// The server after 240 000 ms.
         server: Person<360_000>,
         /// The bottle, empty after both provisioned draws (F-050).
@@ -143,7 +143,7 @@ pub enum OrderOutcome {
 }
 
 /// The full order, **branches interleaved** (SPEC.md §6): P1, P4, P2, P5,
-/// (P2 again on retry), P3, (P7 on path 3), P6 — the two staff genuinely
+/// (P2 again on retry), P3, (P7 and P8 on path 3), P6 — the two staff genuinely
 /// working at once, each step recorded to its own branch History under its
 /// process name (R16). Every path ends with P6: the join consumes the
 /// receipt (REQ-017) and merges `h_a` and `h_b` into the partial order that
@@ -271,11 +271,15 @@ pub fn fulfil_order(
                     let h_b = record(h_b, "refund_flat_white", labour);
                     let (server, till, refund) = refund_flat_white::<320, 700, 390_000>(server, till);
 
-                    // Branch A's stranded shot is drained — the disposal is
-                    // branch A's fourth recorded event (R16/F-041; SPEC.md §8
-                    // review decision 1) — and its cup goes back to the stack.
-                    let h_a = record(h_a, "drain_stranded_shot", shot);
-                    restack_cup(coffee_cup);
+                    // Branch A: P8 — drain the stranded shot (30 000 ms;
+                    // SPEC.md P8; §8 review decision 1): the shot is fed to
+                    // the drain inside the process and its cup goes back to
+                    // the stack; the draw is branch A's fourth recorded
+                    // event (F-048, R16).
+                    let (barista, drain) =
+                        drain_stranded_shot::<36, 390_000, _>(fail2.barista, shot, coffee_cup, fail2.drain);
+                    let (labour, barista) = qualified_draw_time::<30_000, 360_000, 390_000, _>(barista);
+                    let h_a = record(h_a, "drain_stranded_shot", labour);
 
                     // The join: P6 (30 000 ms) with the refund in the flat
                     // white's slot (SPEC.md §6: "P7 replaces the flat white
@@ -288,12 +292,12 @@ pub fn fulfil_order(
 
                     (
                         OrderOutcome::TeaServedFlatWhiteRefunded {
-                            barista: fail2.barista,
+                            barista,
                             server,
                             bottle,
                             till,
                         },
-                        (machine, hopper, tank, urn, teabags, customer, fail2.drain, knock_box, history),
+                        (machine, hopper, tank, urn, teabags, customer, drain, knock_box, history),
                     )
                 }
             }
@@ -431,10 +435,14 @@ pub fn fulfil_order_branches_in_turn(
                     )
                 }
                 Err(fail2) => {
-                    // Branch A winds up: the stranded shot is drained (the
-                    // fourth h_a event, R16/F-041) and its cup restacked.
-                    let h_a = record(h_a, "drain_stranded_shot", shot);
-                    restack_cup(coffee_cup);
+                    // Branch A winds up: P8 — drain the stranded shot
+                    // (30 000 ms; SPEC.md P8): the shot is fed to the drain
+                    // inside the process and its cup restacked; the draw is
+                    // the fourth h_a event (F-048, R16).
+                    let (barista, drain) =
+                        drain_stranded_shot::<36, 390_000, _>(fail2.barista, shot, coffee_cup, fail2.drain);
+                    let (labour, barista) = qualified_draw_time::<30_000, 360_000, 390_000, _>(barista);
+                    let h_a = record(h_a, "drain_stranded_shot", labour);
 
                     // ---- Branch B, only now ----
                     let (cash, customer) = crate::resources::boundary::tender_cash(customer);
@@ -464,12 +472,12 @@ pub fn fulfil_order_branches_in_turn(
 
                     (
                         OrderOutcome::TeaServedFlatWhiteRefunded {
-                            barista: fail2.barista,
+                            barista,
                             server,
                             bottle,
                             till,
                         },
-                        (machine, hopper, tank, urn, teabags, customer, fail2.drain, knock_box, history),
+                        (machine, hopper, tank, urn, teabags, customer, drain, knock_box, history),
                     )
                 }
             }

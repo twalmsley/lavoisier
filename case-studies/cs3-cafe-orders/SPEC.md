@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.3 (implemented) |
+| Specification version | v0.4 (implemented) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -72,7 +72,7 @@ cleaning; staff scheduling.
 | What leaves | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
 | The served order (tray, drinks, crockery), change, any refund | the customer (`Next = Self`) | unbounded | placeholder |
-| Burnt milk | the drain | unbounded | placeholder |
+| Burnt milk; path 3's stranded shot | the drain | unbounded | placeholder |
 | Spent pucks | knock box | unbounded | placeholder |
 | Payment (700 p) | the till (kept: container, not a sink) | — | real |
 | Expended time | **two** Histories (R16) — one per actor — **merged at the join** | — | the per-branch merge, exercised for real at last |
@@ -146,11 +146,20 @@ cleaning; staff scheduling.
   the receipt.
 - **Balances:** money 700 = 320 + 380 (assert); time → `h_b` (structural).
 
+### P8. Drain the stranded shot — path 3 only (branch A)
+- **Actor(s) and reusables:** barista (draws 30 000 ms) — returned.
+- **Consumes:** the stranded espresso shot (36 g) and its cup.
+- **Produces:** the cup back to the counter stack (boundary exit).
+- **Waste routing:** the shot (36 g) fed to the drain **inside the process** —
+  the same Consumer machinery as the burnt milk.
+- **Balances:** mass 36 = 36 (structural — the shot is fed whole); time → `h_a` (structural).
+
 ## 6. Flows
 
 - Dependencies: P1, P2 (then P2 again on retry) and P3 form branch A; P4 and P5 form branch
   B; P6 joins them (and needs P4's receipt — the one deliberate cross-branch dependency,
-  REQ-017); P7 replaces the flat white in P6 on path 3.
+  REQ-017); P7 replaces the flat white in P6 on path 3, and P8 winds up branch A there
+  (the stranded shot to the drain).
 - **This is the concurrency case study.** The branches share **no** resource — different
   actors, different equipment, different stock — so the compiler permits any interleaving
   (R9/R2). The model must demonstrate it: at least two interleavings of branch A and branch
@@ -160,20 +169,22 @@ cleaning; staff scheduling.
 - **Histories:** `h_a` and `h_b` are created per branch and merged at P6. The merged record
   is asserted to have the **Join shape** — branch A's events and branch B's events as
   parallel sequences with no invented interleaving (the first real exercise of R16's partial
-  order). Event counts: path 1 → 3 + 3; path 2 → 4 + 3; path 3 → 4 + 4 (P7 on `h_b`).
+  order). Event counts: path 1 → 3 + 3; path 2 → 4 + 3; path 3 → 4 + 4 (P8 on `h_a`,
+  P7 on `h_b`).
 - **Three paths** (a `#[must_use]` outcome grouping, one variant per path):
   1. **Served, first-try steam:** barista 180 000 ms drawn, server 210 000 ms; bottle at
      150 g; one untried token returned; till 700 p; customer: order + 300 p change.
   2. **Served, re-steamed:** barista 240 000 ms; bottle empty; 150 g burnt milk in the drain;
      both tokens used; till 700 p.
-  3. **Tea served, flat white refunded:** both steams fail — barista 210 000 ms (no P3);
-     300 g burnt milk drained; P7 runs: till 320 p; customer: tea, 300 p change **and** 380 p
-     refund; the espresso shot (path 3 waste) goes to the drain with its cup returned to the
-     counter stack — see §8 Q1.
+  3. **Tea served, flat white refunded:** both steams fail — barista 240 000 ms
+     (90k + 60k + 60k + P8's 30k; no P3); 300 g burnt milk drained; P7 runs: till 320 p;
+     customer: tea, 300 p change **and** 380 p refund; the espresso shot (path 3 waste,
+     36 g) goes to the drain in P8 with its cup returned to the counter stack — see §8 Q1.
 - **Everything accounted at every path's end:** drinks/tray with the customer; change and any
   refund with the customer; till holding its path's balance; staff back with their remaining
-  budgets; stock containers at their drawn-down levels; pucks in the knock box; burnt milk in
-  the drain; untried tokens returned; the **merged** History with the caller.
+  budgets; stock containers at their drawn-down levels; pucks in the knock box; burnt milk
+  (and path 3's stranded shot) in the drain; untried tokens returned; the **merged** History
+  with the caller.
 
 ## 7. Assumptions and placeholders
 
@@ -199,6 +210,9 @@ Implementation round-trip feedback (2026-10-07):
    shot's model sink is therefore the History record (the physical drain is documented); if
    the drain-as-consumer had been intended, the count would read 3+4. Future specs should
    name the source of every expected History event.
+   *Review 2026-10-07: reworked — the shot now exits via the Drain consumer as P8 with its
+   own 30 000 ms draw (barista 240 000 ms on path 3); all four branch-A events are time
+   draws.*
 2. **"Shot in cup" is a loose pair**, not a holder type: macro payloads are consumption-only
    (F-040) and the pair splits on path 3 (shot drained, cup restacked) — R9 loose threading.
 3. **The 1000 p tender is a fixed note** (concrete `Money<1000>` at the till), making a wrong

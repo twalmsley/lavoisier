@@ -57,31 +57,32 @@ flowchart LR
   n_system -- "ServedOrder" --> n_Customer
   n_system -- "Money" --> n_Customer
   n_system -- "BurntMilk" --> n_Drain
+  n_system -- "EspressoShot" --> n_Drain
   n_system -- "SpentPuck" --> n_KnockBox
   n_env_SteamOutcome -- "SteamOutcome" --> n_system
   n_system -- "SteamOutcome (untried)" --> n_env_SteamOutcome
   n_person -- "Person (time budget)" --> n_system
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/lib.rs#L1" "model/cs3-cafe-orders/src/lib.rs"
-  click n_exit_bottle_back_to_fridge "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L709" "model/cs3-cafe-orders/src/resources.rs"
-  click n_fill_hopper "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L717" "model/cs3-cafe-orders/src/resources.rs"
-  click n_fill_urn "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L746" "model/cs3-cafe-orders/src/resources.rs"
-  click n_fill_water_tank "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L732" "model/cs3-cafe-orders/src/resources.rs"
-  click n_exit_keep_hopper "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L724" "model/cs3-cafe-orders/src/resources.rs"
-  click n_exit_keep_tank "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L739" "model/cs3-cafe-orders/src/resources.rs"
-  click n_exit_keep_urn "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L753" "model/cs3-cafe-orders/src/resources.rs"
-  click n_exit_lock_till "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L834" "model/cs3-cafe-orders/src/resources.rs"
-  click n_new_cup "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L793" "model/cs3-cafe-orders/src/resources.rs"
-  click n_new_espresso_machine "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L692" "model/cs3-cafe-orders/src/resources.rs"
-  click n_new_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L761" "model/cs3-cafe-orders/src/resources.rs"
-  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L811" "model/cs3-cafe-orders/src/resources.rs"
-  click n_new_tray "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L818" "model/cs3-cafe-orders/src/resources.rs"
-  click n_open_till "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L826" "model/cs3-cafe-orders/src/resources.rs"
-  click n_exit_restack_cup "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L802" "model/cs3-cafe-orders/src/resources.rs"
-  click n_stock_milk_bottle "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L700" "model/cs3-cafe-orders/src/resources.rs"
-  click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L595" "model/cs3-cafe-orders/src/resources.rs"
-  click n_Drain "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L637" "model/cs3-cafe-orders/src/resources.rs"
-  click n_KnockBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L661" "model/cs3-cafe-orders/src/resources.rs"
-  click n_env_SteamOutcome "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L533" "model/cs3-cafe-orders/src/resources.rs"
+  click n_exit_bottle_back_to_fridge "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L698" "model/cs3-cafe-orders/src/resources.rs"
+  click n_fill_hopper "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L706" "model/cs3-cafe-orders/src/resources.rs"
+  click n_fill_urn "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L735" "model/cs3-cafe-orders/src/resources.rs"
+  click n_fill_water_tank "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L721" "model/cs3-cafe-orders/src/resources.rs"
+  click n_exit_keep_hopper "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L713" "model/cs3-cafe-orders/src/resources.rs"
+  click n_exit_keep_tank "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L728" "model/cs3-cafe-orders/src/resources.rs"
+  click n_exit_keep_urn "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L742" "model/cs3-cafe-orders/src/resources.rs"
+  click n_exit_lock_till "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L823" "model/cs3-cafe-orders/src/resources.rs"
+  click n_new_cup "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L782" "model/cs3-cafe-orders/src/resources.rs"
+  click n_new_espresso_machine "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L681" "model/cs3-cafe-orders/src/resources.rs"
+  click n_new_teabag_box "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L750" "model/cs3-cafe-orders/src/resources.rs"
+  click n_new_teapot "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L800" "model/cs3-cafe-orders/src/resources.rs"
+  click n_new_tray "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L807" "model/cs3-cafe-orders/src/resources.rs"
+  click n_open_till "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L815" "model/cs3-cafe-orders/src/resources.rs"
+  click n_exit_restack_cup "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L791" "model/cs3-cafe-orders/src/resources.rs"
+  click n_stock_milk_bottle "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L689" "model/cs3-cafe-orders/src/resources.rs"
+  click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L572" "model/cs3-cafe-orders/src/resources.rs"
+  click n_Drain "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L616" "model/cs3-cafe-orders/src/resources.rs"
+  click n_KnockBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L650" "model/cs3-cafe-orders/src/resources.rs"
+  click n_env_SteamOutcome "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L510" "model/cs3-cafe-orders/src/resources.rs"
 ```
 
 ## Legend — node → source
@@ -89,44 +90,45 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_system` (cs3-cafe-orders — the modelled system) | the system | [model/cs3-cafe-orders/src/lib.rs#L1](/model/cs3-cafe-orders/src/lib.rs#L1) |
-| `n_exit_bottle_back_to_fridge` (bottle_back_to_fridge) | external party | [model/cs3-cafe-orders/src/resources.rs#L709](/model/cs3-cafe-orders/src/resources.rs#L709) |
-| `n_fill_hopper` (fill_hopper) | external party | [model/cs3-cafe-orders/src/resources.rs#L717](/model/cs3-cafe-orders/src/resources.rs#L717) |
-| `n_fill_urn` (fill_urn) | external party | [model/cs3-cafe-orders/src/resources.rs#L746](/model/cs3-cafe-orders/src/resources.rs#L746) |
-| `n_fill_water_tank` (fill_water_tank) | external party | [model/cs3-cafe-orders/src/resources.rs#L732](/model/cs3-cafe-orders/src/resources.rs#L732) |
-| `n_exit_keep_hopper` (keep_hopper) | external party | [model/cs3-cafe-orders/src/resources.rs#L724](/model/cs3-cafe-orders/src/resources.rs#L724) |
-| `n_exit_keep_tank` (keep_tank) | external party | [model/cs3-cafe-orders/src/resources.rs#L739](/model/cs3-cafe-orders/src/resources.rs#L739) |
-| `n_exit_keep_urn` (keep_urn) | external party | [model/cs3-cafe-orders/src/resources.rs#L753](/model/cs3-cafe-orders/src/resources.rs#L753) |
-| `n_exit_lock_till` (lock_till) | external party | [model/cs3-cafe-orders/src/resources.rs#L834](/model/cs3-cafe-orders/src/resources.rs#L834) |
-| `n_new_cup` (new_cup) | external party | [model/cs3-cafe-orders/src/resources.rs#L793](/model/cs3-cafe-orders/src/resources.rs#L793) |
-| `n_new_espresso_machine` (new_espresso_machine) | external party | [model/cs3-cafe-orders/src/resources.rs#L692](/model/cs3-cafe-orders/src/resources.rs#L692) |
-| `n_new_teabag_box` (new_teabag_box) | external party | [model/cs3-cafe-orders/src/resources.rs#L761](/model/cs3-cafe-orders/src/resources.rs#L761) |
-| `n_new_teapot` (new_teapot) | external party | [model/cs3-cafe-orders/src/resources.rs#L811](/model/cs3-cafe-orders/src/resources.rs#L811) |
-| `n_new_tray` (new_tray) | external party | [model/cs3-cafe-orders/src/resources.rs#L818](/model/cs3-cafe-orders/src/resources.rs#L818) |
-| `n_open_till` (open_till) | external party | [model/cs3-cafe-orders/src/resources.rs#L826](/model/cs3-cafe-orders/src/resources.rs#L826) |
-| `n_exit_restack_cup` (restack_cup) | external party | [model/cs3-cafe-orders/src/resources.rs#L802](/model/cs3-cafe-orders/src/resources.rs#L802) |
-| `n_stock_milk_bottle` (stock_milk_bottle) | external party | [model/cs3-cafe-orders/src/resources.rs#L700](/model/cs3-cafe-orders/src/resources.rs#L700) |
-| `n_Customer` (Customer) | external party | [model/cs3-cafe-orders/src/resources.rs#L595](/model/cs3-cafe-orders/src/resources.rs#L595) |
-| `n_Drain` (Drain) | external party | [model/cs3-cafe-orders/src/resources.rs#L637](/model/cs3-cafe-orders/src/resources.rs#L637) |
-| `n_KnockBox` (KnockBox) | external party | [model/cs3-cafe-orders/src/resources.rs#L661](/model/cs3-cafe-orders/src/resources.rs#L661) |
-| `n_env_SteamOutcome` (environment — SteamOutcome trials) | external party | [model/cs3-cafe-orders/src/resources.rs#L533](/model/cs3-cafe-orders/src/resources.rs#L533) |
+| `n_exit_bottle_back_to_fridge` (bottle_back_to_fridge) | external party | [model/cs3-cafe-orders/src/resources.rs#L698](/model/cs3-cafe-orders/src/resources.rs#L698) |
+| `n_fill_hopper` (fill_hopper) | external party | [model/cs3-cafe-orders/src/resources.rs#L706](/model/cs3-cafe-orders/src/resources.rs#L706) |
+| `n_fill_urn` (fill_urn) | external party | [model/cs3-cafe-orders/src/resources.rs#L735](/model/cs3-cafe-orders/src/resources.rs#L735) |
+| `n_fill_water_tank` (fill_water_tank) | external party | [model/cs3-cafe-orders/src/resources.rs#L721](/model/cs3-cafe-orders/src/resources.rs#L721) |
+| `n_exit_keep_hopper` (keep_hopper) | external party | [model/cs3-cafe-orders/src/resources.rs#L713](/model/cs3-cafe-orders/src/resources.rs#L713) |
+| `n_exit_keep_tank` (keep_tank) | external party | [model/cs3-cafe-orders/src/resources.rs#L728](/model/cs3-cafe-orders/src/resources.rs#L728) |
+| `n_exit_keep_urn` (keep_urn) | external party | [model/cs3-cafe-orders/src/resources.rs#L742](/model/cs3-cafe-orders/src/resources.rs#L742) |
+| `n_exit_lock_till` (lock_till) | external party | [model/cs3-cafe-orders/src/resources.rs#L823](/model/cs3-cafe-orders/src/resources.rs#L823) |
+| `n_new_cup` (new_cup) | external party | [model/cs3-cafe-orders/src/resources.rs#L782](/model/cs3-cafe-orders/src/resources.rs#L782) |
+| `n_new_espresso_machine` (new_espresso_machine) | external party | [model/cs3-cafe-orders/src/resources.rs#L681](/model/cs3-cafe-orders/src/resources.rs#L681) |
+| `n_new_teabag_box` (new_teabag_box) | external party | [model/cs3-cafe-orders/src/resources.rs#L750](/model/cs3-cafe-orders/src/resources.rs#L750) |
+| `n_new_teapot` (new_teapot) | external party | [model/cs3-cafe-orders/src/resources.rs#L800](/model/cs3-cafe-orders/src/resources.rs#L800) |
+| `n_new_tray` (new_tray) | external party | [model/cs3-cafe-orders/src/resources.rs#L807](/model/cs3-cafe-orders/src/resources.rs#L807) |
+| `n_open_till` (open_till) | external party | [model/cs3-cafe-orders/src/resources.rs#L815](/model/cs3-cafe-orders/src/resources.rs#L815) |
+| `n_exit_restack_cup` (restack_cup) | external party | [model/cs3-cafe-orders/src/resources.rs#L791](/model/cs3-cafe-orders/src/resources.rs#L791) |
+| `n_stock_milk_bottle` (stock_milk_bottle) | external party | [model/cs3-cafe-orders/src/resources.rs#L689](/model/cs3-cafe-orders/src/resources.rs#L689) |
+| `n_Customer` (Customer) | external party | [model/cs3-cafe-orders/src/resources.rs#L572](/model/cs3-cafe-orders/src/resources.rs#L572) |
+| `n_Drain` (Drain) | external party | [model/cs3-cafe-orders/src/resources.rs#L616](/model/cs3-cafe-orders/src/resources.rs#L616) |
+| `n_KnockBox` (KnockBox) | external party | [model/cs3-cafe-orders/src/resources.rs#L650](/model/cs3-cafe-orders/src/resources.rs#L650) |
+| `n_env_SteamOutcome` (environment — SteamOutcome trials) | external party | [model/cs3-cafe-orders/src/resources.rs#L510](/model/cs3-cafe-orders/src/resources.rs#L510) |
 | `n_person` (person (model-core boundary)) | external party | — |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
-| `BurntMilk` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L160](/model/cs3-cafe-orders/src/resources.rs#L160) |
-| `Cup` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L358](/model/cs3-cafe-orders/src/resources.rs#L358) |
-| `EspressoMachine` | reusable (placeholder) | — | [model/cs3-cafe-orders/src/resources.rs#L518](/model/cs3-cafe-orders/src/resources.rs#L518) |
-| `Hopper` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L173](/model/cs3-cafe-orders/src/resources.rs#L173) |
-| `MilkBottle` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L129](/model/cs3-cafe-orders/src/resources.rs#L129) |
-| `Money` | continuous (container) | pence | [model/cs3-cafe-orders/src/resources.rs#L103](/model/cs3-cafe-orders/src/resources.rs#L103) |
-| `ServedOrder` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L449](/model/cs3-cafe-orders/src/resources.rs#L449) |
-| `SpentPuck` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L242](/model/cs3-cafe-orders/src/resources.rs#L242) |
-| `SteamOutcome` | outcome token (R17) | — | [model/cs3-cafe-orders/src/resources.rs#L533](/model/cs3-cafe-orders/src/resources.rs#L533) |
-| `TeabagBox` | boundary object (placeholder) | — | [model/cs3-cafe-orders/src/resources.rs#L290](/model/cs3-cafe-orders/src/resources.rs#L290) |
-| `Teapot` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L368](/model/cs3-cafe-orders/src/resources.rs#L368) |
-| `Till` | continuous (container) | pence | [model/cs3-cafe-orders/src/resources.rs#L114](/model/cs3-cafe-orders/src/resources.rs#L114) |
-| `Tray` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L378](/model/cs3-cafe-orders/src/resources.rs#L378) |
-| `Urn` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L255](/model/cs3-cafe-orders/src/resources.rs#L255) |
-| `WaterTank` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L191](/model/cs3-cafe-orders/src/resources.rs#L191) |
+| `BurntMilk` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L158](/model/cs3-cafe-orders/src/resources.rs#L158) |
+| `Cup` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L335](/model/cs3-cafe-orders/src/resources.rs#L335) |
+| `EspressoMachine` | reusable (placeholder) | — | [model/cs3-cafe-orders/src/resources.rs#L495](/model/cs3-cafe-orders/src/resources.rs#L495) |
+| `EspressoShot` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L209](/model/cs3-cafe-orders/src/resources.rs#L209) |
+| `Hopper` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L171](/model/cs3-cafe-orders/src/resources.rs#L171) |
+| `MilkBottle` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L127](/model/cs3-cafe-orders/src/resources.rs#L127) |
+| `Money` | continuous (container) | pence | [model/cs3-cafe-orders/src/resources.rs#L101](/model/cs3-cafe-orders/src/resources.rs#L101) |
+| `ServedOrder` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L426](/model/cs3-cafe-orders/src/resources.rs#L426) |
+| `SpentPuck` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L219](/model/cs3-cafe-orders/src/resources.rs#L219) |
+| `SteamOutcome` | outcome token (R17) | — | [model/cs3-cafe-orders/src/resources.rs#L510](/model/cs3-cafe-orders/src/resources.rs#L510) |
+| `TeabagBox` | boundary object (placeholder) | — | [model/cs3-cafe-orders/src/resources.rs#L267](/model/cs3-cafe-orders/src/resources.rs#L267) |
+| `Teapot` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L345](/model/cs3-cafe-orders/src/resources.rs#L345) |
+| `Till` | continuous (container) | pence | [model/cs3-cafe-orders/src/resources.rs#L112](/model/cs3-cafe-orders/src/resources.rs#L112) |
+| `Tray` | discrete (consumable) | — | [model/cs3-cafe-orders/src/resources.rs#L355](/model/cs3-cafe-orders/src/resources.rs#L355) |
+| `Urn` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L232](/model/cs3-cafe-orders/src/resources.rs#L232) |
+| `WaterTank` | continuous (container) | grams | [model/cs3-cafe-orders/src/resources.rs#L189](/model/cs3-cafe-orders/src/resources.rs#L189) |

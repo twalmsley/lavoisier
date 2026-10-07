@@ -2,7 +2,7 @@
 //!
 //! The third spec→model round trip: this crate implements, downstream of
 //! `model-core`, the agreed natural-language specification
-//! `case-studies/cs3-cafe-orders/SPEC.md` (v0.2, agreed). A small café
+//! `case-studies/cs3-cafe-orders/SPEC.md` (v0.4, agreed). A small café
 //! fulfils one order — a flat white and a pot of tea — with **two staff
 //! working genuinely in parallel**. CS-3 is the **concurrency case study**:
 //! the first model with two actors, two genuinely disjoint branches

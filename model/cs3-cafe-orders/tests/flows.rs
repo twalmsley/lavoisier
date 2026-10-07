@@ -7,8 +7,8 @@
 //! flat-white slot) at the customer, the change and any refund with the
 //! customer, the till at its path's balance, both staff back with their
 //! remaining budgets, the stock containers at their drawn-down levels, the
-//! pucks in the knock box, the burnt milk in the drain, untried tokens
-//! returned, the path-3 cup restacked — and the **merged** History with the
+//! pucks in the knock box, the burnt milk (and path 3's stranded shot) in the
+//! drain, untried tokens returned, the path-3 cup restacked — and the **merged** History with the
 //! caller, asserted to have the **Join shape** (R16): branch A's and branch
 //! B's event sequences intact and un-interleaved, with per-branch counts
 //! 3 + 3 / 4 + 3 / 4 + 4 and per-event attribution and magnitudes.
@@ -260,12 +260,13 @@ fn path_2_served_on_retry_accounts_for_everything() {
 }
 
 /// Path 3 — tea served, flat white refunded (SPEC.md §6): both steams fail —
-/// barista 210 000 ms (no P3), server 240 000 ms (P7 runs); 300 g of burnt
-/// milk drained; the stranded shot drained with its cup restacked (review
-/// decision 1); till at 320 p; the customer holds the tea, their 300 p
-/// change **and** the 380 p refund (on the tray, in the flat white's slot).
-/// Merged record: Join of 4 + 4 — branch A's fourth event is the drained
-/// shot (36 g), branch B's is P7.
+/// barista 240 000 ms (P8 in place of P3), server 240 000 ms (P7 runs);
+/// 300 g of burnt milk and the stranded 36 g shot drained (P8 feeds the shot
+/// to the drain inside the process, with its cup restacked — review decision
+/// 1 as reworked at review); till at 320 p; the customer holds the tea,
+/// their 300 p change **and** the 380 p refund (on the tray, in the flat
+/// white's slot). Merged record: Join of 4 + 4 — all four branch-A events
+/// are time draws (P8's 30 000 ms is the fourth), branch B's fourth is P7.
 ///
 /// Verifies: REQ-015, REQ-016, REQ-017, REQ-018
 #[test]
@@ -278,7 +279,8 @@ fn path_3_refund_accounts_for_everything() {
             bottle,
             till,
         } => {
-            let _barista: Qualified<MachineTraining, 390_000> = barista;
+            // The budget binds: 600 000 − (90 + 60 + 60 + 30) × 1000.
+            let _barista: Qualified<MachineTraining, 360_000> = barista;
             let _server: Person<360_000> = server;
             bottle_back_to_fridge::<0>(bottle);
             // The till gave the flat white's price back (REQ-018's change
@@ -289,10 +291,11 @@ fn path_3_refund_accounts_for_everything() {
             // 300 p change, 380 p refund — and the tea's price is what the
             // till kept.
             assert_eq!(ORDER_PRICE_PENCE - FLAT_WHITE_PRICE_PENCE, TEA_PRICE_PENCE);
-            // 300 g of burnt milk reached the drain across the two failed
-            // attempts (REQ-016), and the stranded 36 g shot was drained
-            // with its cup restacked — its disposal is branch A's fourth
-            // recorded event, below.
+            // The drain took 300 g of burnt milk across the two failed
+            // attempts (REQ-016) plus the stranded 36 g shot, fed inside P8
+            // with its cup restacked (the unbounded sink discards, F-029:
+            // 150 + 150 + 36 g accounted arithmetically); P8's 30 000 ms
+            // draw is branch A's fourth recorded event, below.
             let history = close_counter(counter);
             assert_join_shape(
                 &history,
@@ -300,7 +303,7 @@ fn path_3_refund_accounts_for_everything() {
                     ("pull_espresso", "Labour", 90_000, MS),
                     ("steam_milk", "Labour", 60_000, MS),
                     ("steam_milk", "Labour", 60_000, MS),
-                    ("drain_stranded_shot", "EspressoShot", 36, "grams"),
+                    ("drain_stranded_shot", "Labour", 30_000, MS),
                 ],
                 &[
                     ("take_payment", "Labour", 60_000, MS),
@@ -368,7 +371,7 @@ fn interleavings_are_equivalent_on_path_1() {
 }
 
 /// The interleaving equivalence on the worst path (R9): both orderings of
-/// path 3 — P7 and the drained shot fall at different places in the source,
+/// path 3 — P7 and P8 fall at different places in the source,
 /// yet the end states and the merged records are identical.
 ///
 /// Verifies: REQ-016, REQ-017, REQ-018
@@ -384,7 +387,7 @@ fn interleavings_are_equivalent_on_path_3() {
                 bottle,
                 till,
             } => {
-                let _barista: Qualified<MachineTraining, 390_000> = barista;
+                let _barista: Qualified<MachineTraining, 360_000> = barista;
                 let _server: Person<360_000> = server;
                 bottle_back_to_fridge::<0>(bottle);
                 lock_till::<320>(till);
@@ -400,7 +403,7 @@ fn interleavings_are_equivalent_on_path_3() {
                 ("pull_espresso", "Labour", 90_000, MS),
                 ("steam_milk", "Labour", 60_000, MS),
                 ("steam_milk", "Labour", 60_000, MS),
-                ("drain_stranded_shot", "EspressoShot", 36, "grams"),
+                ("drain_stranded_shot", "Labour", 30_000, MS),
             ],
             &[
                 ("take_payment", "Labour", 60_000, MS),
@@ -434,7 +437,7 @@ fn fixtures_construct_sealed_resources_for_downstream_tests() {
 
 /// The tripwire demonstration (R1 layer 2, F-008, F-032) from outside the
 /// privacy boundary: a fixture espresso shot that is neither built into the
-/// flat white nor recorded as drained is named and used, so `must_use` and
+/// flat white nor fed to the drain is named and used, so `must_use` and
 /// `unused_variables` are both satisfied — no compile-time layer can catch
 /// this leak; the tripwire `Drop` converts it into this test failure.
 #[test]

@@ -989,7 +989,9 @@ unchanged. Three notes from its implementation (which doubled as its validation)
 exercise with no gaps: `Entry::Join`'s public shape made the "no invented interleaving"
 assertions direct (top-level `[Entry::Join(a, b)]`, every entry inside each branch a flat
 in-order `Event`), and downstream `Recordable` impls let a stranded resource's disposal be
-recorded as a branch event. No model-core changes were needed.
+recorded as a branch event — exercised during the build and then replaced at the 2026-10-07
+review by a Drain-consumer process (CS-3's P8), the `Recordable` route having worked as
+designed. No model-core changes were needed.
 
 ---
 

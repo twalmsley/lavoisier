@@ -1,5 +1,5 @@
 //! The café counter's sealed resource family (R1), its creation/exit boundary
-//! (R12) and its processes P1..P7 (SPEC.md §5, F-031).
+//! (R12) and its processes P1..P8 (SPEC.md §5, F-031).
 //!
 //! Layout per F-006/F-031: this module holds the sealed resource types, with
 //! the [`boundary`] (the counter setup, the customer, the sinks and the
@@ -28,22 +28,21 @@
 //! SPEC.md P1 produces "the espresso shot in its cup"; here the
 //! [`EspressoShot`] and its [`Cup`] are threaded side by side as loose values
 //! (R9/F-024 loose threading) rather than packed into a holder type. That is
-//! deliberate: on path 3 the pair **splits** — the stranded shot is drained
-//! (its disposal recorded as branch A's fourth event, see below) while the
-//! cup goes back to the counter stack ([`boundary::restack_cup`], SPEC.md §8
-//! review decision 1) — and a holder would need a hand-written extraction
-//! (F-040: macro payload is consumption-only) for no checking gain.
+//! deliberate: on path 3 the pair **splits** — the stranded shot is fed to
+//! the [`Drain`] while the cup goes back to the counter stack (both inside
+//! [`processes::drain_stranded_shot`], SPEC.md P8; §8 review decision 1) —
+//! and a holder would need a hand-written extraction (F-040: macro payload is
+//! consumption-only) for no checking gain.
 //!
-//! ## The drained shot is recorded, not discarded (R16)
+//! ## The stranded shot goes to the drain (SPEC.md P8)
 //!
-//! R16 accounts "consumed time — and any other event worth recording" to the
-//! `History`. The stranded shot's disposal is exactly such an event: SPEC.md
-//! §6 counts **four** branch-A entries on path 3 against only three time
-//! draws (90 + 60 + 60 = 210 000 ms), so the fourth entry is the disposal
-//! itself — `impl Recordable for EspressoShot` lets branch A's history
-//! consume the shot (the F-041 licence: the History discards the resource but
-//! keeps its record — process `"drain_stranded_shot"`, 36 g). The physical
-//! destination is the drain; the model's sink is the record.
+//! Path 3's already-pulled shot has no drink to join, so it is honest waste:
+//! [`processes::drain_stranded_shot`] (P8, path 3 only) feeds the 36 g shot
+//! to the [`Drain`] **inside the process** — the same `Consumer` machinery
+//! as the burnt milk — and restacks its cup. The barista's 30 000 ms is
+//! drawn by the adjacent `qualified_draw_time` in the flow and recorded to
+//! `h_a` under the process name (F-048, R16), so all four of branch A's
+//! path-3 events are time draws.
 //!
 //! Every consumable here carries the kernel's tripwire `Drop` (R1 layer 2,
 //! F-008) except the crockery and teabags ([`Cup`], [`Teapot`], [`Teabag`] —
@@ -61,7 +60,6 @@ use crate::characteristics::{
 use crate::requirements::{assert_req015, assert_req016, assert_req017, assert_req018};
 use model_core::boundary::{Consumer, Supplier};
 use model_core::common::Qualified;
-use model_core::history::{Event, Permit, Recordable, UNATTRIBUTED};
 use model_core::list::{Cons, Len, Nil};
 
 // ---------------------------------------------------------------------------
@@ -206,32 +204,11 @@ model_core::container_resource! {
     /// 40 g water − 22 g puck). It travels **beside its [`Cup`]** as a loose
     /// pair (see the module docs). Its production exits: built into the flat
     /// white ([`processes::build_flat_white`]), or — stranded on path 3 —
-    /// drained, with the disposal **recorded into branch A's history** (the
-    /// [`Recordable`] impl below, R16/F-041). Tripwired (F-008).
+    /// fed to the [`Drain`] inside [`processes::drain_stranded_shot`]
+    /// (SPEC.md P8). Tripwired (F-008).
     EspressoShot,
     unit = "grams",
-    must_use = "EspressoShot is a conserved resource: build the flat white, or record its draining in the History"
-}
-
-/// The stranded shot's disposal is an event worth recording (R16): path 3's
-/// branch-A history consumes the shot — the F-041 licence: the `History`
-/// defuses the resource (its sanctioned consumer role, F-008) but keeps the
-/// value-level record (item, 36 g). The flow records it under the process
-/// name `"drain_stranded_shot"`; physically the shot goes down the drain
-/// (SPEC.md §8 review decision 1), and the record is the model's sink.
-impl<const V: u64> Recordable for EspressoShot<V> {
-    fn into_record(self, _permit: Permit) -> Event {
-        // Boundary exit: the shot leaves the model into the record; defusing
-        // the tripwire here is the consumer playing its sanctioned role
-        // (F-008).
-        self.defuse();
-        Event {
-            process: UNATTRIBUTED,
-            item: "EspressoShot",
-            magnitude: V,
-            unit: "grams",
-        }
-    }
+    must_use = "EspressoShot is a conserved resource: build the flat white or feed it to the drain (drain_stranded_shot)"
 }
 
 model_core::container_resource! {
@@ -626,9 +603,11 @@ impl<const V: u64> Consumer<Money<V>> for Customer {
 }
 
 /// The drain (SPEC.md §4): the dedicated sink REQ-016 routes burnt milk to,
-/// **inside** [`processes::steam_milk`]. An unbounded sink
-/// (`type Next = Self`, R15, F-029); it necessarily discards what it
-/// consumes, so end-state waste masses are assertable arithmetically only.
+/// **inside** [`processes::steam_milk`] — and the sink path 3's stranded
+/// espresso shot is fed to, inside [`processes::drain_stranded_shot`]
+/// (SPEC.md P8). An unbounded sink (`type Next = Self`, R15, F-029); it
+/// necessarily discards what it consumes, so end-state waste masses are
+/// assertable arithmetically only.
 ///
 /// Placeholder: the drain — assumed able to take any amount of burnt milk.
 ///
@@ -647,6 +626,16 @@ impl DrainSink for Drain {}
 impl<const V: u64> Consumer<BurntMilk<V>> for Drain {
     type Next = Drain;
     fn consume(self, item: BurntMilk<V>) -> Drain {
+        item.defuse(); // sanctioned consumer role (F-008); unbounded sink discards (F-029)
+        self
+    }
+}
+
+/// The drain absorbs path 3's stranded espresso shot (SPEC.md P8);
+/// `Next = Self` (R15, F-029).
+impl<const V: u64> Consumer<EspressoShot<V>> for Drain {
+    type Next = Drain;
+    fn consume(self, item: EspressoShot<V>) -> Drain {
         item.defuse(); // sanctioned consumer role (F-008); unbounded sink discards (F-029)
         self
     }
@@ -862,7 +851,7 @@ pub mod boundary {
     }
 }
 
-/// The counter's processes P1..P7 (SPEC.md §5): pure by-value transformations
+/// The counter's processes P1..P8 (SPEC.md §5): pure by-value transformations
 /// (R1, R2). They mint quantity-bearing values, so they live inside the
 /// resource family's module (F-031).
 ///
@@ -1132,6 +1121,29 @@ pub mod processes {
         (barista, FlatWhite::mint(cup))
     }
 
+    /// P8 — drains the stranded shot (SPEC.md P8; **path 3 only**): when both
+    /// steams fail there is no drink for the already-pulled shot to join, so
+    /// it is honest waste — the shot is fed to the drain **inside the
+    /// process** (the same `Consumer` machinery as the burnt milk; SPEC.md §8
+    /// review decision 1) and its cup goes back to the counter stack
+    /// ([`super::boundary::restack_cup`]). The barista's 30 000 ms is drawn
+    /// by the adjacent `qualified_draw_time` in the flow and recorded to
+    /// `h_a` under the process name (F-048, R16). Mass is conserved
+    /// structurally: the shot is fed whole, so there is nothing to assert.
+    pub fn drain_stranded_shot<const SHOT: u64, const B: u64, D: Consumer<EspressoShot<SHOT>>>(
+        barista: Qualified<MachineTraining, B>,
+        shot: EspressoShot<SHOT>,
+        cup: Cup,
+        drain: D,
+    ) -> (Qualified<MachineTraining, B>, D::Next) {
+        // The shot is fed to the drain INSIDE the process (SPEC.md P8 waste
+        // routing), so the stranded state never exists past the process.
+        let drain = send_to(drain, shot);
+        // The cup goes back to the counter stack through its boundary exit.
+        super::boundary::restack_cup(cup);
+        (barista, drain)
+    }
+
     // -- Branch B: the server (records to `h_b`) -----------------------------
 
     /// P4 — takes payment at the till (R19, SPEC.md P4). The tender is the
@@ -1285,9 +1297,9 @@ mod tests {
         open_till, restack_cup, steam_goes_well, stock_milk_bottle, tender_cash,
     };
     use super::processes::{
-        brew_tea, build_flat_white, deposit_till, draw_grounds, draw_milk, draw_urn_water,
-        draw_water, hand_over, pull_espresso, refund_flat_white, split_money, steam_milk,
-        take_payment,
+        brew_tea, build_flat_white, deposit_till, drain_stranded_shot, draw_grounds, draw_milk,
+        draw_urn_water, draw_water, hand_over, pull_espresso, refund_flat_white, split_money,
+        steam_milk, take_payment,
     };
     use super::{
         Cup, EspressoShot, FlatWhite, FreshTeabagBox, Milk, Money, NineTeabags, PotOfTea,
@@ -1519,27 +1531,19 @@ mod tests {
         let _reusable = server;
     }
 
-    /// The stranded shot's disposal is a recordable event (R16/F-041): the
-    /// branch-A history consumes the shot and keeps its record — process
-    /// name, item, 36 g — and the cup goes back to the stack (SPEC.md §8
-    /// review decision 1).
+    /// P8 (path 3 only): the stranded shot is fed to the drain INSIDE the
+    /// process (SPEC.md P8 waste routing — the drain discarded the 36 g,
+    /// F-029, so the mass is recovered from the constants, R7), the cup goes
+    /// back to the stack, and the barista comes back (R2; the 30 000 ms is
+    /// drawn by the adjacent process in the flow, F-048).
     #[test]
-    fn drained_shot_is_recorded_into_branch_a() {
+    fn drain_stranded_shot_feeds_the_drain_and_restacks_the_cup() {
+        let barista = qualify::<MachineTraining, 600_000>(new_person::<600_000>());
         let shot: EspressoShot<36> = EspressoShot::mint();
         let cup: Cup = Cup::mint();
-        let h_a = record(new_history(), "drain_stranded_shot", shot);
-        restack_cup(cup);
-        assert_eq!(h_a.event_count(), 1);
-        match h_a.entries() {
-            [Entry::Event(e)] => {
-                assert_eq!(
-                    (e.process, e.item, e.magnitude, e.unit),
-                    ("drain_stranded_shot", "EspressoShot", 36, "grams")
-                );
-            }
-            other => panic!("expected exactly one Event entry, got {other:?}"),
-        }
-        let _execution_record = h_a;
+        let (barista, drain) = drain_stranded_shot::<36, 600_000, _>(barista, shot, cup, new_drain());
+        assert_eq!(EspressoShot::<36>::VALUE, 36);
+        let _accounted = (barista, drain);
     }
 
     /// The teabag box supplies through its boundary (R12): the count is the
