@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Specification version | v0.1 |
+| Specification version | v0.2 |
 | Date | 2026-10-07 |
-| Author | Tony (drafted by Claude for review) |
-| Status | draft |
+| Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
+| Status | agreed |
 
 ## 1. Purpose and scope
 
@@ -15,7 +15,7 @@ is the boundary-refinement capstone: **two currencies with the bureau exchange**
 unexercised clause), **a placeholder refined into a real modelled supplier** (the R12
 evolution path, finally walked), **transport between Locations** with one type per
 location-state, **organisations as actors** (vendor, courier), and the model split across
-**two team-shaped crates**.
+**three team-shaped crates** (supply, logistics, works).
 
 **System boundary:** the works' world — its site, its account, its stock — plus the contracted
 courier's loop to the EU vendor. The customer, the bureau and the vendor's own hinterland stay
@@ -55,12 +55,13 @@ transit is a state change, not a duration); the vendor's sourcing.
 | Vendor | boundary **organisation** | finite stock (the refined placeholder) | 1 | — |
 | Works bin | contents-keeping consumer | decreasing space | capacity 5 | holds the packaging |
 
-**Subsystem ownership (two team-shaped crates):**
+**Subsystem ownership (three team-shaped crates; works depends on logistics and supply,
+logistics depends on supply):**
 
-| | `cs5-supply` (library) | `cs5-works` (depends on supply) |
-|---|---|---|
-| Owns | euro cents, the bureau + `exchange`, the vendor organisation and its 3-component stock, the courier and transit states, consign/carry/return transport processes, packaging | the GBP account, the housing rack, goods-in inspection, assembly, the customer + order token, delivery, the bin |
-| REQs | REQ-023, REQ-024, REQ-027 | REQ-025, REQ-026 |
+| | `cs5-supply` (library) | `cs5-logistics` (depends on supply) | `cs5-works` (depends on both) |
+|---|---|---|---|
+| Owns | euro cents, the bureau + `exchange`, the vendor organisation and its 3-component stock, the boxed component and packaging | the courier organisation, the transit states (outbound/at-vendor/inbound), consign/carry/hand-over transport processes | the GBP account, the housing rack, goods-in inspection, assembly, the customer + order token, delivery, the bin |
+| REQs | REQ-023, REQ-024 | REQ-027 | REQ-025, REQ-026 |
 
 ## 4. System boundary: suppliers, consumers, sinks
 
@@ -89,14 +90,15 @@ before/after contrast.
   2000 p → 2340 ec (OUT × 100 = IN × 117, assert — exact by chosen amounts).
 - **Satisfies:** REQ-024.
 
-### P2. Consign the courier — `cs5-supply` (REQ-027)
-- Operator draws 60 000 ms. The payment (2340 ec) and the purchase order are consigned to
-  the contracted courier; courier state at-UK → outbound (structural).
+### P2. Consign the courier — `cs5-logistics` (REQ-027)
+- Operator draws 60 000 ms. The purchase order is consigned to the contracted courier
+  (payment does **not** travel — see §7); courier state at-UK → outbound (structural).
 - **Satisfies:** REQ-027.
 
-### P3. Purchase at the vendor — `cs5-supply` (REQ-023, REQ-027)
-- No operator time (the courier and vendor are the actors). The vendor consumes exactly
-  2340 ec (REQ-023 structural: euro cents only, exact price) and supplies one boxed
+### P3. Purchase at the vendor — `cs5-supply` + `cs5-logistics` (REQ-023, REQ-027)
+- No operator time (the courier and vendor are the actors). The vendor consumes the
+  **remitted** 2340 ec (REQ-023 structural: euro cents only, exact price — the transfer
+  itself is abstracted, §7) against the courier-presented order, and supplies one boxed
   component (450 g) from its 3-stock; courier outbound → at-vendor → inbound with the box.
 - **Balances:** money 2340 = 2340 (structural, exact-price impl); goods 1 = 1 (structural).
 
@@ -146,11 +148,23 @@ before/after contrast.
 - The bureau (fixed 117/100 rate) and the customer stay unbounded placeholders — the
   deliberate contrast to the refined vendor.
 - Transit is a pure state change (R9); nothing is lost or delayed in carriage.
+- **The payment transfer is abstracted:** the 2340 ec are remitted directly from P1's output
+  to the vendor's consumer at P3 (flow-routed) — electronically, as it were; only goods and
+  the order travel with the courier. The euro-cent dimension still balances end to end.
 - The vendor keeps its revenue (boundary organisation; F-029 arithmetic-only accounting).
 - Amounts are chosen so the exchange is remainder-free (2000 p × 117/100 = 2340 ec exactly);
   a non-exact amount would not compile (F-052) — stated as a feature.
 
 ## 8. Open questions for the author
+
+Review decisions (2026-10-07): **as proposed except** — (1) **three crates**, logistics
+separated (`cs5-supply` / `cs5-logistics` / `cs5-works`; ownership table updated); (2) **the
+payment transfer is abstracted** — the ec are remitted flow-routed to the vendor, only goods
+and the order travel (P2/P3 and §7 updated). Questions 3–7 agreed as proposed (refinement
+pair; exact-exchange reliance on F-052; packaging + finite bin + P8; single operator and
+budget-less organisations; quantities).
+
+Original questions, for the record:
 
 1. **Two crates** (`cs5-supply` / `cs5-works`) rather than three (logistics separate) — the
    team-shaped split as proposed?
