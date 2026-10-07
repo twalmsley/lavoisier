@@ -64,8 +64,9 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 4 Learning materials | done (`docs/tutorials/` 00–06 incl. Rust on-ramp and toast capstone; `learn/` exercises crate, solutions verified) | F-015 extended | 2026-10-06: closed (deck parameters set) |
 | 5 Overview deck | done (`decks/overview.md` + PDF, 12 slides) | — | 2026-10-06: approved for now |
 | 6 Technical deck | done (`decks/technical.md` + PDF, 22 slides) | — | 2026-10-06: approved for now |
-| 7 White paper | done (`docs/white-paper.md` v0.1 + PDF, 20 pp) | — (3 doc inconsistencies found; 2 fixed, 1 noted) | pending |
-| 8 Diagram generation (A) | done (`tools/diagram-gen`, `docs/diagrams/` for both crates) | 5 grep-discipline gaps noted (F-021/F-038 territory) | pending |
+| 7 White paper | done (`docs/white-paper.md` v0.1 + PDF, 20 pp) | — (3 doc inconsistencies found; 2 fixed, 1 noted) | 2026-10-07: approved |
+| 8 Diagram generation (A) | done (`tools/diagram-gen`, `docs/diagrams/` for both crates) | F-055 (promoted); hyperlinks fixed root-relative + absolute click URLs | 2026-10-07: approved after link fixes |
+| 12 CS-2 spec | drafted (`case-studies/cs2-puncture-repair/SPEC.md` v0.1) — awaiting review | — | pending: §8 questions 1–7 |
 | 9 Process docgen (B) | not started | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |
