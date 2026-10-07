@@ -71,7 +71,8 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 CS-3 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
 | 12 CS-3 model | done (`model/cs3-cafe-orders`; stranded shot via Drain as P8 per review) | F-041 and F-055 extended | 2026-10-07: closed |
 | 12 CS-4 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
-| 12 CS-4 model | done (`model/cs4-stores` + `model/cs4-line`; full 25-cycle recursion; CHANGE-IMPACT.md) | F-056; F-001/F-010/F-011/F-055 extended | pending |
+| 12 CS-4 model | done (`model/cs4-stores` + `model/cs4-line`; full 25-cycle recursion; CHANGE-IMPACT.md) | F-056; F-001/F-010/F-011/F-055 extended | 2026-10-07: closed (quantum clock approved) |
+| 12 CS-5 spec | drafted (`case-studies/cs5-two-site/SPEC.md` v0.1) — awaiting review | — | pending: §8 questions 1–7 |
 | 9 Process docgen (B) | not started | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |
