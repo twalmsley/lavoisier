@@ -68,7 +68,8 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 8 Diagram generation (A) | done (`tools/diagram-gen`, `docs/diagrams/` for both crates) | F-055 (promoted); hyperlinks fixed root-relative + absolute click URLs | 2026-10-07: approved after link fixes |
 | 12 CS-2 spec | done (v0.2 agreed) | — | 2026-10-07: Q1–4, 6–7 as proposed; Q5 changed — P4 gets its own 60 000 ms draw |
 | 12 CS-2 model | done (`model/cs2-puncture-repair`, full gate green; diagram-gen multi-type fix) | F-050 extended; F-055 #3 resolved | 2026-10-07: closed (cement encoding approved) |
-| 12 CS-3 spec | drafted (`case-studies/cs3-cafe-orders/SPEC.md` v0.1) — awaiting review | — | pending: §8 questions 1–6 |
+| 12 CS-3 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
+| 12 CS-3 model | in progress | | |
 | 9 Process docgen (B) | not started | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |

@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Specification version | v0.1 |
+| Specification version | v0.2 |
 | Date | 2026-10-07 |
-| Author | Tony (drafted by Claude for review) |
-| Status | draft |
+| Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
+| Status | agreed |
 
 ## 1. Purpose and scope
 
@@ -186,6 +186,13 @@ cleaning; staff scheduling.
   interleave freely by sharing nothing; it does not execute threads.
 
 ## 8. Open questions for the author
+
+Review decisions (2026-10-07): **all six agreed as proposed** — the stranded shot is drained
+with its cup restacked; partial refund (tea still served); the receipt token carries REQ-017;
+energy/temperature out of scope; quantities as drafted; merged-History assertions as drafted
+(Join shape + per-branch counts).
+
+Original questions, for the record:
 
 1. **Path 3's stranded espresso:** if both steams fail, the already-pulled shot has no drink
    to join. Proposed: it is drained (36 g to the drain) and its cup goes back to the counter
