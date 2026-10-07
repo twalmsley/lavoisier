@@ -70,7 +70,8 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 CS-2 model | done (`model/cs2-puncture-repair`, full gate green; diagram-gen multi-type fix) | F-050 extended; F-055 #3 resolved | 2026-10-07: closed (cement encoding approved) |
 | 12 CS-3 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
 | 12 CS-3 model | done (`model/cs3-cafe-orders`; stranded shot via Drain as P8 per review) | F-041 and F-055 extended | 2026-10-07: closed |
-| 12 CS-4 spec | drafted (`case-studies/cs4-batch-run/SPEC.md` v0.1) — awaiting review | — | pending: §10 questions 1–6 |
+| 12 CS-4 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
+| 12 CS-4 model | in progress | | |
 | 9 Process docgen (B) | not started | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |

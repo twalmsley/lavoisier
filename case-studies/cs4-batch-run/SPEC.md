@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Specification version | v0.1 |
+| Specification version | v0.2 |
 | Date | 2026-10-07 |
-| Author | Tony (drafted by Claude for review) |
-| Status | draft |
+| Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
+| Status | agreed |
 
 ## 1. Purpose and scope
 
@@ -171,6 +171,14 @@ headroom (2048) and F-009's long-type side files; the 25-cycle recursion's compi
 - Masses are round-number stand-ins; drill swarf at 10 g keeps the bin arithmetic exact.
 
 ## 10. Open questions for the author
+
+Review decisions (2026-10-07): **all six agreed as proposed** — type-level recursion as the
+batch encoding; the two-crate split and ownership table; the two change-impact probes
+(reverted, documented in CHANGE-IMPACT.md); the scale targets and §8 measurements as drafted
+(25 units, not 50); the quantities and budgets; totals-plus-spot-checks for the ~102-event
+History.
+
+Original questions, for the record:
 
 1. **Repetition as type-level recursion** (`BuildBatch<N>`, compile-time unrolled 25×) is the
    honest encoding — a loop cannot type-check because every cycle changes the types. Confirm
