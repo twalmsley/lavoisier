@@ -79,8 +79,9 @@ fn sanitize_label(s: &str) -> String {
 
 #[derive(Debug, Clone)]
 enum PIn {
-    /// A plain resource input (base type).
-    Res(String),
+    /// Plain resource input(s): one base type per way of satisfying the
+    /// parameter's bound (several for a multi-type requirement, F-055 #3).
+    Res(Vec<String>),
     /// A sink fed through a `Consumer`/`ConsumeList` bound (or a REQ bound
     /// naming a sink type): process -> sink, labeled with the item.
     Sink { sink: String, label: String },
@@ -101,13 +102,31 @@ fn is_threadable(cm: &CrateModel, base: &str) -> bool {
         .unwrap_or(false)
 }
 
-/// Resolve a generic parameter's bound string to a base type via its
-/// requirement trait and the `satisfies!` map.
-fn resolve_req_base(cm: &CrateModel, bounds: &str) -> Option<String> {
+/// Resolve a generic parameter's bound string to ALL base types that satisfy
+/// its requirement trait, via the `satisfies!` map (F-055 #3: requirements may
+/// be satisfied by several types — e.g. CS-2's REQ-012 airtight tubes).
+fn resolve_req_bases(cm: &CrateModel, bounds: &str) -> Option<Vec<String>> {
     let id = cm.req_in_bounds(bounds)?;
     let tys = cm.satisfies_types.get(&id)?;
-    let first = tys.first()?;
-    Some(cm.resolve_alias(first))
+    if tys.is_empty() {
+        return None;
+    }
+    Some(tys.iter().map(|t| cm.resolve_alias(t)).collect())
+}
+
+/// Single-type resolution for contexts that can only use one base (sink and
+/// boundary-object positions). Warns instead of silently dropping when the
+/// requirement is satisfied by more than one type (F-055 #3).
+fn resolve_req_base(cm: &CrateModel, bounds: &str) -> Option<String> {
+    let all = resolve_req_bases(cm, bounds)?;
+    if all.len() > 1 {
+        eprintln!(
+            "WARN: requirement in bounds `{bounds}` is satisfied by {} types ({}); using the first - review this edge",
+            all.len(),
+            all.join(", ")
+        );
+    }
+    all.into_iter().next()
 }
 
 /// Resolve one declared parameter type of a process into a `PIn`.
@@ -165,12 +184,15 @@ fn resolve_param(cm: &CrateModel, fdef: &FnDef, pty: &str) -> PIn {
                 _ => {}
             }
         }
-        if let Some(b) = resolve_req_base(cm, bounds) {
-            if cm.is_sink_object(&b) {
+        if let Some(bases) = resolve_req_bases(cm, bounds) {
+            if bases.len() == 1 && cm.is_sink_object(&bases[0]) {
+                let b = bases.into_iter().next().unwrap();
                 let items = cm.sink_items(&b).join(" / ");
                 return PIn::Sink { sink: b, label: items };
             }
-            return PIn::Res(b);
+            // One input edge per satisfying type (F-055 #3): a multi-type
+            // requirement means any of these resources can arrive here.
+            return PIn::Res(bases);
         }
         return PIn::Unknown(format!("{t}: {bounds}"));
     }
@@ -182,7 +204,7 @@ fn resolve_param(cm: &CrateModel, fdef: &FnDef, pty: &str) -> PIn {
     if cm.resources.get(&b).map(|r| r.kind == ResKind::BoundaryObject).unwrap_or(false) {
         PIn::Obj(b)
     } else {
-        PIn::Res(b)
+        PIn::Res(vec![b])
     }
 }
 
@@ -353,7 +375,7 @@ pub fn build_top_level(cm: &mut CrateModel, core_locs: &BTreeMap<String, Loc>) -
         let mut objs: Vec<String> = Vec::new();
         for (_, pty) in &f.params {
             match resolve_param(cm, f, pty) {
-                PIn::Res(b) => in_bases.push(b),
+                PIn::Res(bs) => in_bases.extend(bs),
                 PIn::Obj(b) => objs.push(b),
                 PIn::Sink { sink, label } => sink_edges.push((f.name.clone(), sink, label)),
                 PIn::Supplier { src, label } => {

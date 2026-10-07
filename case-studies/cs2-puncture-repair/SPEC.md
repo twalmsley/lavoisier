@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.2 |
+| Specification version | v0.3 (implemented) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -172,6 +172,22 @@ framing; unbounded waste stream with no disposal step; single History; per-path 
 outcome-grouping variants; the round quantities; REQ-012 stays multi-type). Question 5 —
 **changed:** P4 gets its own 60 000 ms draw (path totals updated above to 900 000 /
 1 020 000 / 1 080 000 ms).
+
+Implementation round-trip feedback (2026-10-07):
+1. **A state change must have an owning process:** §5 routed the dead tube to recycling but no
+   process owned located→dead; the model needed an explicit `retire_tube` (R9). Folded into
+   the flows; future specs should name every conversion.
+2. **Nested-kit encoding:** the cement tube is the kit type's own continuous magnitude
+   (`PatchKit<Patches, CEMENT_G>`), drawn through the kit's boundary — not a held container
+   object (F-040 forbids tripwired held contents). Both kinds of contents remain facts of one
+   sealed kit type.
+3. **Unbounded sinks discard (F-029):** the "3 g / 6 g in the waste stream" end states are
+   assertable only arithmetically from the constants, not by inspecting the sink.
+4. **Ordering precision:** the expressible P5 orderings are around wallet-readying and
+   dead-tube retirement; buying the spare *before* the second failure is deliberately
+   inexpressible (F-050 extension) — a feature, now stated as one.
+5. **REQ-012's multi-type satisfaction** exposed the F-055 point-3 diagram ambiguity as a
+   real silent error; the generator now draws one edge per satisfying type (fixed same day).
 
 Original questions, for the record:
 

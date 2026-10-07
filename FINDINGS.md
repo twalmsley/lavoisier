@@ -9,7 +9,8 @@ implementation; F-042…F-052 added 2026-10-02 from the `RESULTS.md` files of ex
 through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model-core` by path,
 with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
 R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build; F-015 extended 2026-10-03 by
-the learning-materials build; F-055 added 2026-10-06 by the diagram-generator build.
+the learning-materials build; F-055 added 2026-10-06 by the diagram-generator build; F-050 extended and F-055 point 3
+resolved 2026-10-07 by the CS-2 build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1222,6 +1223,12 @@ a one-retry flow).
 
 **Evidence:** EXP-10 (`src/flows.rs::drill_with_one_retry`, `tests/flows.rs`).
 
+**Extended (2026-10-07, CS-2 build):** provisioning bounds more than retry counts — it also
+polices *when* contingency resources may be acquired. A pessimistic early purchase (buying the
+spare before the second failure is known) is statically inexpressible as a complete flow: on
+the success arm the unused spare's only consumer is already claimed by the patched tube, a
+dead end. Contingency purchases therefore sit on the failure arm by construction.
+
 ---
 
 ## F-051 — Money needs no new kernel machinery: one dimension per currency, and an exact-price `Consumer` impl turns wrong payments into type-check-time errors that name the right price
@@ -1351,4 +1358,11 @@ which will lean on the same extraction.
 
 **Evidence:** `tools/diagram-gen/src/{scan,flow}.rs`; the WARN comments in
 `docs/diagrams/pilot-workshop/*.md`.
+
+**Point 3 RESOLVED (2026-10-07, CS-2 build):** the predicted ambiguity became a real, silent
+error — CS-2's multi-type REQ-012 made the top-level diagram route the spare tube to "caller"
+instead of into `refit_and_inflate`, with no warning. Fixed in `tools/diagram-gen`: a
+requirement bound now resolves to **one input edge per satisfying type**, and the remaining
+single-pick contexts (sink/boundary-object positions) WARN instead of silently taking the
+first. trace.sh itself handled the many-to-many case correctly from the start.
 

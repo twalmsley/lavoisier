@@ -1,0 +1,22 @@
+error[E0308]: mismatched types
+  --> tests/ui/pay_wrong_price.rs:14:48
+   |
+14 |     let counter = send_to(new_parts_counter(), underpayment);
+   |                   -------                      ^^^^^^^^^^^^ expected `650`, found `600`
+   |                   |
+   |                   arguments to this function are incorrect
+   |
+   = note: expected struct `Money<650>`
+              found struct `Money<600>`
+help: the return type of this call is `Money<600>` due to the type of the argument passed
+  --> tests/ui/pay_wrong_price.rs:14:19
+   |
+14 |     let counter = send_to(new_parts_counter(), underpayment);
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^------------^
+   |                                                |
+   |                                                this argument influences the return type of `send_to`
+note: function defined here
+  --> $WORKSPACE/model-core/src/boundary.rs
+   |
+   | pub fn send_to<I, C: Consumer<I>>(consumer: C, item: I) -> C::Next {
+   |        ^^^^^^^

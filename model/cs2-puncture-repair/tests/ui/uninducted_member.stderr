@@ -1,0 +1,21 @@
+error[E0277]: this person may not use the workstand: `Person<1800000>` is not an inducted workshop member (REQ-010)
+  --> tests/ui/uninducted_member.rs:12:24
+   |
+12 |     let r = open_wheel(person, new_workstand(), wheel_arrives_for_service());
+   |             ---------- ^^^^^^ REQ-010: workshop tools may be used only by an inducted member
+   |             |
+   |             required by a bound introduced by this call
+   |
+   = help: the trait `Inducted` is not implemented for `Person<1800000>`
+   = note: induction is granted at the boundary (R12/R18): `qualify::<Induction, BUDGET>(person)` wraps a `Person` into a `Qualified` member
+help: the trait `Inducted` is implemented for `Qualified<Induction, MS>`
+  --> src/characteristics.rs
+   |
+   | impl<const MS: u64> Inducted for model_core::common::Qualified<Induction, MS> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Person<1800000>` to implement `Req010InductedAtTheWorkstand`
+note: required by a bound in `open_wheel`
+  --> src/resources.rs
+   |
+   |     pub fn open_wheel<O: Req010InductedAtTheWorkstand>(member: O, workstand: Workstand, wheel: PuncturedWheel) -> (O, Workstand, Op...
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `open_wheel`

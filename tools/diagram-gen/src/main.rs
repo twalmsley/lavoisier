@@ -514,7 +514,11 @@ fn main() {
     let root = PathBuf::from(args.next().unwrap_or_else(|| ".".to_string()));
     let mut crates: Vec<String> = args.collect();
     if crates.is_empty() {
-        crates = vec!["cs1-pot-of-tea".to_string(), "pilot-workshop".to_string()];
+        crates = vec![
+            "cs1-pot-of-tea".to_string(),
+            "cs2-puncture-repair".to_string(),
+            "pilot-workshop".to_string(),
+        ];
     }
 
     // Line locations for the fixed model-core helper API, for legend links.

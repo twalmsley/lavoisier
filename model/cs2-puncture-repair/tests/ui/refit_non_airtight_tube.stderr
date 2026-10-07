@@ -1,0 +1,22 @@
+error[E0277]: this tube may not be fitted to the wheel: `PatchedTube<183>` is not airtight (REQ-012: patched-and-checked, or new)
+  --> tests/ui/refit_non_airtight_tube.rs:17:42
+   |
+17 |     let r = refit_and_inflate::<2083, _, _>(member, new_workstand(), new_pump(), open, unchecked);
+   |                                          ^ REQ-012: a wheel may be refitted only with an airtight tube
+   |
+   = help: the trait `Airtight` is not implemented for `PatchedTube<183>`
+   = note: two states satisfy this requirement (deliberately multi-type): `check_patch` produces the checked `CheckedTube`, and `buy_spare` supplies a new `SpareTube`
+help: the following other types implement trait `Airtight`
+  --> src/resources.rs
+   |
+   | impl<const V: u64> Airtight for CheckedTube<V> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `CheckedTube<V>`
+...
+   | impl Airtight for SpareTube {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^ `SpareTube`
+   = note: required for `PatchedTube<183>` to implement `Req012AirtightTubeOnly`
+note: required by a bound in `refit_and_inflate`
+  --> src/resources.rs
+   |
+   | ...10InductedAtTheWorkstand, T: Req012AirtightTubeOnly>(member: O, workstand: Workstand, pump: Pump, wheel: OpenWheel, tube: T) ->...
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `refit_and_inflate`

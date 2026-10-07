@@ -12,6 +12,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cs2-puncture-repair"
+version = "0.1.0"
+dependencies = [
+ "cs2-puncture-repair",
+ "model-core",
+ "trybuild",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

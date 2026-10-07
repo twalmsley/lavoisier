@@ -1,0 +1,46 @@
+error[E0277]: this tube may not be patched: `PuncturedTube` does not have a located puncture (REQ-011)
+  --> tests/ui/patch_unlocated_tube.rs:21:48
+   |
+21 |     let r = patch_tube::<1, 183, 3, 1_800_000, _, _>(
+   |                                                ^ REQ-011: only a located puncture may be patched
+   |
+   = help: the trait `PunctureLocated` is not implemented for `PuncturedTube`
+   = note: locating is a process (one type per state, R9): `find_hole` turns a `PuncturedTube` into a `LocatedTube` - only that state can be patched
+help: the trait `PunctureLocated` is implemented for `LocatedTube`
+  --> src/resources.rs
+   |
+   | impl PunctureLocated for LocatedTube {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `PuncturedTube` to implement `Req011LocatedBeforePatching`
+note: required by a bound in `patch_tube`
+  --> src/resources.rs
+   |
+   | ...SPENT_G: u64, const B: u64, T: Req011LocatedBeforePatching, W: Req013FailedPatchesToWasteStream + Consumer<SpentPatch<SPENT_G>>>...
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `patch_tube`
+
+error[E0277]: `PuncturedTube` is not a tube with a located puncture (REQ-011: only a located puncture may be patched)
+  --> tests/ui/patch_unlocated_tube.rs:21:13
+   |
+21 |       let r = patch_tube::<1, 183, 3, 1_800_000, _, _>(
+   |  _____________^
+22 | |         member,
+23 | |         punctured_tube,
+24 | |         patch,
+...  |
+27 | |         new_waste_stream(),
+28 | |     );
+   | |_____^ a tube with its puncture located is required here
+   |
+   = help: the trait `PunctureLocated` is not implemented for `PuncturedTube`
+   = note: locating is a process (one type per state, R9): `find_hole` turns a `PuncturedTube` into a `LocatedTube` - no blind patching
+help: the trait `PunctureLocated` is implemented for `LocatedTube`
+  --> src/resources.rs
+   |
+   | impl PunctureLocated for LocatedTube {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `PuncturedTube` to implement `Req011LocatedBeforePatching`
+note: required by a bound in `PatchFail`
+  --> src/resources.rs
+   |
+   | pub struct PatchFail<T: Req011LocatedBeforePatching, W, const B: u64> {
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `PatchFail`
