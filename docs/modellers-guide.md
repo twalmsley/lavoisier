@@ -6,8 +6,10 @@
 > compiler says when you get it wrong. Everything here is illustrated from real code in this
 > repository — mostly the CS-1 case study (`model/cs1-pot-of-tea/`, built from
 > `case-studies/cs1-pot-of-tea/SPEC.md`), with the pilot (`model/pilot-workshop/`) covering
-> what CS-1 doesn't: fallible processes, qualifications and safety, and money. File paths are
-> given throughout so you can open the worked example next to this guide.
+> what CS-1 doesn't: fallible processes, qualifications and safety, and money. The later
+> case studies (CS-2..CS-5, `model/cs2-*` through `model/cs5-*`) carry the multi-crate
+> patterns of section 3.7. File paths are given throughout so you can open the worked
+> example next to this guide.
 >
 > F-numbers refer to entries in `FINDINGS.md`; R-numbers to `instructions.md`.
 >
@@ -448,6 +450,55 @@ code cannot defuse spent teabags.
 - **Tripwire demos** are `#[should_panic(expected = "resource leak: …")]` tests — one from
   inside the boundary and one downstream via `test_fixture()`.
 
+### 3.7 Multi-crate models
+
+A model split across crates is the R1 subsystem pattern: each crate is a team-shaped
+subsystem, and the crate edge is an interface the compiler polices. CS-4 (two crates:
+`model/cs4-stores` + `model/cs4-line`) and CS-5 (three: `model/cs5-supply` +
+`model/cs5-logistics` + `model/cs5-works`) are the worked examples. The patterns the ladder
+proved:
+
+- **The crate edge is itself a requirement.** CS-4's REQ-019 ("assemblies only from
+  stores-issued materials") is not a trait anyone could forget to bound — `cs4-stores` owns
+  every material type and its seal, so `cs4-line` *physically cannot* mint or source
+  materials (F-006/EXP-08 carrying a real model). Put the resources, their seals and the
+  stock in the owning subsystem's crate; downstream crates get processes only. See the
+  ownership table in `case-studies/cs4-batch-run/SPEC.md` §3 and the crate docs in
+  `model/cs4-stores/src/lib.rs`.
+- **Cross-crate requirement bounds split R10 in two (F-054 ext.).** The sealed
+  characteristic trait (with its associated-const magnitudes) lives *beside the type in the
+  owning crate*; the requirement trait lives *with whoever states the requirement*. CS-5's
+  REQ-025 is the first cross-crate bound: the works' requirement
+  (`model/cs5-works/src/requirements.rs`) bounds supply's sealed `GoodsInInspected`
+  characteristic (`model/cs5-supply/src/characteristics.rs`).
+- **Permits are same-crate only; cross-crate consumption is by keeping (F-054 ext.).** A
+  permit type (section 3.4) is unconstructible downstream, so a crate consuming another
+  crate's sealed resource cannot extract from it. The working shape is to *keep* the
+  resource as untripwired payload inside the product (F-040) — CS-4's `Assembly` keeps its
+  stores-sealed bolts (`model/cs4-stores/src/resources.rs`).
+- **Money across crates: the holder wraps, the currency owner mints (F-057).** A downstream
+  account holds the owning crate's sealed cash *by value as payload*
+  (`Account<P>` holding `Money<P>`, `model/cs5-works/src/resources.rs`), with draws/deposits
+  composed from the owner's public conserving `split`/`combine` — balance parameter and held
+  cash cannot drift. And owning a currency obliges you to ship parameterized boundary
+  entry/exit functions (`gbp_enters_the_model::<P>` / `gbp_leaves_the_model::<P>`,
+  `model/cs5-supply/src/resources.rs`), because downstream boundary objects cannot mint
+  sealed cash — F-035's "whoever mints ships a sink", extended to the entries.
+- **Budgets threaded through type-level recursion need the quantum clock (F-056).** A const
+  budget cannot descend through a recursive batch trait on stable (`B − 150_000` needs
+  nightly). CS-4's operator holds time as Peano quanta (`Operator<Q: Nat>`, 150 × 30 000 ms),
+  decremented structurally per fixed-size draw, each draw minting conserved `Effort<MS>` in
+  real milliseconds for the History (`model/cs4-line/src/batch.rs`; the `Operator` type in
+  `model/cs4-stores/src/resources.rs`). Costs: draws come in fixed quanta, and the ~40-line
+  F-043 parallel-labour fork; the upside: overdraw is a check-time, editor-visible error.
+  Use plain `Person<BUDGET>` with caller-stated remainders everywhere else, and say which
+  encoding each actor uses.
+- **Know the two cross-crate error shapes.** Change impact arrives in **per-crate waves**
+  (F-001 ext.): `cargo build` stops at the first failing crate, so fix wave *n* to see wave
+  *n*+1 — `case-studies/cs4-batch-run/CHANGE-IMPACT.md` is the worked catalogue. And the
+  diagram generator currently scans per crate (F-055), so a multi-crate model's cross-crate
+  flows WARN rather than render — a known tool gap, not a model error.
+
 ---
 
 ## 4. Reading compiler errors
@@ -564,7 +615,9 @@ hop inside the wrapper — the decimal magnitudes still identify the offending c
 The type-level capacity exceeds the crate's `recursion_limit`: the box is too big for the
 current limit. Peano needs ≈ N + 3; the mandated `#![recursion_limit = "2048"]` covers
 capacities to ~2000, and the attribute is **per crate** — a new crate (including each
-integration-test file) that forgets it gets this error at capacity ~130 (F-010). Keep
+integration-test file) that forgets it gets this error at roughly capacity 100–130 — and
+CS-4 measured a 100-item supplier *plus its fill machinery* needing ≈151, so the default no
+longer covers even 100 (F-010 and its CS-4 extension). Keep
 capacities ≤ ~500 where convenient; compile time goes superlinear past that (F-011).
 
 ### 4.6 E0451 "field `_seal` … is private" / E0423

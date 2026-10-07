@@ -50,16 +50,16 @@ project, and both are documented.
 | Path | What it is |
 |---|---|
 | [`instructions.md`](instructions.md) | The agreed requirements of the modelling approach itself (R1–R19): conservation rules, type-level capacity, traceability conventions, the lint/tripwire regime, boundary design, fallible processes, qualifications, money, open questions. Every rule is backed by experiment evidence. |
-| [`FINDINGS.md`](FINDINGS.md) | The findings log (F-001–F-054): everything stable Rust could not express, what each limitation cost, and the workaround adopted — from "conservation errors are invisible to `cargo check`" to a deterministic rustc SIGBUS. |
+| [`FINDINGS.md`](FINDINGS.md) | The findings log (F-001–F-057): everything stable Rust could not express, what each limitation cost, and the workaround adopted — from "conservation errors are invisible to `cargo check`" to a deterministic rustc SIGBUS. |
 | [`experiments/`](experiments/) | Twelve self-contained experiment crates (EXP-01–EXP-12), each testing one risky claim in isolation, with per-criterion verdicts and verbatim compiler output in each `RESULTS.md`. |
-| [`model/`](model/) | The real library: **`model-core`** (type-level numbers, units and quantities, the sealed-resource kernel, boundary traits, execution history, requirement macros), **`pilot-workshop`** (a complete small model — cut → drill → fasten — with fallible drilling, a qualified operator, money, and live requirements traceability) and **`cs1-pot-of-tea`** (the CS-1 case-study model). Gated by `ci.sh`. |
+| [`model/`](model/) | The real workspace, ten crates gated by `ci.sh`: **`model-core`** (type-level numbers, units and quantities, the sealed-resource kernel, boundary traits, execution history, requirement macros), **`pilot-workshop`** (a complete small model — cut → drill → fasten — with fallible drilling, a qualified operator, money, and live requirements traceability), and the eight case-study crates: **`cs1-pot-of-tea`**, **`cs2-puncture-repair`**, **`cs3-cafe-orders`**, the two-crate **`cs4-stores`**/**`cs4-line`** subsystem pair, and the three-crate **`cs5-supply`**/**`cs5-logistics`**/**`cs5-works`** split. |
 | [`docs/`](docs/) | Project documentation, led by the **[modeller's guide](docs/modellers-guide.md)**: the practical companion to `instructions.md` — setting up a model crate, the spec-to-model walkthrough on CS-1, the full error-reading guide, the must-not-break checklist, and the known limitations stated plainly. |
 | [`docs/tutorials/`](docs/tutorials/) + [`learn/`](learn/) | The learning materials: a numbered tutorial sequence (from a Rust on-ramp for systems engineers to a capstone model), paired with a hands-on exercises crate — broken files you fix until `cargo test` passes, with solutions. |
-| [`docs/white-paper.md`](docs/white-paper.md) | The white paper (v0.1, living): the full account — motivation, method, approach, experiments, findings, limitations, conclusions — with a committed PDF rebuilt by `docs/build-paper.sh`. |
+| [`docs/white-paper.md`](docs/white-paper.md) | The white paper (v0.2, living): the full account — motivation, method, approach, experiments, the case-study ladder, findings, limitations, conclusions — with a committed PDF rebuilt by `docs/build-paper.sh`. |
 | [`docs/diagrams/`](docs/diagrams/) | Generated diagrams for each model crate at three levels (context, top-level, detailed): GitHub-rendered Mermaid with legend tables hyperlinking every node into the source. Regenerate with `tools/diagrams.sh` (`tools/diagram-gen`, std-only). |
 | [`decks/`](decks/) | Slide decks: the non-technical overview (12 slides) and the technical features tour (22 slides) — markdown sources rendered by GitHub, with committed PDFs rebuilt by `decks/build.sh`. |
 | [`SPEC_TEMPLATE.md`](SPEC_TEMPLATE.md) | The natural-language specification template new models are written from: each section maps mechanically onto model elements, and anything a spec leaves out comes back as a numbered question rather than a guess. |
-| [`case-studies/`](case-studies/) | The agreed case-study specifications (filled-in copies of the template), starting with [CS-1: making a pot of tea](case-studies/cs1-pot-of-tea/SPEC.md) — the first spec→model round trip, implemented as `model/cs1-pot-of-tea`. |
+| [`case-studies/`](case-studies/) | The agreed case-study specifications (filled-in copies of the template), all five implemented: [CS-1 making a pot of tea](case-studies/cs1-pot-of-tea/SPEC.md), [CS-2 bicycle puncture repair](case-studies/cs2-puncture-repair/SPEC.md) (fallibility, rework, money), [CS-3 café order fulfilment](case-studies/cs3-cafe-orders/SPEC.md) (real concurrency, merged Histories), [CS-4 small-batch production run](case-studies/cs4-batch-run/SPEC.md) (scale, two subsystem crates, and the measured [change-impact exercise](case-studies/cs4-batch-run/CHANGE-IMPACT.md)) and [CS-5 two-site fulfilment](case-studies/cs5-two-site/SPEC.md) (two currencies, transport, three team-shaped crates). |
 | [`PLAN.md`](PLAN.md) | The programme plan for the case-study and publication phase: the case-study ladder (CS-1–CS-5, each stressing something no earlier one did), the deliverables in order, and the live status table. |
 
 ## Getting started
@@ -96,9 +96,11 @@ outright), the loss is recorded as a finding and mitigated, not papered over.
 
 Working and verified: the core library with all agreed requirements implemented (R1–R19,
 including execution history, fallible processes, qualifications and money), the pilot
-model, and the full CI gate. The case-study programme ([`PLAN.md`](PLAN.md)) is underway:
-CS-1 (making a pot of tea) is done — agreed spec, full gate green, findings logged — and
-the documentation step that produced the [modeller's guide](docs/modellers-guide.md) came
-next, with learning materials, slide decks and the white paper to follow. Open questions —
-validation vs verification, document generation, change impact, tolerances — are listed at
-the end of `instructions.md`.
+model, and the full CI gate. The **case-study ladder is complete** ([`PLAN.md`](PLAN.md)):
+CS-1 through CS-5 each ran the spec→model round trip — agreed spec, full gate green,
+findings logged (through F-057) — alongside the delivered documentation, learning
+materials, slide decks, white paper (v0.2) and generated diagrams. Next per the plan:
+steps 9–11 — process document generation, the DSL experiments, and model analysis. Open
+questions — validation vs verification, document generation, tolerances — are listed at
+the end of `instructions.md`; change impact now has its measured demonstration in
+[CS-4's change-impact exercise](case-studies/cs4-batch-run/CHANGE-IMPACT.md).

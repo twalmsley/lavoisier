@@ -73,7 +73,8 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 CS-4 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
 | 12 CS-4 model | done (`model/cs4-stores` + `model/cs4-line`; full 25-cycle recursion; CHANGE-IMPACT.md) | F-056; F-001/F-010/F-011/F-055 extended | 2026-10-07: closed (quantum clock approved) |
 | 12 CS-5 spec | done (v0.2 agreed) | — | 2026-10-07: three crates (logistics separate); payment transfer abstracted; rest as proposed |
-| 12 CS-5 model | done (`model/cs5-supply` + `cs5-logistics` + `cs5-works`; ladder complete) | F-057; F-054 extended | pending |
-| 9 Process docgen (B) | not started | | |
+| 12 CS-5 model | done (`model/cs5-supply` + `cs5-logistics` + `cs5-works`; ladder complete) | F-057; F-054 extended | 2026-10-07: closed |
+| 12 Post-ladder increments | done (white paper v0.2 25 pp; decks refreshed in place; guide §3.7 multi-crate; README) | — | 2026-10-07: verified |
+| 9 Process docgen (B) | in progress | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |

@@ -18,7 +18,7 @@ date: "October 2026"
 
 - `instructions.md` — the 19 agreed rules (R1–R19), the normative spec
 - `model-core` — the library: numbers, units, resource kernel, boundary, history, requirements
-- Downstream **model crates** — one per system modelled (pilot workshop, CS-1 pot of tea)
+- Downstream **model crates** — per system modelled: the pilot workshop plus the five case studies (CS-1..CS-5)
 - The evidence loop: *experiment → finding (F-NNN) → rule (R-NN) → implementation*
 - One repository, one verification gate (`ci.sh`)
 
@@ -151,17 +151,18 @@ date: "October 2026"
 - Six steps, one command: full build, all tests, strict lints, a plain production build, the traceability report, a feature-placement audit
 - Why a *full build*: the balance checks fire late in compilation — quick checks and editors cannot see them
 - Why a *plain build*: proves test fixtures cannot leak into production models
-- Over 100 checks, green end to end, on every change
+- Over 200 checks, green end to end, on every change
 
 # Evidence and limits
 
-- 12 controlled experiments; 54 findings, each citing verbatim compiler evidence
+- 12 controlled experiments; 57 findings, each citing verbatim compiler evidence
+- Five case studies — pot of tea to two-site fulfilment — ran the method end to end; CS-4's change-impact probes measured the "impact analysis for free" claim
 - Highlights: balance checks invisible to editors (F-001); the silent-drop gap (F-002); a reproducible compiler crash found and fenced (F-034); diagnostics that erase aliases (F-009)
 - Every rule in the method cites the finding that justifies it — and the limitations are part of the record
 
 # Where to go next
 
-- Learn: tutorials 00–06 → `learn/` exercises → CS-1's code → the modeller's guide
-- Watch the roadmap: generated diagrams, generated work instructions, model analysis, a dedicated DSL
-- Read the white paper (forthcoming) for the full account
+- Learn: tutorials 00–06 → `learn/` exercises → the case-study code (CS-1..CS-5) → the modeller's guide
+- Diagrams are generated from every model (`docs/diagrams/`); the roadmap holds generated work instructions, model analysis, a dedicated DSL
+- Read the white paper (`docs/white-paper.md`, v0.2) for the full account
 - Or simply: open the repository and run `./ci.sh`

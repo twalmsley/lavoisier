@@ -54,9 +54,10 @@ date: "October 2026"
 # The evidence so far
 
 - 12 controlled experiments — every design rule is backed by measured evidence
-- 19 agreed rules; 54 documented findings, including the honest limitations
-- A working library and two complete models (a workshop assembly; making a pot of tea)
-- Over 100 automated checks run on every change, end to end
+- 19 agreed rules; 57 documented findings, including the honest limitations
+- A working library and six complete models — a workshop pilot plus five case studies,
+  from everyday (a pot of tea, a puncture repair) to industrial (a batch run, two-site fulfilment)
+- Over 200 automated checks run on every change, end to end
 
 # What it costs — honestly
 
@@ -73,8 +74,9 @@ date: "October 2026"
 
 # Where this goes
 
-- A ladder of case studies: from a pot of tea to multi-site production
-- Generated outputs: diagrams at every level of detail; work instructions people can follow
+- The case-study ladder is **complete**: from a pot of tea to two-site production with procurement
+- Diagrams are already generated from every model, at three levels of detail
+- Next: generated work instructions people can follow
 - Analysis tools that point out gaps and weak style in a model
 - A dedicated notation (a DSL), so engineers write models without writing Rust
 
