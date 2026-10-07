@@ -17,6 +17,9 @@ Diagram nodes carry absolute `click` links into the defining source line (GitHub
 | `cs3-cafe-orders` — case study CS-3: café order fulfilment | [context](cs3-cafe-orders/context.md) | [top-level](cs3-cafe-orders/top-level.md) | [detailed](cs3-cafe-orders/detailed.md) |
 | `cs4-stores` — case study CS-4, the stores subsystem | [context](cs4-stores/context.md) | [top-level](cs4-stores/top-level.md) | [detailed](cs4-stores/detailed.md) |
 | `cs4-line` — case study CS-4, the production-line subsystem | [context](cs4-line/context.md) | [top-level](cs4-line/top-level.md) | [detailed](cs4-line/detailed.md) |
+| `cs5-supply` — case study CS-5, the supply subsystem | [context](cs5-supply/context.md) | [top-level](cs5-supply/top-level.md) | [detailed](cs5-supply/detailed.md) |
+| `cs5-logistics` — case study CS-5, the logistics subsystem | [context](cs5-logistics/context.md) | [top-level](cs5-logistics/top-level.md) | [detailed](cs5-logistics/detailed.md) |
+| `cs5-works` — case study CS-5, the works subsystem | [context](cs5-works/context.md) | [top-level](cs5-works/top-level.md) | [detailed](cs5-works/detailed.md) |
 | `pilot-workshop` — the downstream pilot model | [context](pilot-workshop/context.md) | [top-level](pilot-workshop/top-level.md) | [detailed](pilot-workshop/detailed.md) |
 
 Regenerate after a model change:

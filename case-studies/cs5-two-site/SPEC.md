@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.2 |
+| Specification version | v0.3 (implemented) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -163,6 +163,18 @@ payment transfer is abstracted** — the ec are remitted flow-routed to the vend
 and the order travel (P2/P3 and §7 updated). Questions 3–7 agreed as proposed (refinement
 pair; exact-exchange reliance on F-052; packaging + finite bin + P8; single operator and
 budget-less organisations; quantities).
+
+Implementation round-trip feedback (2026-10-07):
+1. **The purchase order** is required by P2/P3 but was missing from §3's resource table —
+   implemented as a supply-sealed `PurchaseOrder`; future specs: every token in §5 belongs in §3.
+2. **P1's crate assignment:** the bureau half lives in supply, the account-draw call side in
+   works — the §3/§5 split read two ways; resolved per the ownership table.
+3. **"The vendor keeps its revenue"** is F-029 boundary discard with the dimension's books
+   stated arithmetically (2340 minted = 2340 paid) — a type-level revenue counter is
+   inexpressible on stable (F-028 shape), consistent with §7's intent.
+4. **Cross-crate patterns found:** the holder-wraps/owner-mints money shape (F-057) and the
+   same-crate-only limit on permits (F-054 extension) — both now recorded for future
+   multi-crate specs.
 
 Original questions, for the record:
 

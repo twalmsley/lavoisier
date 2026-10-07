@@ -520,6 +520,9 @@ fn main() {
             "cs3-cafe-orders".to_string(),
             "cs4-stores".to_string(),
             "cs4-line".to_string(),
+            "cs5-supply".to_string(),
+            "cs5-logistics".to_string(),
+            "cs5-works".to_string(),
             "pilot-workshop".to_string(),
         ];
     }

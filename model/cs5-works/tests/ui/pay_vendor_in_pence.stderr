@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/pay_vendor_in_pence.rs:16:57
+   |
+16 |     let (boxed, vendor) = sell_component(vendor, order, pence);
+   |                           --------------                ^^^^^ expected `Euros<2340>`, found `Money<2340>`
+   |                           |
+   |                           arguments to this function are incorrect
+   |
+   = note: expected struct `Euros<2340>`
+              found struct `Money<2340>`
+note: function defined here
+  --> $WORKSPACE/cs5-supply/src/resources.rs
+   |
+   |     pub fn sell_component<V: Req023PaidInEuroCents + Consumer<PurchaseOrder>>(vendor: V, order: PurchaseOrder, payment: Euros<COMPO...
+   |            ^^^^^^^^^^^^^^

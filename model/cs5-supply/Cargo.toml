@@ -1,0 +1,39 @@
+# CS-5: two-site fulfilment with procurement — the BOUNDARY-REFINEMENT
+# capstone, split across three team-shaped crates (SPEC §3). This crate is the
+# SUPPLY subsystem: euro cents (the new currency dimension, R19), the bureau
+# and its exchange process (R19's last unexercised clause), the vendor
+# organisation with its FINITE 3-component stock (the refined R12 placeholder
+# — every earlier vendor was an unbounded `Next = Self` form), the boxed
+# component and its packaging, and REQ-023/REQ-024. The sibling crates
+# `cs5-logistics` (courier transport) and `cs5-works` (the UK workshop) depend
+# on it; the crate edge carries the currency seals (EXP-08, F-005/F-006).
+# Built from the agreed specification ../../case-studies/cs5-two-site/SPEC.md
+# (v0.2, agreed), following instructions.md and the cs2/cs4 layouts.
+
+[package]
+name = "cs5-supply"
+version = "0.1.0"
+edition = "2024"
+description = "Case study CS-5, supply subsystem: the euro-cent currency dimension (R19), the bureau exchange at 117 ec per 100 p, the EU vendor refined from an unbounded placeholder into a finite 3-component stock, the boxed precision component and its packaging - the upstream crate of the three-crate two-site model"
+
+[features]
+# Downstream-test fixtures (R1, FINDINGS.md F-004): the model-core resource
+# kernel macros expand `test_fixture()` constructors behind the INVOKING
+# crate's `test-support` feature, so this crate declares the feature too. It
+# is enabled ONLY via [dev-dependencies] re-declarations; ci.sh polices that
+# it never appears under any [dependencies]-like section.
+test-support = []
+
+[dependencies]
+# Production dependency: NO features (the plain `cargo build` in ci.sh is
+# what proves production code cannot reach fixture constructors, F-004).
+model-core = { path = "../model-core" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../model-core", features = ["test-support"] }
+cs5-supply = { path = ".", features = ["test-support"] }
+# No trybuild here: CS-5's type-check-time compile-fail cases all probe the
+# crate edges and the downstream bounds, so they live in cs5-works/tests/ui
+# (R4); this crate's conservation regressions are rustdoc `compile_fail`
+# doc-tests (F-001, F-003).

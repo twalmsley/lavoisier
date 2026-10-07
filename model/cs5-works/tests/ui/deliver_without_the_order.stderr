@@ -1,0 +1,21 @@
+error[E0277]: this delivery may not proceed: `PurchaseOrder` is not the customer's order token (REQ-026)
+  --> tests/ui/deliver_without_the_order.rs:19:29
+   |
+19 |         deliver(instrument, not_the_order, payment, customer, account);
+   |         -------             ^^^^^^^^^^^^^ REQ-026: delivery happens only against the customer's order, with payment taken on delivery
+   |         |
+   |         required by a bound introduced by this call
+   |
+   = help: the trait `ProofOfOrder` is not implemented for `PurchaseOrder`
+   = note: the order is placed at the boundary (`place_order`) and is the only key `deliver` accepts; the 9000 p payment is consumed in the same process (payment on delivery)
+help: the trait `ProofOfOrder` is implemented for `CustomerOrder`
+  --> src/resources.rs
+   |
+   | impl ProofOfOrder for CustomerOrder {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `PurchaseOrder` to implement `Req026DeliveryAgainstTheOrder`
+note: required by a bound in `deliver`
+  --> src/resources.rs
+   |
+   | ...: u64, C: GoodsInInspected, O: Req026DeliveryAgainstTheOrder, K: Consumer<Instrument<C, IG>>>(instrument: Instrument<C, IG>, ord...
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `deliver`

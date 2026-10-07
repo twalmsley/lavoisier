@@ -1,0 +1,37 @@
+# CS-5: two-site fulfilment with procurement — the BOUNDARY-REFINEMENT
+# capstone. This crate is the LOGISTICS subsystem: the contracted courier
+# organisation, the four location-states of its loop (at-UK / outbound /
+# at-vendor / inbound — one type per location-state, R9), and the
+# consign/carry/purchase/hand-over transport processes. REQ-027 (all
+# inter-site transport by the contracted courier) lives here. Depends on
+# cs5-supply (the purchase order, the euro cents it escorts the goods for,
+# and the boxed component it carries home); cs5-works depends on both.
+# Built from the agreed specification ../../case-studies/cs5-two-site/SPEC.md
+# (v0.2, agreed).
+
+[package]
+name = "cs5-logistics"
+version = "0.1.0"
+edition = "2024"
+description = "Case study CS-5, logistics subsystem: the contracted courier organisation with one sealed type per location-state (at-UK, outbound, at-vendor, inbound), the consign/carry/purchase-at-vendor/hand-over transport processes, and REQ-027 - the middle crate of the three-crate two-site model"
+
+[features]
+# Declared so the model-core kernel macros' feature-gated fixtures compile
+# cleanly (unexpected_cfgs); enabled ONLY via the [dev-dependencies]
+# re-declarations below (R1, FINDINGS.md F-004).
+test-support = []
+
+[dependencies]
+# Production dependencies: NO features (the plain `cargo build` in ci.sh is
+# what proves production code cannot reach fixture constructors, F-004).
+model-core = { path = "../model-core" }
+cs5-supply = { path = "../cs5-supply" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../model-core", features = ["test-support"] }
+cs5-supply = { path = "../cs5-supply", features = ["test-support"] }
+cs5-logistics = { path = ".", features = ["test-support"] }
+# No trybuild here: the REQ-027 compile-fail probe exercises the courier from
+# the works' side, so it lives in cs5-works/tests/ui with the other pinned
+# cases (R4).

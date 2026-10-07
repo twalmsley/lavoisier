@@ -1,0 +1,43 @@
+# CS-5: two-site fulfilment with procurement — the BOUNDARY-REFINEMENT
+# capstone. This crate is the WORKS subsystem: the UK workshop's GBP account
+# (a works-sealed container whose balance IS supply-sealed cash held by
+# value), the housing rack, goods-in inspection, assembly, the customer and
+# their order token, delivery with payment on delivery, and the finite
+# packaging bin with its P8 disposal. REQ-025 and REQ-026 live here. Depends
+# on cs5-supply and cs5-logistics: the crate edges carry the currency and
+# component seals (EXP-08, F-005/F-006) — the works can mint neither euro
+# cents nor components, proved by tests/ui/.
+# Built from the agreed specification ../../case-studies/cs5-two-site/SPEC.md
+# (v0.2, agreed).
+
+[package]
+name = "cs5-works"
+version = "0.1.0"
+edition = "2024"
+description = "Case study CS-5, works subsystem: the GBP account at 5000 p, the three-housing rack, goods-in inspection, assembly of the 1000 g instrument, delivery against the customer's order with 9000 p taken, and the capacity-5 packaging bin - the downstream crate of the three-crate two-site model, with the two flow orderings and the cross-currency compile-fail pins"
+
+[features]
+# Declared so the model-core kernel macros' feature-gated fixtures compile
+# cleanly (unexpected_cfgs); enabled ONLY via the [dev-dependencies]
+# re-declarations below (R1, FINDINGS.md F-004).
+test-support = []
+
+[dependencies]
+# Production dependencies: NO features (the plain `cargo build` in ci.sh is
+# what proves production code cannot reach fixture constructors, F-004).
+model-core = { path = "../model-core" }
+cs5-supply = { path = "../cs5-supply" }
+cs5-logistics = { path = "../cs5-logistics" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../model-core", features = ["test-support"] }
+cs5-supply = { path = "../cs5-supply", features = ["test-support"] }
+cs5-logistics = { path = "../cs5-logistics", features = ["test-support"] }
+cs5-works = { path = ".", features = ["test-support"] }
+# trybuild is the one allowed dev-dependency (R4), used ONLY for
+# type-check-time compile-fail cases (the cross-currency payment, the
+# crate-edge mint attempt, and the requirement/capacity bound probes);
+# conservation violations are post-monomorphization (F-001, F-003) and live
+# as rustdoc `compile_fail` doc-tests instead.
+trybuild = "1"

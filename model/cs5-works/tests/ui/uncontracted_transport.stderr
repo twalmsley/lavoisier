@@ -1,0 +1,25 @@
+error[E0277]: goods may not be moved between sites by `WhiteVan`: it is not the contracted courier (REQ-027)
+  --> tests/ui/uncontracted_transport.rs:14:27
+   |
+14 |     let courier = consign(WhiteVan, order);
+   |                   ------- ^^^^^^^^ REQ-027: all inter-site transport must be by the contracted courier
+   |                   |
+   |                   required by a bound introduced by this call
+   |
+help: the trait `ContractedCourier` is not implemented for `WhiteVan`
+  --> tests/ui/uncontracted_transport.rs:10:1
+   |
+10 | struct WhiteVan;
+   | ^^^^^^^^^^^^^^^
+   = note: only the sealed `CourierAtUk` carries the contract (F-026): consign it (`consign`), and the location-states carry the cargo by value from there
+help: the trait `ContractedCourier` is implemented for `CourierAtUk`
+  --> $WORKSPACE/cs5-logistics/src/resources.rs
+   |
+   | impl ContractedCourier for CourierAtUk {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `WhiteVan` to implement `Req027ContractedTransportOnly`
+note: required by a bound in `consign`
+  --> $WORKSPACE/cs5-logistics/src/resources.rs
+   |
+   |     pub fn consign<C: Req027ContractedTransportOnly>(courier: C, order: PurchaseOrder) -> OutboundCourier {
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `consign`

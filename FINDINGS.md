@@ -11,7 +11,8 @@ with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-
 R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build; F-015 extended 2026-10-03 by
 the learning-materials build; F-055 added 2026-10-06 by the diagram-generator build; F-050 extended and F-055 point 3
 resolved 2026-10-07 by the CS-2 build; F-041 and F-055 extended 2026-10-07 by the CS-3 build; F-056 added and F-001/F-010/F-011/F-055
-extended 2026-10-07 by the CS-4 build.
+extended 2026-10-07 by the CS-4 build; F-057 added and F-054 extended 2026-10-07 by the CS-5
+build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1354,6 +1355,13 @@ only required when the *returned* type's const parameters must vary with the inp
 **Evidence:** `model/cs1-pot-of-tea/src/characteristics.rs` (`Boiling`, `BrewPermit`),
 `src/resources.rs` (`pour_and_brew`).
 
+**Extended (2026-10-07, CS-5 build):** permit-gated extractions are **same-crate only** — a
+permit type is unconstructible downstream, so a crate consuming another crate's sealed
+resource cannot extract from it. The working cross-crate shapes: consume by **keeping** (the
+resource as untripwired payload inside the product, F-040), and the R10 split that goes with
+it — the sealed characteristic (with its magnitude consts) lives beside the type in the
+owning crate, while the requirement trait lives with whoever states the requirement.
+
 ---
 
 ## F-055 — Machine-reading the models: five gaps in the grep discipline (extends F-021/F-038)
@@ -1430,4 +1438,28 @@ choose per actor — ad-hoc draws (R15 style) or recursion-compatible quanta —
 
 **Evidence:** `model/cs4-line/src/batch.rs` (`Operator`, `BuildBatch`),
 `case-studies/cs4-batch-run/CHANGE-IMPACT.md` §6.
+
+---
+
+## F-057 — Cross-crate money: the holder wraps, the currency owner mints
+
+**What couldn't be expressed:** a downstream crate holding or moving another crate's sealed
+currency without new machinery. Two precedented moves were needed:
+
+- **The holder wraps:** the works' `Account<P>` holds the supply crate's sealed `Money<P>` by
+  value as payload, and its draws/deposits are compositions of supply's public conserving
+  `split`/`combine`. The balance const parameter and the held cash are the same number by
+  construction, so they cannot drift.
+- **The currency owner ships generic boundary entries:** downstream boundary objects (the
+  works' float, the customer's payment) cannot mint sealed cash, so a currency-owning crate
+  must export parameterized boundary in/out functions (`gbp_enters/leaves_the_model::<P>`) —
+  the same licence as model-core's `quantity::boundary`, now a stated obligation of owning a
+  currency (extends F-035's "whoever mints ships a sink" to "…and the boundary entries").
+
+**What it cost:** nothing beyond the pattern; a type-level revenue counter for the vendor is
+inexpressible on stable (the F-028/E0207 const-arithmetic shape), so boundary organisations'
+takings stay arithmetic-only (F-029).
+
+**Evidence:** `model/cs5-works/src/` (`Account`), `model/cs5-supply/src/` (boundary fns);
+CS-5 build report.
 

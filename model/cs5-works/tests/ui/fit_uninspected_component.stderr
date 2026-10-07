@@ -1,0 +1,53 @@
+error[E0277]: this part may not be fitted: `BoxedComponent` has not passed goods-in inspection at the UK site (REQ-025)
+  --> tests/ui/fit_uninspected_component.rs:15:39
+   |
+15 |     let instrument = assemble::<1050, _>(housing, boxed);
+   |                                       ^ REQ-025: a component may be fitted only after goods-in inspection
+   |
+   = help: the trait `GoodsInInspected` is not implemented for `BoxedComponent`
+   = note: inspection is a process (one type per state, R9): `inspect` turns the boxed 450 g component into the fit-ready 400 g `InspectedComponent` and routes the 50 g packaging to the bin
+help: the trait `GoodsInInspected` is implemented for `InspectedComponent`
+  --> $WORKSPACE/cs5-supply/src/resources.rs
+   |
+   | impl GoodsInInspected for InspectedComponent {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `BoxedComponent` to implement `Req025InspectedBeforeFitting`
+note: required by a bound in `assemble`
+  --> src/resources.rs
+   |
+   |     pub fn assemble<const G: u64, C: Req025InspectedBeforeFitting>(housing: Housing, component: C) -> Instrument<C, G> {
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `assemble`
+
+error[E0277]: `BoxedComponent` has not passed goods-in inspection (REQ-025: a component may be fitted only after goods-in inspection at the UK site)
+  --> tests/ui/fit_uninspected_component.rs:15:22
+   |
+15 |     let instrument = assemble::<1050, _>(housing, boxed);
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ an inspected component is required here
+   |
+   = help: the trait `GoodsInInspected` is not implemented for `BoxedComponent`
+   = note: inspection is a process (one type per state, R9): `open_and_inspect` turns the 450 g `BoxedComponent` into the 400 g `InspectedComponent` and routes the 50 g packaging to the bin
+help: the trait `GoodsInInspected` is implemented for `InspectedComponent`
+  --> $WORKSPACE/cs5-supply/src/resources.rs
+   |
+   | impl GoodsInInspected for InspectedComponent {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `Instrument`
+  --> $WORKSPACE/model-core/src/resource.rs
+   |
+   |           pub struct $Name<$( $T $(: $TB)? ,)* $( const $C: $CT ,)*> {
+   |                                      ^^^ required by this bound in `Instrument`
+   |
+  ::: src/resources.rs
+   |
+   | / model_core::consumable_resource! {
+   | |     /// The finished instrument (SPEC §3): a housing fitted with an inspected
+   | |     /// precision component, `G` grams in all (1000 = 600 + 400, conserved at
+   | |     /// compile time by [`processes::assemble`]). The housing and the
+...  |
+   | |     Instrument<C: GoodsInInspected, const G: u64> {
+   | |     ---------- required by a bound in this struct
+...  |
+   | |     must_use = "Instrument is the product: deliver it to the customer against their order (REQ-026)"
+   | | }
+   | |_- in this macro invocation
+   = note: this error originates in the macro `$crate::__mc_consumable_resource` which comes from the expansion of the macro `model_core::consumable_resource` (in Nightly builds, run with -Z macro-backtrace for more info)

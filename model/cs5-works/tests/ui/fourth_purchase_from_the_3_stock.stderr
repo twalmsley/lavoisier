@@ -1,0 +1,36 @@
+error[E0277]: `Vendor<model_core::list::Nil>` cannot supply anything: it is exhausted, or it is not a supplier of discrete items
+  --> tests/ui/fourth_purchase_from_the_3_stock.rs:17:40
+   |
+17 |     let (_b4, vendor) = sell_component(vendor, place_purchase_order(), Euros::test_fixture());
+   |                         -------------- ^^^^^^ this supplier has nothing left to supply
+   |                         |
+   |                         required by a bound introduced by this call
+   |
+   = help: the trait `model_core::boundary::Supplier` is not implemented for `Vendor<model_core::list::Nil>`
+   = note: a supplier with items left is e.g. `BoltBox<Cons<..>>`; its empty state (`BoltBox<Nil>`) is a distinct resource that cannot supply (R12)
+   = note: `Supplier` is discrete-only (F-028): continuous material is drawn by a draw process (R15), not supplied through this trait
+help: the trait `model_core::boundary::Supplier` is implemented for `Vendor<model_core::list::Cons<BoxedComponent, T>>`
+  --> $WORKSPACE/cs5-supply/src/resources.rs
+   |
+   | impl<T> Supplier for Vendor<Cons<BoxedComponent, T>> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `sell_component`
+  --> $WORKSPACE/cs5-supply/src/resources.rs
+   |
+   | ...MPONENT_PRICE_EC>>>::Next: Supplier<Item = BoxedComponent> {
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `sell_component`
+
+error[E0277]: `Vendor<model_core::list::Nil>` cannot supply anything: it is exhausted, or it is not a supplier of discrete items
+  --> tests/ui/fourth_purchase_from_the_3_stock.rs:17:25
+   |
+17 |     let (_b4, vendor) = sell_component(vendor, place_purchase_order(), Euros::test_fixture());
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this supplier has nothing left to supply
+   |
+   = help: the trait `model_core::boundary::Supplier` is not implemented for `Vendor<model_core::list::Nil>`
+   = note: a supplier with items left is e.g. `BoltBox<Cons<..>>`; its empty state (`BoltBox<Nil>`) is a distinct resource that cannot supply (R12)
+   = note: `Supplier` is discrete-only (F-028): continuous material is drawn by a draw process (R15), not supplied through this trait
+help: the trait `model_core::boundary::Supplier` is implemented for `Vendor<model_core::list::Cons<BoxedComponent, T>>`
+  --> $WORKSPACE/cs5-supply/src/resources.rs
+   |
+   | impl<T> Supplier for Vendor<Cons<BoxedComponent, T>> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -48,6 +48,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "cs5-logistics"
+version = "0.1.0"
+dependencies = [
+ "cs5-logistics",
+ "cs5-supply",
+ "model-core",
+]
+
+[[package]]
+name = "cs5-supply"
+version = "0.1.0"
+dependencies = [
+ "cs5-supply",
+ "model-core",
+]
+
+[[package]]
+name = "cs5-works"
+version = "0.1.0"
+dependencies = [
+ "cs5-logistics",
+ "cs5-supply",
+ "cs5-works",
+ "model-core",
+ "trybuild",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
