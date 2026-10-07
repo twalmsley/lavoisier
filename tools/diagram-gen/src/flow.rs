@@ -51,6 +51,9 @@ pub struct FlowGraph {
     pub nodes: Vec<FNode>,
     pub edges: Vec<FEdge>,
     pub warnings: Vec<String>,
+    /// Observed call instantiations: (callee name, const-generic name -> the
+    /// decimal/typename argument at this call site). For docgen's balances.
+    pub calls: Vec<(String, BTreeMap<String, String>)>,
     occ: BTreeMap<String, usize>,
 }
 
@@ -287,6 +290,36 @@ impl<'a> Cur<'a> {
             Some(b'&') => {
                 self.i += 1;
                 self.parse_expr()
+            }
+            Some(b'<') => {
+                // A qualified-path call: `<Type as Trait<..>>::method(args)`
+                // (cs4-line's recursive batch entry). Anything else starting
+                // with `<` stays an opaque literal.
+                let inner = self.balanced_angles();
+                let _ = inner;
+                if self.peek() == Some(b':') && self.peek2() == Some(b':') {
+                    self.i += 2;
+                    let name = self.ident();
+                    self.skip_ws();
+                    if !name.is_empty() && self.peek() == Some(b'(') {
+                        self.i += 1;
+                        let mut args = Vec::new();
+                        loop {
+                            self.skip_ws();
+                            if self.peek() == Some(b')') {
+                                self.i += 1;
+                                break;
+                            }
+                            args.push(self.parse_expr());
+                            self.skip_ws();
+                            if self.peek() == Some(b',') {
+                                self.i += 1;
+                            }
+                        }
+                        return Expr::Call { name, turbo: Vec::new(), args };
+                    }
+                }
+                Expr::Lit(None)
             }
             Some(b'(') => {
                 self.i += 1;
@@ -882,8 +915,9 @@ impl<'a> Tracer<'a> {
             return Val::Slots { node: sink_node, tys: vec![sink_ty], fallible: false };
         }
 
-        // Resolve the callee.
-        if let Some(fdef) = self.cm.fns.get(name).cloned() {
+        // Resolve the callee: this crate's fns, then a workspace dependency's
+        // (F-055 ext. 7 — cross-crate flows resolve instead of warning).
+        if let Some(fdef) = self.cm.callable(name).cloned() {
             if fdef.kind == FnKind::Test {
                 return Val::None; // a tests-file helper (assertions)
             }
@@ -949,6 +983,15 @@ impl<'a> Tracer<'a> {
                 .collect();
             return Val::Slots { node, tys, fallible: false };
         }
+        // A trait-method step (e.g. the recursive batch entry,
+        // `<StartRig as BuildBatch<N25>>::build_batch(rig)`): known signature,
+        // but its associated-type outputs are opaque — shown as a plain step
+        // with a source link, without a WARN.
+        if let Some(fdef) = self.cm.trait_fns.get(name).cloned() {
+            let node = self.add_node(name, name, NKind::Process, Some(fdef.loc.clone()));
+            self.wire_args(node, &[], &argvals);
+            return Val::Slots { node, tys: Vec::new(), fallible: false };
+        }
         self.warn(format!("unknown callee `{name}` in a traced flow — shown as a plain step"));
         let node = self.add_node(name, name, NKind::Helper, None);
         self.wire_args(node, &[], &argvals);
@@ -1002,6 +1045,8 @@ impl<'a> Tracer<'a> {
                 fdef.name
             ));
         }
+        // Record the observed instantiation for docgen's balance restatement.
+        self.g.calls.push((fdef.name.clone(), map.clone()));
         let arg_ty = |k: usize| -> Option<String> {
             match argvals.get(k) {
                 Some(Val::One { ty, .. }) => ty.clone(),

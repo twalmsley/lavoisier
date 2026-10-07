@@ -30,4 +30,4 @@ if [ -z "${DIAGRAM_REPO_BLOB_BASE:-}" ]; then
 fi
 export DIAGRAM_REPO_BLOB_BASE="${DIAGRAM_REPO_BLOB_BASE:-}"
 
-cargo run --quiet --release --manifest-path tools/diagram-gen/Cargo.toml -- "$PWD" "$@"
+cargo run --quiet --release --manifest-path tools/diagram-gen/Cargo.toml --bin diagram-gen -- "$PWD" "$@"

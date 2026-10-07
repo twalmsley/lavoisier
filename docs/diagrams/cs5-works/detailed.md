@@ -24,14 +24,23 @@ flowchart LR
     direction TB
     n_new_person["new_person"]:::boundary
     n_open_the_books["open_the_books"]:::boundary
+    n_new_bureau["new_bureau"]:::boundary
+    n_vendor_opens_for_business["vendor_opens_for_business"]:::boundary
+    n_courier_reports_for_duty["courier_reports_for_duty"]:::boundary
     n_stock_the_rack["stock_the_rack"]:::boundary
     n_new_bin["new_bin"]:::boundary
     n_place_order["place_order"]:::boundary
+    n_place_purchase_order["place_purchase_order"]:::boundary
     n_present_payment["present_payment"]:::boundary
   end
   subgraph sg_system["Processes"]
     direction TB
     n_draw_cash["draw_cash"]:::process
+    n_exchange["exchange"]:::process
+    n_consign["consign"]:::process
+    n_carry_to_vendor["carry_to_vendor"]:::process
+    n_purchase_at_vendor["purchase_at_vendor"]:::process
+    n_hand_over["hand_over"]:::process
     n_inspect["inspect"]:::process
     n_empty_bin["empty_bin"]:::process
     n_assemble["assemble"]:::process
@@ -40,23 +49,13 @@ flowchart LR
   subgraph sg_helpers["Time accounting and helpers (model-core)"]
     direction TB
     n_new_history["new_history"]:::helper
-    n_new_bureau["new_bureau"]:::helper
-    n_vendor_opens_for_business["vendor_opens_for_business"]:::helper
-    n_courier_reports_for_duty["courier_reports_for_duty"]:::helper
-    n_new_packaging_disposal["new_packaging_disposal"]:::helper
     n_take_one["take_one"]:::helper
     n_draw_time["draw_time"]:::helper
     n_record["record exchange_currency"]:::helper
-    n_exchange["exchange"]:::helper
     n_draw_time_2["draw_time (2)"]:::helper
     n_record_2["record consign_courier (2)"]:::helper
-    n_place_purchase_order["place_purchase_order"]:::helper
-    n_consign["consign"]:::helper
-    n_carry_to_vendor["carry_to_vendor"]:::helper
-    n_purchase_at_vendor["purchase_at_vendor"]:::helper
     n_draw_time_3["draw_time (3)"]:::helper
     n_record_3["record receive_goods (3)"]:::helper
-    n_hand_over["hand_over"]:::helper
     n_draw_time_4["draw_time (4)"]:::helper
     n_record_4["record goods_in_inspection (4)"]:::helper
     n_draw_time_5["draw_time (5)"]:::helper
@@ -69,6 +68,7 @@ flowchart LR
   subgraph sg_sinks["System boundary — sinks"]
     direction TB
     n_new_customer["new_customer"]:::sink
+    n_new_packaging_disposal["new_packaging_disposal"]:::sink
   end
   n_new_customer -- "Customer" --> n_place_order
   n_stock_the_rack -- "FullHousingRack" --> n_take_one
@@ -76,21 +76,21 @@ flowchart LR
   n_new_history -- "History" --> n_record
   n_draw_time -- "Labour 120000 ms" --> n_record
   n_open_the_books -- "Account" --> n_draw_cash
-  n_new_bureau -- "bureau" --> n_exchange
-  n_draw_cash -- "Money 2000" --> n_exchange
+  n_new_bureau -- "Bureau" --> n_exchange
+  n_draw_cash -- "Money 2000 pence" --> n_exchange
   n_draw_time -- "Person 1080000 ms" --> n_draw_time_2
   n_record -- "History" --> n_record_2
   n_draw_time_2 -- "Labour 60000 ms" --> n_record_2
-  n_courier_reports_for_duty -- "courier" --> n_consign
-  n_place_purchase_order -- "purchase_order" --> n_consign
-  n_consign -- "courier" --> n_carry_to_vendor
-  n_carry_to_vendor -- "courier" --> n_purchase_at_vendor
-  n_vendor_opens_for_business -- "vendor" --> n_purchase_at_vendor
-  n_exchange -- "Euros 2340" --> n_purchase_at_vendor
+  n_courier_reports_for_duty -- "CourierAtUk" --> n_consign
+  n_place_purchase_order -- "PurchaseOrder" --> n_consign
+  n_consign -- "OutboundCourier" --> n_carry_to_vendor
+  n_carry_to_vendor -- "CourierAtVendor" --> n_purchase_at_vendor
+  n_vendor_opens_for_business -- "StockedVendor" --> n_purchase_at_vendor
+  n_exchange -- "Euros 2340 euro" --> n_purchase_at_vendor
   n_draw_time_2 -- "Person 1020000 ms" --> n_draw_time_3
   n_record_2 -- "History" --> n_record_3
   n_draw_time_3 -- "Labour 60000 ms" --> n_record_3
-  n_purchase_at_vendor -- "courier" --> n_hand_over
+  n_purchase_at_vendor -- "InboundCourier" --> n_hand_over
   n_draw_time_3 -- "Person 960000 ms" --> n_draw_time_4
   n_record_3 -- "History" --> n_record_4
   n_draw_time_4 -- "Labour 60000 ms" --> n_record_4
@@ -100,7 +100,7 @@ flowchart LR
   n_record_4 -- "History" --> n_record_5
   n_draw_time_5 -- "Labour 30000 ms" --> n_record_5
   n_inspect -- "EmptyBin" --> n_empty_bin
-  n_new_packaging_disposal -- "disposal" --> n_empty_bin
+  n_new_packaging_disposal -- "PackagingDisposal" --> n_empty_bin
   n_draw_time_5 -- "Person 870000 ms" --> n_draw_time_6
   n_record_5 -- "History" --> n_record_6
   n_draw_time_6 -- "Labour 180000 ms" --> n_record_6
@@ -118,18 +118,28 @@ flowchart LR
   click n_new_person "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L152" "model/model-core/src/common.rs"
   click n_new_history "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L264" "model/model-core/src/history.rs"
   click n_open_the_books "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L303" "model/cs5-works/src/resources.rs"
+  click n_new_bureau "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L399" "model/cs5-supply/src/resources.rs"
+  click n_vendor_opens_for_business "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L421" "model/cs5-supply/src/resources.rs"
+  click n_courier_reports_for_duty "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L103" "model/cs5-logistics/src/resources.rs"
   click n_new_customer "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L323" "model/cs5-works/src/resources.rs"
   click n_stock_the_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L345" "model/cs5-works/src/resources.rs"
   click n_new_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L355" "model/cs5-works/src/resources.rs"
+  click n_new_packaging_disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L489" "model/cs5-supply/src/resources.rs"
   click n_place_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L329" "model/cs5-works/src/resources.rs"
   click n_take_one "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/boundary.rs#L173" "model/model-core/src/boundary.rs"
   click n_draw_time "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
   click n_draw_cash "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L391" "model/cs5-works/src/resources.rs"
+  click n_exchange "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L607" "model/cs5-supply/src/resources.rs"
   click n_draw_time_2 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record_2 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
+  click n_place_purchase_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L409" "model/cs5-supply/src/resources.rs"
+  click n_consign "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L132" "model/cs5-logistics/src/resources.rs"
+  click n_carry_to_vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L142" "model/cs5-logistics/src/resources.rs"
+  click n_purchase_at_vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L159" "model/cs5-logistics/src/resources.rs"
   click n_draw_time_3 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record_3 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
+  click n_hand_over "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L171" "model/cs5-logistics/src/resources.rs"
   click n_draw_time_4 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record_4 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
   click n_inspect "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L417" "model/cs5-works/src/resources.rs"
@@ -152,28 +162,28 @@ flowchart LR
 | `n_new_person` (new_person) | boundary source | [model/model-core/src/common.rs#L152](/model/model-core/src/common.rs#L152) |
 | `n_new_history` (new_history) | model-core helper | [model/model-core/src/history.rs#L264](/model/model-core/src/history.rs#L264) |
 | `n_open_the_books` (open_the_books) | boundary source | [model/cs5-works/src/resources.rs#L303](/model/cs5-works/src/resources.rs#L303) |
-| `n_new_bureau` (new_bureau) | model-core helper | — |
-| `n_vendor_opens_for_business` (vendor_opens_for_business) | model-core helper | — |
-| `n_courier_reports_for_duty` (courier_reports_for_duty) | model-core helper | — |
+| `n_new_bureau` (new_bureau) | boundary source | [model/cs5-supply/src/resources.rs#L399](/model/cs5-supply/src/resources.rs#L399) |
+| `n_vendor_opens_for_business` (vendor_opens_for_business) | boundary source | [model/cs5-supply/src/resources.rs#L421](/model/cs5-supply/src/resources.rs#L421) |
+| `n_courier_reports_for_duty` (courier_reports_for_duty) | boundary source | [model/cs5-logistics/src/resources.rs#L103](/model/cs5-logistics/src/resources.rs#L103) |
 | `n_new_customer` (new_customer) | boundary sink | [model/cs5-works/src/resources.rs#L323](/model/cs5-works/src/resources.rs#L323) |
 | `n_stock_the_rack` (stock_the_rack) | boundary source | [model/cs5-works/src/resources.rs#L345](/model/cs5-works/src/resources.rs#L345) |
 | `n_new_bin` (new_bin) | boundary source | [model/cs5-works/src/resources.rs#L355](/model/cs5-works/src/resources.rs#L355) |
-| `n_new_packaging_disposal` (new_packaging_disposal) | model-core helper | — |
+| `n_new_packaging_disposal` (new_packaging_disposal) | boundary sink | [model/cs5-supply/src/resources.rs#L489](/model/cs5-supply/src/resources.rs#L489) |
 | `n_place_order` (place_order) | boundary source | [model/cs5-works/src/resources.rs#L329](/model/cs5-works/src/resources.rs#L329) |
 | `n_take_one` (take_one) | model-core helper | [model/model-core/src/boundary.rs#L173](/model/model-core/src/boundary.rs#L173) |
 | `n_draw_time` (draw_time) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record` (record exchange_currency) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_draw_cash` (draw_cash) | process | [model/cs5-works/src/resources.rs#L391](/model/cs5-works/src/resources.rs#L391) |
-| `n_exchange` (exchange) | model-core helper | — |
+| `n_exchange` (exchange) | process | [model/cs5-supply/src/resources.rs#L607](/model/cs5-supply/src/resources.rs#L607) |
 | `n_draw_time_2` (draw_time (2)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_2` (record consign_courier (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
-| `n_place_purchase_order` (place_purchase_order) | model-core helper | — |
-| `n_consign` (consign) | model-core helper | — |
-| `n_carry_to_vendor` (carry_to_vendor) | model-core helper | — |
-| `n_purchase_at_vendor` (purchase_at_vendor) | model-core helper | — |
+| `n_place_purchase_order` (place_purchase_order) | boundary source | [model/cs5-supply/src/resources.rs#L409](/model/cs5-supply/src/resources.rs#L409) |
+| `n_consign` (consign) | process | [model/cs5-logistics/src/resources.rs#L132](/model/cs5-logistics/src/resources.rs#L132) |
+| `n_carry_to_vendor` (carry_to_vendor) | process | [model/cs5-logistics/src/resources.rs#L142](/model/cs5-logistics/src/resources.rs#L142) |
+| `n_purchase_at_vendor` (purchase_at_vendor) | process | [model/cs5-logistics/src/resources.rs#L159](/model/cs5-logistics/src/resources.rs#L159) |
 | `n_draw_time_3` (draw_time (3)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_3` (record receive_goods (3)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
-| `n_hand_over` (hand_over) | model-core helper | — |
+| `n_hand_over` (hand_over) | process | [model/cs5-logistics/src/resources.rs#L171](/model/cs5-logistics/src/resources.rs#L171) |
 | `n_draw_time_4` (draw_time (4)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_4` (record goods_in_inspection (4)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_inspect` (inspect) | process | [model/cs5-works/src/resources.rs#L417](/model/cs5-works/src/resources.rs#L417) |
@@ -187,17 +197,6 @@ flowchart LR
 | `n_record_7` (record deliver_and_take_payment (7)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_present_payment` (present_payment) | boundary source | [model/cs5-works/src/resources.rs#L336](/model/cs5-works/src/resources.rs#L336) |
 | `n_deliver` (deliver) | process | [model/cs5-works/src/resources.rs#L488](/model/cs5-works/src/resources.rs#L488) |
-
-<!-- WARN (diagram-gen): unknown callee `new_bureau` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `vendor_opens_for_business` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `courier_reports_for_duty` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `new_packaging_disposal` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `exchange` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `place_purchase_order` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `consign` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `carry_to_vendor` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `purchase_at_vendor` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `hand_over` in a traced flow — shown as a plain step -->
 
 ## Composite fallible flow — `fulfil_order_bin_last`
 
@@ -218,14 +217,23 @@ flowchart LR
     direction TB
     n_new_person["new_person"]:::boundary
     n_open_the_books["open_the_books"]:::boundary
+    n_new_bureau["new_bureau"]:::boundary
+    n_vendor_opens_for_business["vendor_opens_for_business"]:::boundary
+    n_courier_reports_for_duty["courier_reports_for_duty"]:::boundary
     n_stock_the_rack["stock_the_rack"]:::boundary
     n_new_bin["new_bin"]:::boundary
     n_place_order["place_order"]:::boundary
+    n_place_purchase_order["place_purchase_order"]:::boundary
     n_present_payment["present_payment"]:::boundary
   end
   subgraph sg_system["Processes"]
     direction TB
     n_draw_cash["draw_cash"]:::process
+    n_exchange["exchange"]:::process
+    n_consign["consign"]:::process
+    n_carry_to_vendor["carry_to_vendor"]:::process
+    n_purchase_at_vendor["purchase_at_vendor"]:::process
+    n_hand_over["hand_over"]:::process
     n_inspect["inspect"]:::process
     n_assemble["assemble"]:::process
     n_deliver["deliver"]:::process
@@ -234,22 +242,12 @@ flowchart LR
   subgraph sg_helpers["Time accounting and helpers (model-core)"]
     direction TB
     n_new_history["new_history"]:::helper
-    n_new_bureau["new_bureau"]:::helper
-    n_vendor_opens_for_business["vendor_opens_for_business"]:::helper
-    n_courier_reports_for_duty["courier_reports_for_duty"]:::helper
-    n_new_packaging_disposal["new_packaging_disposal"]:::helper
     n_draw_time["draw_time"]:::helper
     n_record["record exchange_currency"]:::helper
-    n_exchange["exchange"]:::helper
     n_draw_time_2["draw_time (2)"]:::helper
     n_record_2["record consign_courier (2)"]:::helper
-    n_place_purchase_order["place_purchase_order"]:::helper
-    n_consign["consign"]:::helper
-    n_carry_to_vendor["carry_to_vendor"]:::helper
-    n_purchase_at_vendor["purchase_at_vendor"]:::helper
     n_draw_time_3["draw_time (3)"]:::helper
     n_record_3["record receive_goods (3)"]:::helper
-    n_hand_over["hand_over"]:::helper
     n_draw_time_4["draw_time (4)"]:::helper
     n_record_4["record goods_in_inspection (4)"]:::helper
     n_take_one["take_one"]:::helper
@@ -263,27 +261,28 @@ flowchart LR
   subgraph sg_sinks["System boundary — sinks"]
     direction TB
     n_new_customer["new_customer"]:::sink
+    n_new_packaging_disposal["new_packaging_disposal"]:::sink
   end
   n_new_customer -- "Customer" --> n_place_order
   n_new_person -- "Person 1200000 ms" --> n_draw_time
   n_new_history -- "History" --> n_record
   n_draw_time -- "Labour 120000 ms" --> n_record
   n_open_the_books -- "Account" --> n_draw_cash
-  n_new_bureau -- "bureau" --> n_exchange
-  n_draw_cash -- "Money 2000" --> n_exchange
+  n_new_bureau -- "Bureau" --> n_exchange
+  n_draw_cash -- "Money 2000 pence" --> n_exchange
   n_draw_time -- "Person 1080000 ms" --> n_draw_time_2
   n_record -- "History" --> n_record_2
   n_draw_time_2 -- "Labour 60000 ms" --> n_record_2
-  n_courier_reports_for_duty -- "courier" --> n_consign
-  n_place_purchase_order --> n_consign
-  n_consign -- "courier" --> n_carry_to_vendor
-  n_carry_to_vendor -- "courier" --> n_purchase_at_vendor
-  n_vendor_opens_for_business -- "vendor" --> n_purchase_at_vendor
-  n_exchange -- "Euros 2340" --> n_purchase_at_vendor
+  n_courier_reports_for_duty -- "CourierAtUk" --> n_consign
+  n_place_purchase_order -- "PurchaseOrder" --> n_consign
+  n_consign -- "OutboundCourier" --> n_carry_to_vendor
+  n_carry_to_vendor -- "CourierAtVendor" --> n_purchase_at_vendor
+  n_vendor_opens_for_business -- "StockedVendor" --> n_purchase_at_vendor
+  n_exchange -- "Euros 2340 euro" --> n_purchase_at_vendor
   n_draw_time_2 -- "Person 1020000 ms" --> n_draw_time_3
   n_record_2 -- "History" --> n_record_3
   n_draw_time_3 -- "Labour 60000 ms" --> n_record_3
-  n_purchase_at_vendor -- "courier" --> n_hand_over
+  n_purchase_at_vendor -- "InboundCourier" --> n_hand_over
   n_draw_time_3 -- "Person 960000 ms" --> n_draw_time_4
   n_record_3 -- "History" --> n_record_4
   n_draw_time_4 -- "Labour 60000 ms" --> n_record_4
@@ -308,21 +307,31 @@ flowchart LR
   n_record_6 -- "History" --> n_record_7
   n_draw_time_7 -- "Labour 30000 ms" --> n_record_7
   n_inspect -- "EmptyBin" --> n_empty_bin
-  n_new_packaging_disposal -- "disposal" --> n_empty_bin
+  n_new_packaging_disposal -- "PackagingDisposal" --> n_empty_bin
   click n_new_person "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L152" "model/model-core/src/common.rs"
   click n_new_history "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L264" "model/model-core/src/history.rs"
   click n_open_the_books "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L303" "model/cs5-works/src/resources.rs"
+  click n_new_bureau "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L399" "model/cs5-supply/src/resources.rs"
+  click n_vendor_opens_for_business "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L421" "model/cs5-supply/src/resources.rs"
+  click n_courier_reports_for_duty "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L103" "model/cs5-logistics/src/resources.rs"
   click n_new_customer "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L323" "model/cs5-works/src/resources.rs"
   click n_stock_the_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L345" "model/cs5-works/src/resources.rs"
   click n_new_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L355" "model/cs5-works/src/resources.rs"
+  click n_new_packaging_disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L489" "model/cs5-supply/src/resources.rs"
   click n_place_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L329" "model/cs5-works/src/resources.rs"
   click n_draw_time "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
   click n_draw_cash "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L391" "model/cs5-works/src/resources.rs"
+  click n_exchange "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L607" "model/cs5-supply/src/resources.rs"
   click n_draw_time_2 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record_2 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
+  click n_place_purchase_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L409" "model/cs5-supply/src/resources.rs"
+  click n_consign "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L132" "model/cs5-logistics/src/resources.rs"
+  click n_carry_to_vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L142" "model/cs5-logistics/src/resources.rs"
+  click n_purchase_at_vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L159" "model/cs5-logistics/src/resources.rs"
   click n_draw_time_3 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record_3 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
+  click n_hand_over "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L171" "model/cs5-logistics/src/resources.rs"
   click n_draw_time_4 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L242" "model/model-core/src/common.rs"
   click n_record_4 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
   click n_inspect "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L417" "model/cs5-works/src/resources.rs"
@@ -346,27 +355,27 @@ flowchart LR
 | `n_new_person` (new_person) | boundary source | [model/model-core/src/common.rs#L152](/model/model-core/src/common.rs#L152) |
 | `n_new_history` (new_history) | model-core helper | [model/model-core/src/history.rs#L264](/model/model-core/src/history.rs#L264) |
 | `n_open_the_books` (open_the_books) | boundary source | [model/cs5-works/src/resources.rs#L303](/model/cs5-works/src/resources.rs#L303) |
-| `n_new_bureau` (new_bureau) | model-core helper | — |
-| `n_vendor_opens_for_business` (vendor_opens_for_business) | model-core helper | — |
-| `n_courier_reports_for_duty` (courier_reports_for_duty) | model-core helper | — |
+| `n_new_bureau` (new_bureau) | boundary source | [model/cs5-supply/src/resources.rs#L399](/model/cs5-supply/src/resources.rs#L399) |
+| `n_vendor_opens_for_business` (vendor_opens_for_business) | boundary source | [model/cs5-supply/src/resources.rs#L421](/model/cs5-supply/src/resources.rs#L421) |
+| `n_courier_reports_for_duty` (courier_reports_for_duty) | boundary source | [model/cs5-logistics/src/resources.rs#L103](/model/cs5-logistics/src/resources.rs#L103) |
 | `n_new_customer` (new_customer) | boundary sink | [model/cs5-works/src/resources.rs#L323](/model/cs5-works/src/resources.rs#L323) |
 | `n_stock_the_rack` (stock_the_rack) | boundary source | [model/cs5-works/src/resources.rs#L345](/model/cs5-works/src/resources.rs#L345) |
 | `n_new_bin` (new_bin) | boundary source | [model/cs5-works/src/resources.rs#L355](/model/cs5-works/src/resources.rs#L355) |
-| `n_new_packaging_disposal` (new_packaging_disposal) | model-core helper | — |
+| `n_new_packaging_disposal` (new_packaging_disposal) | boundary sink | [model/cs5-supply/src/resources.rs#L489](/model/cs5-supply/src/resources.rs#L489) |
 | `n_place_order` (place_order) | boundary source | [model/cs5-works/src/resources.rs#L329](/model/cs5-works/src/resources.rs#L329) |
 | `n_draw_time` (draw_time) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record` (record exchange_currency) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_draw_cash` (draw_cash) | process | [model/cs5-works/src/resources.rs#L391](/model/cs5-works/src/resources.rs#L391) |
-| `n_exchange` (exchange) | model-core helper | — |
+| `n_exchange` (exchange) | process | [model/cs5-supply/src/resources.rs#L607](/model/cs5-supply/src/resources.rs#L607) |
 | `n_draw_time_2` (draw_time (2)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_2` (record consign_courier (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
-| `n_place_purchase_order` (place_purchase_order) | model-core helper | — |
-| `n_consign` (consign) | model-core helper | — |
-| `n_carry_to_vendor` (carry_to_vendor) | model-core helper | — |
-| `n_purchase_at_vendor` (purchase_at_vendor) | model-core helper | — |
+| `n_place_purchase_order` (place_purchase_order) | boundary source | [model/cs5-supply/src/resources.rs#L409](/model/cs5-supply/src/resources.rs#L409) |
+| `n_consign` (consign) | process | [model/cs5-logistics/src/resources.rs#L132](/model/cs5-logistics/src/resources.rs#L132) |
+| `n_carry_to_vendor` (carry_to_vendor) | process | [model/cs5-logistics/src/resources.rs#L142](/model/cs5-logistics/src/resources.rs#L142) |
+| `n_purchase_at_vendor` (purchase_at_vendor) | process | [model/cs5-logistics/src/resources.rs#L159](/model/cs5-logistics/src/resources.rs#L159) |
 | `n_draw_time_3` (draw_time (3)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_3` (record receive_goods (3)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
-| `n_hand_over` (hand_over) | model-core helper | — |
+| `n_hand_over` (hand_over) | process | [model/cs5-logistics/src/resources.rs#L171](/model/cs5-logistics/src/resources.rs#L171) |
 | `n_draw_time_4` (draw_time (4)) | model-core helper | [model/model-core/src/common.rs#L242](/model/model-core/src/common.rs#L242) |
 | `n_record_4` (record goods_in_inspection (4)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_inspect` (inspect) | process | [model/cs5-works/src/resources.rs#L417](/model/cs5-works/src/resources.rs#L417) |
@@ -382,22 +391,22 @@ flowchart LR
 | `n_record_7` (record empty_bin (7)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
 | `n_empty_bin` (empty_bin) | process | [model/cs5-works/src/resources.rs#L537](/model/cs5-works/src/resources.rs#L537) |
 
-<!-- WARN (diagram-gen): unknown callee `new_bureau` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `vendor_opens_for_business` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `courier_reports_for_duty` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `new_packaging_disposal` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `exchange` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `place_purchase_order` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `consign` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `carry_to_vendor` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `purchase_at_vendor` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `hand_over` in a traced flow — shown as a plain step -->
-
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
 | `Account` | boundary object | — | [model/cs5-works/src/resources.rs#L75](/model/cs5-works/src/resources.rs#L75) |
+| `BoxedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L125](/model/cs5-supply/src/resources.rs#L125) |
+| `Bureau` | reusable (placeholder) | — | [model/cs5-supply/src/resources.rs#L97](/model/cs5-supply/src/resources.rs#L97) |
+| `CourierAtUk` | boundary object | — | [model/cs5-logistics/src/resources.rs#L36](/model/cs5-logistics/src/resources.rs#L36) |
+| `CourierAtVendor` | boundary object | — | [model/cs5-logistics/src/resources.rs#L70](/model/cs5-logistics/src/resources.rs#L70) |
 | `Customer` | boundary object (placeholder) | — | [model/cs5-works/src/resources.rs#L274](/model/cs5-works/src/resources.rs#L274) |
 | `CustomerOrder` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L225](/model/cs5-works/src/resources.rs#L225) |
+| `Euros` | continuous (container) | euro cents | [model/cs5-supply/src/resources.rs#L60](/model/cs5-supply/src/resources.rs#L60) |
+| `InboundCourier` | boundary object | — | [model/cs5-logistics/src/resources.rs#L79](/model/cs5-logistics/src/resources.rs#L79) |
+| `InspectedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L142](/model/cs5-supply/src/resources.rs#L142) |
 | `Instrument` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L162](/model/cs5-works/src/resources.rs#L162) |
+| `Money` | continuous (container) | pence | [model/cs5-supply/src/resources.rs#L47](/model/cs5-supply/src/resources.rs#L47) |
+| `OutboundCourier` | boundary object | — | [model/cs5-logistics/src/resources.rs#L62](/model/cs5-logistics/src/resources.rs#L62) |
+| `PackagingDisposal` | boundary object (placeholder) | — | [model/cs5-supply/src/resources.rs#L350](/model/cs5-supply/src/resources.rs#L350) |
+| `PurchaseOrder` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L178](/model/cs5-supply/src/resources.rs#L178) |

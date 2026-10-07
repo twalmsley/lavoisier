@@ -6,7 +6,7 @@ Three GitHub-viewable Mermaid diagrams per model crate, generated from the crate
 
 - **Context** — the system as one box; only what crosses the boundary (R12/R15).
 - **Top-level** — the first level of processes with their inputs and outputs, linked to each other and to the boundary: the R9 connection graph from the process signatures.
-- **Detailed** — all levels, fully connected: the flow trace with adjacent time draws, History records, internal waste routing and disposal steps, plus the composite fallible flows where the crate has them.
+- **Detailed** — all levels, fully connected: the flow traces with adjacent time draws, History records, internal waste routing and disposal steps — the composite fallible flows and every integration-test flow that composes two or more processes (order variants demonstrate R9's sequencing freedom).
 
 Diagram nodes carry absolute `click` links into the defining source line (GitHub renders Mermaid in an iframe, so only absolute urls survive); **the legend table under each diagram carries the same hyperlinks** as plain markdown; the `click` directives still work in local Mermaid renderers.
 
@@ -28,4 +28,4 @@ Regenerate after a model change:
 ./tools/diagrams.sh
 ```
 
-The generator is `tools/diagram-gen` (std-only Rust, outside the model workspace). Where its line-based heuristics cannot see something it emits a WARN to stderr and an HTML comment in the affected file rather than guessing.
+The generator is `tools/diagram-gen` (std-only Rust, outside the model workspace); multi-crate models resolve their workspace dependencies' types and processes, so cross-crate edges carry links into the owning crate. Where the line-based heuristics cannot see something the generator emits a WARN to stderr and an HTML comment in the affected file rather than guessing. The per-process documents generated from the same extraction live in [docs/processes](../processes/README.md).

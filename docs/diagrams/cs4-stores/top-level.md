@@ -17,8 +17,6 @@ flowchart LR
   classDef system fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
   subgraph sg_sources["System boundary — sources and setup"]
     direction TB
-    n_new_disposal["new_disposal"]:::boundary
-    n_new_finished_goods["new_finished_goods"]:::boundary
     n_clock_in["clock_in"]:::boundary
     n_place_works_order["place_works_order"]:::boundary
     n_SheetRack["SheetRack"]:::boundary
@@ -39,22 +37,23 @@ flowchart LR
   end
   subgraph sg_sinks["System boundary — sinks"]
     direction TB
+    n_Disposal["Disposal"]:::sink
+    n_FinishedGoods["FinishedGoods"]:::sink
     n_ship_finished_goods["ship_finished_goods"]:::sink
   end
   n_caller["caller / flow"]:::flowio
   n_History["History"]:::resource
   n_Operator["Operator"]:::resource
-  n_join_assembly -- "Assembly" --> n_caller
+  n_join_assembly -- "Assembly" --> n_reconcile
   n_shear_sheet -- "Blank" --> n_bore_blank
   n_caller -- "Cons" --> n_join_assembly
-  n_shear_sheet -- "CutSwarf" --> n_caller
-  n_new_disposal -- "Disposal" --> n_caller
-  n_bore_blank -- "DrillSwarf" --> n_caller
+  n_shear_sheet -- "CutSwarf" --> n_Disposal
+  n_bore_blank -- "DrillSwarf" --> n_Disposal
   n_bore_blank -- "DrilledPlate" --> n_join_assembly
   n_draw_effort_120k -- "Effort" --> n_caller
   n_draw_effort_30k -- "Effort" --> n_caller
   n_draw_effort_60k -- "Effort" --> n_caller
-  n_new_finished_goods -- "FinishedGoods" --> n_ship_finished_goods
+  n_FinishedGoods -- "FinishedGoods" --> n_ship_finished_goods
   n_issue_materials -- "History" --> n_History
   n_reconcile -- "History" --> n_History
   n_History -- "History" --> n_issue_materials
@@ -65,6 +64,8 @@ flowchart LR
   n_reconcile -- "ReconciledNote" --> n_caller
   n_caller -- "Sheet" --> n_shear_sheet
   n_place_works_order -- "WorksOrder" --> n_issue_materials
+  n_reconcile -- "Assembly" --> n_FinishedGoods
+  n_reconcile -- "CutSwarf / DrillSwarf" --> n_Disposal
   n_issue_materials -- "SheetRack" --> n_SheetRack
   n_issue_materials -- "BoltBox" --> n_BoltBox
   n_full_box -- "BoltBox" --> n_BoltBox
@@ -84,8 +85,8 @@ flowchart LR
   click n_draw_effort_120k "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L942" "model/cs4-stores/src/resources.rs"
   click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
   click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
-  click n_new_disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L629" "model/cs4-stores/src/resources.rs"
-  click n_new_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L620" "model/cs4-stores/src/resources.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
   click n_ship_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L688" "model/cs4-stores/src/resources.rs"
   click n_History "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L158" "model/model-core/src/history.rs"
   click n_Operator "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L435" "model/cs4-stores/src/resources.rs"
@@ -110,8 +111,8 @@ flowchart LR
 | `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
 | `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
 | `n_caller` (caller / flow) | flow input/output | — |
-| `n_new_disposal` (new_disposal) | boundary source | [model/cs4-stores/src/resources.rs#L629](/model/cs4-stores/src/resources.rs#L629) |
-| `n_new_finished_goods` (new_finished_goods) | boundary source | [model/cs4-stores/src/resources.rs#L620](/model/cs4-stores/src/resources.rs#L620) |
+| `n_Disposal` (Disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
 | `n_ship_finished_goods` (ship_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L688](/model/cs4-stores/src/resources.rs#L688) |
 | `n_History` (History) | shared resource | [model/model-core/src/history.rs#L158](/model/model-core/src/history.rs#L158) |
 | `n_Operator` (Operator) | shared resource | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
@@ -130,7 +131,6 @@ flowchart LR
 | `Blank` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L105](/model/cs4-stores/src/resources.rs#L105) |
 | `BoltBox` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |
 | `CutSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L124](/model/cs4-stores/src/resources.rs#L124) |
-| `Disposal` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
 | `DrillSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L132](/model/cs4-stores/src/resources.rs#L132) |
 | `DrilledPlate` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L114](/model/cs4-stores/src/resources.rs#L114) |
 | `Effort` | continuous (container) | person-milliseconds | [model/cs4-stores/src/resources.rs#L243](/model/cs4-stores/src/resources.rs#L243) |
@@ -142,7 +142,4 @@ flowchart LR
 | `SheetRack` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L314](/model/cs4-stores/src/resources.rs#L314) |
 | `WorksOrder` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L206](/model/cs4-stores/src/resources.rs#L206) |
 
-<!-- WARN (diagram-gen): reconcile: unresolved parameter `AS: ` -->
-<!-- WARN (diagram-gen): reconcile: unresolved parameter `consumer of AS` -->
 <!-- WARN (diagram-gen): reconcile: unresolved parameter `FB: SwarfReturn` -->
-<!-- WARN (diagram-gen): reconcile: unresolved parameter `consumer of Contents` -->

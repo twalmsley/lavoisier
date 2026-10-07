@@ -28,6 +28,7 @@ flowchart LR
   n_WheelOwner["WheelOwner"]:::external
   n_env_PatchOutcome["environment — PatchOutcome trials"]:::external
   n_person["person (model-core boundary)"]:::external
+  n_history["History — the execution record (R16)"]:::external
   n_new_patch_kit -- "PatchKit (items supplier)" --> n_system
   n_new_pump -- "Pump" --> n_system
   n_new_workstand -- "Workstand" --> n_system
@@ -42,6 +43,7 @@ flowchart LR
   n_env_PatchOutcome -- "PatchOutcome" --> n_system
   n_system -- "PatchOutcome (untried)" --> n_env_PatchOutcome
   n_person -- "Person (time budget)" --> n_system
+  n_system -- "Labour (expended time)" --> n_history
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs2-puncture-repair/src/lib.rs#L1" "model/cs2-puncture-repair/src/lib.rs"
   click n_new_patch_kit "https://github.com/twalmsley/lavoisier/blob/main/model/cs2-puncture-repair/src/resources.rs#L638" "model/cs2-puncture-repair/src/resources.rs"
   click n_new_pump "https://github.com/twalmsley/lavoisier/blob/main/model/cs2-puncture-repair/src/resources.rs#L629" "model/cs2-puncture-repair/src/resources.rs"
@@ -73,6 +75,7 @@ flowchart LR
 | `n_WheelOwner` (WheelOwner) | external party | [model/cs2-puncture-repair/src/resources.rs#L581](/model/cs2-puncture-repair/src/resources.rs#L581) |
 | `n_env_PatchOutcome` (environment — PatchOutcome trials) | external party | [model/cs2-puncture-repair/src/resources.rs#L416](/model/cs2-puncture-repair/src/resources.rs#L416) |
 | `n_person` (person (model-core boundary)) | external party | — |
+| `n_history` (History — the execution record (R16)) | external party | — |
 
 ## Resources on the edges
 

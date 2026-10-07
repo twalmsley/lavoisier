@@ -75,6 +75,6 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 CS-5 spec | done (v0.2 agreed) | — | 2026-10-07: three crates (logistics separate); payment transfer abstracted; rest as proposed |
 | 12 CS-5 model | done (`model/cs5-supply` + `cs5-logistics` + `cs5-works`; ladder complete) | F-057; F-054 extended | 2026-10-07: closed |
 | 12 Post-ladder increments | done (white paper v0.2 25 pp; decks refreshed in place; guide §3.7 multi-crate; README) | — | 2026-10-07: verified |
-| 9 Process docgen (B) | in progress | | |
+| 9 Process docgen (B) | done (`docgen` bin + `tools/docgen.sh`; 166 process docs across all crates; F-055 gaps 1/7 fixed in the shared scanner) | F-055 part-resolved | pending: R20 wording to agree |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |

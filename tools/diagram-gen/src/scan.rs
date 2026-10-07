@@ -110,7 +110,8 @@ pub fn scan_core_locs(root: &Path) -> BTreeMap<String, Loc> {
     out
 }
 
-pub fn scan_crate(root: &Path, krate: &str) -> CrateModel {
+/// Scan one crate's own source (no dependency resolution).
+fn scan_crate_own(root: &Path, krate: &str) -> CrateModel {
     let mut cm = CrateModel { name: krate.to_string(), ..Default::default() };
     let src = root.join("model").join(krate).join("src");
     let mut files: Vec<_> = std::fs::read_dir(&src)
@@ -121,13 +122,19 @@ pub fn scan_crate(root: &Path, krate: &str) -> CrateModel {
     files.sort();
     for f in &files {
         let rel = crate::rel_path(root, f);
-        let capture = f.file_name().map(|n| n == "flows.rs").unwrap_or(false);
-        scan_file(&mut cm, f, &rel, capture, false);
+        // A file module IS a module (Rust semantics): seed the module stack
+        // with the file stem so `src/processes.rs` counts as the `processes`
+        // module (the multi-crate layout splits modules into files).
+        let stem = f
+            .file_stem()
+            .map(|s| s.to_string_lossy().to_string())
+            .filter(|s| s != "lib" && s != "mod");
+        scan_file(&mut cm, f, &rel, true, false, stem.as_deref());
     }
     let tests_flows = root.join("model").join(krate).join("tests/flows.rs");
     if tests_flows.is_file() {
         let rel = crate::rel_path(root, &tests_flows);
-        scan_file(&mut cm, &tests_flows, &rel, true, true);
+        scan_file(&mut cm, &tests_flows, &rel, true, true, None);
     }
     // Crate title from lib.rs's `//! # name — title` line.
     let lib = src.join("lib.rs");
@@ -147,6 +154,132 @@ pub fn scan_crate(root: &Path, krate: &str) -> CrateModel {
     cm
 }
 
+/// Workspace model dependencies of a crate (path deps under `model/`,
+/// excluding `model-core` — the fixed kernel stays the built-in table),
+/// transitively, in deterministic discovery order.
+pub fn model_deps(root: &Path, krate: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut queue: Vec<String> = vec![krate.to_string()];
+    while let Some(k) = queue.pop() {
+        let toml = root.join("model").join(&k).join("Cargo.toml");
+        let Ok(text) = std::fs::read_to_string(&toml) else {
+            continue;
+        };
+        let mut in_deps = false;
+        for line in text.lines() {
+            let t = line.trim();
+            if t.starts_with('[') {
+                in_deps = t == "[dependencies]";
+                continue;
+            }
+            if !in_deps || !t.contains("path") {
+                continue;
+            }
+            let name = t.split('=').next().unwrap_or("").trim().to_string();
+            if name.is_empty() || name == "model-core" {
+                continue;
+            }
+            if !out.contains(&name) {
+                out.push(name.clone());
+                queue.push(name);
+            }
+        }
+    }
+    out
+}
+
+/// Scan a model crate, resolving its workspace dependencies' models into the
+/// result (F-055 ext. 7): upstream types, sinks, suppliers, requirements and
+/// callable processes merge in (this crate's own items always win), while
+/// upstream fns stay in `dep_fns` so they are never projected as this crate's
+/// own processes.
+pub fn scan_crate(root: &Path, krate: &str) -> CrateModel {
+    let mut cm = scan_crate_own(root, krate);
+    for dep in model_deps(root, krate) {
+        if !root.join("model").join(&dep).join("src").is_dir() {
+            cm.warn(format!("dependency crate `{dep}` not found under model/"));
+            continue;
+        }
+        let d = scan_crate_own(root, &dep);
+        merge_dep(&mut cm, d);
+    }
+    cm
+}
+
+fn merge_dep(cm: &mut CrateModel, d: CrateModel) {
+    let dep_name = d.name.replace('-', "_");
+    for (name, mut f) in d.fns {
+        if matches!(f.kind, FnKind::Process | FnKind::Boundary | FnKind::Flow) {
+            // Prefix the module path with the dep crate so fill-machinery
+            // lookups stay namespaced per crate.
+            f.module.insert(0, dep_name.clone());
+            if !cm.fns.contains_key(&name) {
+                if let Some(prev) = cm.dep_fns.get(&name) {
+                    if prev.loc.file != f.loc.file {
+                        cm.warn(format!(
+                            "fn `{name}` is defined in two dependency crates; keeping {}",
+                            prev.loc.file
+                        ));
+                    }
+                } else {
+                    cm.dep_fns.insert(name, f);
+                }
+            }
+        }
+    }
+    for (k, v) in d.trait_fns {
+        cm.trait_fns.entry(k).or_insert(v);
+    }
+    for (k, v) in d.resources {
+        cm.resources.entry(k).or_insert(v);
+    }
+    for (k, v) in d.aliases {
+        cm.aliases.entry(k).or_insert(v);
+    }
+    for (k, v) in d.structs {
+        cm.structs.entry(k).or_insert(v);
+    }
+    for (k, v) in d.enums {
+        cm.enums.entry(k).or_insert(v);
+    }
+    for c in d.consumers {
+        if !cm.consumers.iter().any(|x| x.sink == c.sink && x.item == c.item) {
+            cm.dep_consumers.insert(cm.consumers.len());
+            cm.consumers.push(c);
+        }
+    }
+    for s in d.suppliers {
+        if !cm.suppliers.iter().any(|x| x.src == s.src && x.item == s.item) {
+            cm.suppliers.push(s);
+        }
+    }
+    for (k, v) in d.fill_items {
+        cm.fill_items.entry(format!("{dep_name}::{k}")).or_insert(v);
+    }
+    for (k, v) in d.consts {
+        cm.consts.entry(k).or_insert(v);
+    }
+    for (k, v) in d.reqs {
+        cm.reqs.entry(k).or_insert(v);
+    }
+    for (k, v) in d.req_sentence {
+        cm.req_sentence.entry(k).or_insert(v);
+    }
+    for (k, v) in d.req_by_trait {
+        cm.req_by_trait.entry(k).or_insert(v);
+    }
+    for (k, v) in d.satisfies_types {
+        let e = cm.satisfies_types.entry(k).or_default();
+        for t in v {
+            if !e.contains(&t) {
+                e.push(t);
+            }
+        }
+    }
+    // Dep outcome tokens are the dep's own context crossings, not this
+    // crate's: deliberately NOT merged.
+}
+
 struct FileCx<'a> {
     lines: Vec<&'a str>,
     code: Vec<String>,
@@ -155,7 +288,14 @@ struct FileCx<'a> {
     capture: bool,
 }
 
-fn scan_file(cm: &mut CrateModel, path: &Path, rel: &str, capture: bool, is_tests: bool) {
+fn scan_file(
+    cm: &mut CrateModel,
+    path: &Path,
+    rel: &str,
+    capture: bool,
+    is_tests: bool,
+    stem: Option<&str>,
+) {
     let Ok(text) = std::fs::read_to_string(path) else {
         cm.warn(format!("cannot read {rel}"));
         return;
@@ -165,8 +305,10 @@ fn scan_file(cm: &mut CrateModel, path: &Path, rel: &str, capture: bool, is_test
     let cx = FileCx { lines, code, file: rel.to_string(), is_tests, capture };
 
     let n = cx.lines.len();
-    let mut mod_stack: Vec<String> = Vec::new();
+    let mut mod_stack: Vec<String> = stem.map(|s| vec![s.to_string()]).unwrap_or_default();
+    let seed_len = mod_stack.len();
     let mut pending_doc: Vec<String> = Vec::new();
+    let mut pending_should_panic = false;
     let mut i = 0usize;
     while i < n {
         let t = cx.lines[i].trim_start();
@@ -188,9 +330,15 @@ fn scan_file(cm: &mut CrateModel, path: &Path, rel: &str, capture: bool, is_test
         if c.starts_with("#[") || c.starts_with("#![") {
             // Attributes are single-line in this codebase (R10/F-021 keeps
             // them so); they do not detach a doc block from its item.
+            if c.starts_with("#[should_panic") {
+                pending_should_panic = true;
+            }
             i += 1;
             continue;
         }
+        // Any real item consumes the pending `#[should_panic]`.
+        let took_should_panic = pending_should_panic;
+        pending_should_panic = false;
         // Module open / close.
         if (c.starts_with("pub mod ") || c.starts_with("mod ") || c.starts_with("pub(crate) mod "))
             && c.ends_with('{')
@@ -204,7 +352,9 @@ fn scan_file(cm: &mut CrateModel, path: &Path, rel: &str, capture: bool, is_test
             continue;
         }
         if c == "}" {
-            mod_stack.pop();
+            if mod_stack.len() > seed_len {
+                mod_stack.pop();
+            }
             pending_doc.clear();
             i += 1;
             continue;
@@ -236,11 +386,18 @@ fn scan_file(cm: &mut CrateModel, path: &Path, rel: &str, capture: bool, is_test
             i = end;
             continue;
         }
+        if c.starts_with("pub const ") || c.starts_with("const ") {
+            let (joined, end) = join_to_semicolon(&cx, i);
+            parse_const_item(cm, &joined);
+            pending_doc.clear();
+            i = end;
+            continue;
+        }
         if c.contains("pub fn ")
             || c.starts_with("pub(crate) fn ")
             || (cx.is_tests && c.starts_with("fn "))
         {
-            i = scan_fn(cm, &cx, i, &mod_stack, &pending_doc);
+            i = scan_fn(cm, &cx, i, &mod_stack, &pending_doc, took_should_panic);
             pending_doc.clear();
             continue;
         }
@@ -260,7 +417,7 @@ fn scan_file(cm: &mut CrateModel, path: &Path, rel: &str, capture: bool, is_test
             continue;
         }
         if c.starts_with("pub trait ") || c.starts_with("trait ") {
-            i = skip_item(&cx, i);
+            i = scan_trait(cm, &cx, i, &mod_stack);
             pending_doc.clear();
             continue;
         }
@@ -334,6 +491,173 @@ fn parse_alias(cm: &mut CrateModel, joined: &str) {
     }
 }
 
+/// `pub const NAME: u64 = <expr>;` — the model's named magnitudes (R7).
+/// Evaluated where the expression is integer arithmetic over literals and
+/// previously seen consts; `const _: () = ...` assertion backings are ignored.
+fn parse_const_item(cm: &mut CrateModel, joined: &str) {
+    let t = joined.trim().trim_start_matches("pub ").trim_start_matches("const ").trim();
+    let Some(colon) = t.find(':') else { return };
+    let name = t[..colon].trim().to_string();
+    if name == "_" || name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
+        return;
+    }
+    let rest = &t[colon + 1..];
+    let Some(eq) = rest.find('=') else { return };
+    let ty = rest[..eq].trim();
+    if ty != "u64" {
+        return;
+    }
+    let expr = rest[eq + 1..].trim().trim_end_matches(';').trim().to_string();
+    let value = eval_const_expr(&expr, &cm.consts);
+    cm.consts.insert(name, (expr, value));
+}
+
+/// Evaluate an integer expression over literals, known consts, `+ - * /` and
+/// parentheses. Returns None on anything else (conservative).
+pub fn eval_const_expr(
+    expr: &str,
+    consts: &std::collections::BTreeMap<String, (String, Option<u64>)>,
+) -> Option<u64> {
+    struct P<'a> {
+        s: &'a [u8],
+        i: usize,
+        consts: &'a std::collections::BTreeMap<String, (String, Option<u64>)>,
+    }
+    impl<'a> P<'a> {
+        fn ws(&mut self) {
+            while self.s.get(self.i).map(|c| c.is_ascii_whitespace()).unwrap_or(false) {
+                self.i += 1;
+            }
+        }
+        fn atom(&mut self) -> Option<u64> {
+            self.ws();
+            match self.s.get(self.i)? {
+                b'(' => {
+                    self.i += 1;
+                    let v = self.sum()?;
+                    self.ws();
+                    if self.s.get(self.i) == Some(&b')') {
+                        self.i += 1;
+                        Some(v)
+                    } else {
+                        None
+                    }
+                }
+                c if c.is_ascii_digit() => {
+                    let start = self.i;
+                    while self
+                        .s
+                        .get(self.i)
+                        .map(|c| c.is_ascii_alphanumeric() || *c == b'_')
+                        .unwrap_or(false)
+                    {
+                        self.i += 1;
+                    }
+                    let tok = std::str::from_utf8(&self.s[start..self.i]).ok()?;
+                    let clean: String = tok.chars().filter(|c| *c != '_').collect();
+                    clean.parse().ok()
+                }
+                c if c.is_ascii_alphabetic() || *c == b'_' => {
+                    let start = self.i;
+                    while self
+                        .s
+                        .get(self.i)
+                        .map(|c| c.is_ascii_alphanumeric() || *c == b'_')
+                        .unwrap_or(false)
+                    {
+                        self.i += 1;
+                    }
+                    let tok = std::str::from_utf8(&self.s[start..self.i]).ok()?;
+                    self.consts.get(tok).and_then(|(_, v)| *v)
+                }
+                _ => None,
+            }
+        }
+        fn prod(&mut self) -> Option<u64> {
+            let mut v = self.atom()?;
+            loop {
+                self.ws();
+                match self.s.get(self.i) {
+                    Some(b'*') => {
+                        self.i += 1;
+                        v = v.checked_mul(self.atom()?)?;
+                    }
+                    Some(b'/') => {
+                        self.i += 1;
+                        let d = self.atom()?;
+                        v = v.checked_div(d)?;
+                    }
+                    _ => return Some(v),
+                }
+            }
+        }
+        fn sum(&mut self) -> Option<u64> {
+            let mut v = self.prod()?;
+            loop {
+                self.ws();
+                match self.s.get(self.i) {
+                    Some(b'+') => {
+                        self.i += 1;
+                        v = v.checked_add(self.prod()?)?;
+                    }
+                    Some(b'-') => {
+                        self.i += 1;
+                        v = v.checked_sub(self.prod()?)?;
+                    }
+                    _ => return Some(v),
+                }
+            }
+        }
+    }
+    let mut p = P { s: expr.as_bytes(), i: 0, consts };
+    let v = p.sum()?;
+    p.ws();
+    if p.i == expr.len() { Some(v) } else { None }
+}
+
+/// Method signatures inside a `trait` block, consulted only for
+/// qualified-path calls (`<T as Trait>::method(..)`) in traced flows.
+fn scan_trait(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String]) -> usize {
+    let end = skip_item(cx, i);
+    let mut depth = 0i64;
+    for j in i..end.min(cx.lines.len()) {
+        let before = depth;
+        depth += brace_delta(&cx.code[j]);
+        let t = cx.code[j].trim();
+        if before == 1 && t.starts_with("fn ") {
+            let mut sig = String::new();
+            for cj in cx.code.iter().take(end.min(cx.lines.len())).skip(j) {
+                for ch in cj.chars() {
+                    if ch == '{' || ch == ';' {
+                        break;
+                    }
+                    sig.push(ch);
+                }
+                if cj.contains('{') || cj.contains(';') {
+                    break;
+                }
+                sig.push(' ');
+            }
+            if let Some((name, generics, params, ret)) = parse_fn_sig(&sig) {
+                cm.trait_fns.entry(name.clone()).or_insert(FnDef {
+                    name,
+                    module: mods.to_vec(),
+                    loc: Loc { file: cx.file.clone(), line: j + 1 },
+                    generics,
+                    params,
+                    ret,
+                    kind: FnKind::Other,
+                    body: None,
+                    placeholder: false,
+                    docs: Vec::new(),
+                    should_panic: false,
+                });
+            }
+        }
+    }
+    end
+}
+
 fn parse_satisfies(cm: &mut CrateModel, c: &str) {
     // `model_core::satisfies!(assert_req006, KettleAtTheBoil);`
     let Some(open) = c.find('(') else { return };
@@ -360,14 +684,23 @@ fn fn_kind(cx: &FileCx, mods: &[String], is_pub: bool) -> FnKind {
         FnKind::Boundary
     } else if cx.is_tests {
         FnKind::Test
-    } else if cx.file.ends_with("src/flows.rs") && mods.is_empty() && is_pub {
+    } else if cx.file.ends_with("src/flows.rs") && mods.len() <= 1 && is_pub {
+        // Top-level `pub fn` in the flows module (the file stem seeds one
+        // module level, so `mods` is `["flows"]` there).
         FnKind::Flow
     } else {
         FnKind::Other
     }
 }
 
-fn scan_fn(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String], docs: &[String]) -> usize {
+fn scan_fn(
+    cm: &mut CrateModel,
+    cx: &FileCx,
+    i: usize,
+    mods: &[String],
+    docs: &[String],
+    should_panic: bool,
+) -> usize {
     // Join lines until the body `{` (or a `;` for a bodyless decl).
     let mut sig = String::new();
     let mut open: Option<(usize, usize)> = None; // (line, byte col of '{')
@@ -442,6 +775,8 @@ fn scan_fn(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String], docs: &[
         kind,
         body,
         placeholder,
+        docs: docs.to_vec(),
+        should_panic,
     };
     if cm.fns.contains_key(&def.0) {
         cm.warn(format!(
@@ -708,10 +1043,19 @@ fn scan_struct(cm: &mut CrateModel, cx: &FileCx, i: usize, docs: &[String]) -> u
             kind: ResKind::BoundaryObject,
             unit: None,
             placeholder,
+            placeholder_text: placeholder_tags(docs),
+            doc_first: docs.first().cloned().unwrap_or_default(),
             loc: Loc { file: cx.file.clone(), line: i + 1 },
         });
     }
     end
+}
+
+/// The `Placeholder: ...` tag lines of a doc block (tag text without the tag).
+fn placeholder_tags(docs: &[String]) -> Vec<String> {
+    docs.iter()
+        .filter_map(|d| d.strip_prefix("Placeholder:").map(|r| r.trim().to_string()))
+        .collect()
 }
 
 fn scan_enum(cm: &mut CrateModel, cx: &FileCx, i: usize) -> usize {
@@ -796,19 +1140,60 @@ fn scan_impl(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String]) -> usi
     }
     let loc = Loc { file: cx.file.clone(), line: i + 1 };
 
-    // `impl<..> Consumer<Item> for Sink`
-    if let Some(cpos) = find_trait_use(&header, "Consumer") {
-        if let Some(fpos) = header.find(" for ") {
-            let item_ty = &header[cpos..];
+    // The generic parameter names declared by the impl itself
+    // (`impl<H, T, const G: u64> ...`), to tell a concrete contents head
+    // from a generic one (F-055 #1).
+    let impl_generics: Vec<String> = {
+        let after = header.trim_start().strip_prefix("impl").unwrap_or("");
+        if after.trim_start().starts_with('<') {
+            generic_args(&format!("X{}", after.trim_start()))
+                .iter()
+                .map(|g| {
+                    let g = g.trim().trim_start_matches("const ").trim();
+                    g.split(':').next().unwrap_or(g).trim().to_string()
+                })
+                .collect()
+        } else {
+            Vec::new()
+        }
+    };
+
+    // Split the header into the implemented-trait side and the self-type
+    // side at the top-level ` for ` — trait names mentioned in a where
+    // clause (`where Bin: Consumer<..>`) must NOT register an impl.
+    let (impl_lhs, impl_rhs) = match impl_for_split(&header) {
+        Some((l, r)) => (l, r),
+        None => (header.clone(), String::new()),
+    };
+    let self_ty_full = match find_top_where(&impl_rhs) {
+        Some(w) => impl_rhs[..w].trim().to_string(),
+        None => impl_rhs.trim().to_string(),
+    };
+
+    // `impl<..> Consumer<Item> for Sink` (possibly path-qualified,
+    // `model_core::boundary::Consumer<..>`).
+    if let Some(cpos) = find_trait_use(&impl_lhs, "Consumer") {
+        if !self_ty_full.is_empty() {
+            let item_ty = &impl_lhs[cpos..];
             let item = generic_args(item_ty).first().cloned().unwrap_or_default();
-            let sink = base_name(header[fpos + 5..].trim());
+            let sink = base_name(&self_ty_full);
             if !sink.is_empty() && !item.is_empty() {
                 cm.consumers.push(ConsumerImpl { sink, item, loc: loc.clone() });
             }
         }
-    } else if header.contains(" Supplier for ") || header.contains(" Supplier for\t") {
-        if let Some(fpos) = header.find(" for ") {
-            let src = base_name(header[fpos + 5..].trim());
+    } else if impl_lhs.trim_end().ends_with(" Supplier")
+        || impl_lhs.trim_end().ends_with("::Supplier")
+    {
+        {
+            let self_ty = self_ty_full.as_str();
+            let src = base_name(self_ty);
+            // The contents head when the self type is `Src<Cons<Head, ..>>`
+            // and the head is concrete (not one of the impl's own generics).
+            let head = generic_args(self_ty)
+                .first()
+                .filter(|a| base_name(a) == "Cons")
+                .and_then(|a| generic_args(a).first().map(|h| base_name(h)))
+                .filter(|h| !h.is_empty() && !impl_generics.contains(h));
             // Look for `type Item = ...;` inside the block.
             let mut item = None;
             if has_block {
@@ -827,15 +1212,18 @@ fn scan_impl(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String]) -> usi
                 }
             }
             if !src.is_empty() {
-                cm.suppliers.push(SupplierImpl { src, item, loc: loc.clone() });
+                cm.suppliers.push(SupplierImpl { src, item, head, loc: loc.clone() });
             }
         }
-    } else if let Some(p) = header.find(" Fill for Cons<") {
-        let cons_ty = &header[p + " Fill for ".len()..];
+    } else if impl_lhs.trim_end().ends_with(" Fill") && self_ty_full.starts_with("Cons<") {
+        let cons_ty = self_ty_full.as_str();
         if let Some(arg) = generic_args(cons_ty).first() {
             let item = base_name(arg);
             if !item.is_empty() && item != "T" {
-                cm.fill_items.insert(mods.join("::"), item);
+                let e = cm.fill_items.entry(mods.join("::")).or_default();
+                if !e.contains(&item) {
+                    e.push(item);
+                }
             }
         }
     }
@@ -843,11 +1231,36 @@ fn scan_impl(cm: &mut CrateModel, cx: &FileCx, i: usize, mods: &[String]) -> usi
     if has_block { skip_item(cx, j) } else { j + 1 }
 }
 
-/// Position just past `TraitName` where the header uses ` TraitName<`,
+/// First top-level `" for "` in an impl header (outside any brackets):
+/// splits the implemented-trait side from the self-type side.
+fn impl_for_split(header: &str) -> Option<(String, String)> {
+    let b = header.as_bytes();
+    let mut depth = 0i64;
+    let mut k = 0usize;
+    while k + 5 <= header.len() {
+        match b[k] {
+            b'(' | b'[' | b'{' | b'<' => depth += 1,
+            b')' | b']' | b'}' | b'>' => depth -= 1,
+            b' ' if depth == 0 && header[k..].starts_with(" for ") => {
+                return Some((header[..k].to_string(), header[k + 5..].to_string()));
+            }
+            _ => {}
+        }
+        k += 1;
+    }
+    None
+}
+
+/// Position just past the opening of `TraitName<` in an impl header, matched
+/// as ` TraitName<` or `::TraitName<` (path-qualified impls, F-055 ext. 7),
 /// returning the index of `TraitName` (so the `<..>` can be read).
 fn find_trait_use(header: &str, trait_name: &str) -> Option<usize> {
-    let pat = format!(" {trait_name}<");
-    header.find(&pat).map(|p| p + 1)
+    for pat in [format!(" {trait_name}<"), format!("::{trait_name}<")] {
+        if let Some(p) = header.find(&pat) {
+            return Some(p + pat.len() - trait_name.len() - 1);
+        }
+    }
+    None
 }
 
 #[allow(clippy::too_many_lines)]
@@ -920,12 +1333,20 @@ fn scan_macro(
                     })
                 });
                 if !name.is_empty() {
+                    let all_docs: Vec<String> =
+                        pending_doc.iter().chain(inner_docs.iter()).cloned().collect();
                     cm.resources.insert(
                         name,
                         ResourceDef {
                             kind,
                             unit,
                             placeholder,
+                            placeholder_text: placeholder_tags(&all_docs),
+                            doc_first: inner_docs
+                                .first()
+                                .or(pending_doc.first())
+                                .cloned()
+                                .unwrap_or_default(),
                             loc: Loc { file: cx.file.clone(), line: dl + 1 },
                         },
                     );
@@ -984,9 +1405,22 @@ fn scan_macro(
                 let (s, f, e) = (get("success"), get("failure"), get("exit"));
                 let loc = Loc { file: cx.file.clone(), line: dl + 1 };
                 if !token.is_empty() {
+                    let all_docs: Vec<String> =
+                        pending_doc.iter().chain(inner_docs.iter()).cloned().collect();
                     cm.resources.insert(
                         token.clone(),
-                        ResourceDef { kind: ResKind::OutcomeToken, unit: None, placeholder, loc: loc.clone() },
+                        ResourceDef {
+                            kind: ResKind::OutcomeToken,
+                            unit: None,
+                            placeholder,
+                            placeholder_text: placeholder_tags(&all_docs),
+                            doc_first: inner_docs
+                                .first()
+                                .or(pending_doc.first())
+                                .cloned()
+                                .unwrap_or_default(),
+                            loc: loc.clone(),
+                        },
                     );
                     for (fname, params, ret) in [
                         (s.clone(), vec![], vec![token.clone()]),
@@ -1012,6 +1446,8 @@ fn scan_macro(
                                 kind: FnKind::Boundary,
                                 body: None,
                                 placeholder: true,
+                                docs: inner_docs.clone(),
+                                should_panic: false,
                             },
                         );
                     }
@@ -1060,6 +1496,8 @@ fn scan_macro(
                             },
                             body: None,
                             placeholder,
+                            docs: inner_docs.clone(),
+                            should_panic: false,
                         },
                     );
                 }
@@ -1078,6 +1516,14 @@ fn scan_macro(
                 let tname: String =
                     after.chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
                 if !tname.is_empty() {
+                    // The requirement's doc sentence (`REQ-NNN: <sentence>`),
+                    // for docgen's compliance section.
+                    if let Some(sentence) = inner_docs
+                        .iter()
+                        .find_map(|d| d.strip_prefix(&format!("{id}:")).map(|r| r.trim().to_string()))
+                    {
+                        cm.req_sentence.insert(id.clone(), sentence);
+                    }
                     cm.req_by_trait.insert(tname.clone(), id.clone());
                     cm.reqs.insert(id, (tname, Loc { file: cx.file.clone(), line: tl + 1 }));
                 }

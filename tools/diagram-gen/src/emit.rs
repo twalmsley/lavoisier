@@ -45,7 +45,7 @@ pub fn render_label(cm: &CrateModel, ty: &str) -> String {
 }
 
 /// Keep Mermaid-safe characters only (labels are emitted inside quotes).
-fn sanitize_label(s: &str) -> String {
+pub(crate) fn sanitize_label(s: &str) -> String {
     let mut out = String::new();
     for c in s.chars() {
         if c.is_alphanumeric()
@@ -78,7 +78,7 @@ fn sanitize_label(s: &str) -> String {
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone)]
-enum PIn {
+pub(crate) enum PIn {
     /// Plain resource input(s): one base type per way of satisfying the
     /// parameter's bound (several for a multi-type requirement, F-055 #3).
     Res(Vec<String>),
@@ -130,7 +130,7 @@ fn resolve_req_base(cm: &CrateModel, bounds: &str) -> Option<String> {
 }
 
 /// Resolve one declared parameter type of a process into a `PIn`.
-fn resolve_param(cm: &CrateModel, fdef: &FnDef, pty: &str) -> PIn {
+pub(crate) fn resolve_param(cm: &CrateModel, fdef: &FnDef, pty: &str) -> PIn {
     let t = pty.trim();
     // A bare generic parameter name?
     if let Some(g) = fdef.generics.iter().find(|g| !g.is_const && g.name == t) {
@@ -163,23 +163,78 @@ fn resolve_param(cm: &CrateModel, fdef: &FnDef, pty: &str) -> PIn {
                 }
                 "ConsumeList" | "Consumer" => {
                     let arg = generic_args(piece).first().cloned().unwrap_or_default();
-                    let label = render_label(cm, &arg);
                     let item_base = match list_shape(cm, &arg) {
                         Some((_, it)) => it,
                         None => base_name(&arg),
                     };
+                    // Is the consumed item itself opaque here — a generic
+                    // parameter of this fn, or an associated projection
+                    // (`FB::Contents`)? Then the item label must come from
+                    // the sink, not from the bound's text.
+                    let item_is_opaque = fdef
+                        .generics
+                        .iter()
+                        .any(|gp| !gp.is_const && gp.name == item_base)
+                        || arg.contains("::");
+                    let label = if item_is_opaque {
+                        String::new() // filled from the sink below
+                    } else {
+                        render_label(cm, &arg)
+                    };
                     let sink = resolve_req_base(cm, bounds)
                         .filter(|b| cm.is_sink_object(b))
                         .or_else(|| {
+                            if item_is_opaque {
+                                return None;
+                            }
                             cm.consumers
                                 .iter()
                                 .find(|c| base_name(&c.item) == item_base)
                                 .map(|c| c.sink.clone())
+                        })
+                        .or_else(|| {
+                            // Container-contents inference: the opaque item is
+                            // another parameter's contents (`bin: Bin<_, Contents>`
+                            // with `D: ConsumeList<Contents>`) — the sink takes
+                            // what that container consumes (unique, or nothing).
+                            if !item_is_opaque {
+                                return None;
+                            }
+                            let container = fdef.params.iter().find_map(|(_, pty)| {
+                                if pty.trim() == t {
+                                    return None;
+                                }
+                                let holds = crate::idents_in(pty).contains(&item_base);
+                                if holds {
+                                    let b = cm.resolve_alias(&base_name(pty));
+                                    if cm.is_sink_object(&b) { Some(b) } else { None }
+                                } else {
+                                    None
+                                }
+                            })?;
+                            let mut sinks: Vec<String> = Vec::new();
+                            for it in cm.sink_items(&container) {
+                                for c in cm.consumers.iter() {
+                                    if base_name(&c.item) == it
+                                        && c.sink != container
+                                        && !sinks.contains(&c.sink)
+                                    {
+                                        sinks.push(c.sink.clone());
+                                    }
+                                }
+                            }
+                            if sinks.len() == 1 { sinks.into_iter().next() } else { None }
                         });
                     if let Some(sink) = sink {
+                        let label = if label.is_empty() {
+                            cm.sink_items(&sink).join(" / ")
+                        } else {
+                            label
+                        };
                         return PIn::Sink { sink, label };
                     }
-                    return PIn::Unknown(format!("consumer of {label}"));
+                    let shown = if item_is_opaque { item_base } else { render_label(cm, &arg) };
+                    return PIn::Unknown(format!("consumer of {shown}"));
                 }
                 _ => {}
             }
@@ -193,6 +248,31 @@ fn resolve_param(cm: &CrateModel, fdef: &FnDef, pty: &str) -> PIn {
             // One input edge per satisfying type (F-055 #3): a multi-type
             // requirement means any of these resources can arrive here.
             return PIn::Res(bases);
+        }
+        // An unconstrained generic that a sibling bound consumes
+        // (`assemblies: AS` with `FG: ... + ConsumeList<AS>`): the input is
+        // whatever that sink consumes.
+        if bounds.is_empty() {
+            for sib in &fdef.generics {
+                if sib.is_const || sib.name == *t {
+                    continue;
+                }
+                for piece in split_top(&sib.bounds, '+') {
+                    let head = base_name(piece.trim());
+                    if (head == "ConsumeList" || head == "Consumer")
+                        && generic_args(&piece).first().map(|a| a.trim() == t).unwrap_or(false)
+                    {
+                        if let Some(sink) =
+                            resolve_req_base(cm, &sib.bounds).filter(|b| cm.is_sink_object(b))
+                        {
+                            let items = cm.sink_items(&sink);
+                            if !items.is_empty() {
+                                return PIn::Res(items);
+                            }
+                        }
+                    }
+                }
+            }
         }
         return PIn::Unknown(format!("{t}: {bounds}"));
     }
@@ -230,7 +310,7 @@ fn find_supplier_for(cm: &CrateModel, item: &str) -> Option<String> {
 /// Static outputs of a process: (base type, arm note) pairs; continuations
 /// (`::Rest` / `::Next`) are skipped, `::Item` resolves through the supplier,
 /// `Result<Ok, Err>` bundles are flattened to their fields.
-fn resolve_outputs(cm: &CrateModel, fdef: &FnDef) -> (Vec<(String, Option<&'static str>)>, Vec<String>) {
+pub(crate) fn resolve_outputs(cm: &CrateModel, fdef: &FnDef) -> (Vec<(String, Option<&'static str>)>, Vec<String>) {
     let mut outs: Vec<(String, Option<&'static str>)> = Vec::new();
     let mut supplier_outs: Vec<String> = Vec::new();
     let resolve_generic = |g: &str| -> Option<String> {
@@ -854,7 +934,48 @@ pub fn build_context(cm: &mut CrateModel, flow_fns_used: &BTreeSet<String>) -> F
     }
 
     // Sink objects: what leaves the system, labeled by their Consumer impls.
-    let mut sinks: Vec<String> = cm.consumers.iter().map(|c| c.sink.clone()).collect();
+    // A dependency crate's sink appears only when this crate touches it
+    // (names it, or its items, in a signature or a traced flow) — the merged
+    // upstream model must not inflate a subsystem's own boundary.
+    let mut touched: BTreeSet<String> = BTreeSet::new();
+    for f in cm.fns.values() {
+        for (_, pt) in &f.params {
+            touched.extend(crate::idents_in(pt));
+        }
+        for r in &f.ret {
+            touched.extend(crate::idents_in(r));
+        }
+        for gp in &f.generics {
+            touched.extend(crate::idents_in(&gp.bounds));
+        }
+    }
+    for fname in flow_fns_used {
+        touched.insert(fname.clone());
+        if let Some(fd) = cm.callable(fname) {
+            for r in &fd.ret {
+                touched.extend(crate::idents_in(r));
+            }
+        }
+    }
+    let touched: BTreeSet<String> =
+        touched.iter().map(|t| cm.resolve_alias(t)).chain(touched.iter().cloned()).collect();
+    let mut sinks: Vec<String> = Vec::new();
+    for (k, c) in cm.consumers.iter().enumerate() {
+        if sinks.contains(&c.sink) {
+            continue;
+        }
+        let dep_only = (0..cm.consumers.len())
+            .filter(|&i| cm.consumers[i].sink == c.sink)
+            .all(|i| cm.dep_consumers.contains(&i));
+        let _ = k;
+        if dep_only
+            && !touched.contains(&c.sink)
+            && !cm.sink_items(&c.sink).iter().any(|it| touched.contains(it))
+        {
+            continue;
+        }
+        sinks.push(c.sink.clone());
+    }
     sinks.sort();
     sinks.dedup();
     for s in &sinks {
@@ -927,7 +1048,7 @@ pub fn build_context(cm: &mut CrateModel, flow_fns_used: &BTreeSet<String>) -> F
 // Mermaid + markdown emission.
 // ---------------------------------------------------------------------------
 
-fn kind_name(k: NKind) -> &'static str {
+pub(crate) fn kind_name(k: NKind) -> &'static str {
     match k {
         NKind::Process => "process",
         NKind::Boundary => "boundary source",
@@ -955,7 +1076,7 @@ fn class_name(k: NKind) -> &'static str {
     }
 }
 
-fn mermaid(g: &FlowGraph, direction: &str) -> String {
+pub(crate) fn mermaid(g: &FlowGraph, direction: &str) -> String {
     let mut s = String::new();
     let _ = writeln!(s, "```mermaid");
     let _ = writeln!(s, "flowchart {direction}");
@@ -1056,7 +1177,7 @@ fn mermaid(g: &FlowGraph, direction: &str) -> String {
     s
 }
 
-fn legend(g: &FlowGraph) -> String {
+pub(crate) fn legend(g: &FlowGraph) -> String {
     let mut s = String::new();
     let _ = writeln!(s, "| Node | Kind | Defined at |");
     let _ = writeln!(s, "|---|---|---|");
@@ -1136,13 +1257,49 @@ fn stamp(cm: &CrateModel) -> String {
 // Per-crate orchestration.
 // ---------------------------------------------------------------------------
 
-pub fn emit_crate(
-    _root: &Path,
-    out_dir: &Path,
+/// How many distinct model processes (or composite flows) a captured body
+/// composes — the flow-discovery test (F-055: generalized from the old
+/// `flow_order_a*` naming convention).
+fn composed_processes(cm: &CrateModel, body: &str) -> usize {
+    // Strip string literals first: History assertions quote process names
+    // (`assert_eq!(e1.process, "fill_kettle")`), which are not calls.
+    let mut code = String::with_capacity(body.len());
+    let mut in_str = false;
+    let mut prev = '\0';
+    for c in body.chars() {
+        if in_str {
+            if c == '"' && prev != '\\' {
+                in_str = false;
+            }
+            prev = if c == '\\' && prev == '\\' { '\0' } else { c };
+            continue;
+        }
+        if c == '"' {
+            in_str = true;
+        } else {
+            code.push(c);
+        }
+        prev = c;
+    }
+    let mut n = 0usize;
+    for (name, f) in cm.fns.iter().chain(cm.dep_fns.iter()) {
+        if matches!(f.kind, FnKind::Process | FnKind::Flow)
+            && (code.contains(&format!("{name}(")) || code.contains(&format!("{name}::<")))
+            && crate::contains_ident(&code, name)
+        {
+            n += 1;
+        }
+    }
+    n
+}
+
+/// Trace every flow worth a detailed diagram: the canonical `flow_order_a*`
+/// test (titled "Main flow") when present, every composite production flow,
+/// and every other integration-test fn that composes 2+ processes.
+pub fn collect_traced_flows(
     cm: &mut CrateModel,
     core_locs: &BTreeMap<String, Loc>,
-) {
-    // ---- detailed: trace the canonical flow (+ composite flows) ----
+) -> Vec<(String, FlowGraph, Loc)> {
     let main_flow: Option<String> = cm
         .fns
         .keys()
@@ -1154,24 +1311,60 @@ pub fn emit_crate(
         .filter(|f| f.kind == FnKind::Flow && f.body.is_some())
         .map(|f| f.name.clone())
         .collect();
+    let mut test_flows: Vec<(String, usize, String)> = cm
+        .fns
+        .values()
+        .filter(|f| {
+            f.kind == FnKind::Test
+                && !f.should_panic // a tripwire counterexample is not a flow
+                && Some(&f.name) != main_flow.as_ref()
+                && f.body.as_deref().map(|b| composed_processes(cm, b) >= 2).unwrap_or(false)
+        })
+        .map(|f| (f.loc.file.clone(), f.loc.line, f.name.clone()))
+        .collect();
+    test_flows.sort();
 
     let mut traced: Vec<(String, FlowGraph, Loc)> = Vec::new();
-    let mut flow_fns_used: BTreeSet<String> = BTreeSet::new();
     if let Some(mf) = &main_flow {
         let loc = cm.fns[mf].loc.clone();
         if let Some(g) = Tracer::trace(cm, core_locs, mf) {
-            for n in &g.nodes {
-                flow_fns_used.insert(n.fname.clone());
-            }
             traced.push((format!("Main flow — `{mf}`"), g, loc));
         }
-    } else {
-        cm.warn("no `flow_order_a*` integration-test flow found".to_string());
     }
     for cf in &composite_flows {
         let loc = cm.fns[cf].loc.clone();
         if let Some(g) = Tracer::trace(cm, core_locs, cf) {
             traced.push((format!("Composite fallible flow — `{cf}`"), g, loc));
+        }
+    }
+    for (_, _, tf) in &test_flows {
+        let loc = cm.fns[tf].loc.clone();
+        if let Some(g) = Tracer::trace(cm, core_locs, tf) {
+            traced.push((format!("Test flow — `{tf}`"), g, loc));
+        }
+    }
+    if traced.is_empty() {
+        cm.warn(
+            "no flow to trace: no `flow_order_a*` test, no composite flow fn, and no \
+             integration test composing 2+ processes"
+                .to_string(),
+        );
+    }
+    traced
+}
+
+pub fn emit_crate(
+    _root: &Path,
+    out_dir: &Path,
+    cm: &mut CrateModel,
+    core_locs: &BTreeMap<String, Loc>,
+) {
+    // ---- detailed: trace the flows ----
+    let traced = collect_traced_flows(cm, core_locs);
+    let mut flow_fns_used: BTreeSet<String> = BTreeSet::new();
+    for (_, g, _) in &traced {
+        for n in &g.nodes {
+            flow_fns_used.insert(n.fname.clone());
         }
     }
 
@@ -1285,7 +1478,7 @@ fn count_edges(g: &FlowGraph) -> usize {
     seen.len()
 }
 
-fn write_out(dir: &Path, name: &str, content: &str) {
+pub(crate) fn write_out(dir: &Path, name: &str, content: &str) {
     let path = dir.join(name);
     std::fs::write(&path, content).unwrap_or_else(|e| panic!("write {}: {e}", path.display()));
 }
@@ -1308,9 +1501,10 @@ pub fn emit_index(root: &Path, rows: &[(String, String)]) {
         "- **Context** — the system as one box; only what crosses the boundary (R12/R15).\n\
          - **Top-level** — the first level of processes with their inputs and outputs, linked \
          to each other and to the boundary: the R9 connection graph from the process signatures.\n\
-         - **Detailed** — all levels, fully connected: the flow trace with adjacent time draws, \
-         History records, internal waste routing and disposal steps, plus the composite \
-         fallible flows where the crate has them.\n"
+         - **Detailed** — all levels, fully connected: the flow traces with adjacent time draws, \
+         History records, internal waste routing and disposal steps — the composite \
+         fallible flows and every integration-test flow that composes two or more processes \
+         (order variants demonstrate R9's sequencing freedom).\n"
     );
     let _ = writeln!(
         s,
@@ -1336,9 +1530,12 @@ pub fn emit_index(root: &Path, rows: &[(String, String)]) {
     let _ = writeln!(
         s,
         "\nRegenerate after a model change:\n\n```sh\n./tools/diagrams.sh\n```\n\nThe generator \
-         is `tools/diagram-gen` (std-only Rust, outside the model workspace). Where its \
-         line-based heuristics cannot see something it emits a WARN to stderr and an HTML \
-         comment in the affected file rather than guessing."
+         is `tools/diagram-gen` (std-only Rust, outside the model workspace); multi-crate \
+         models resolve their workspace dependencies' types and processes, so cross-crate \
+         edges carry links into the owning crate. Where the line-based heuristics cannot see \
+         something the generator emits a WARN to stderr and an HTML comment in the affected \
+         file rather than guessing. The per-process documents generated from the same \
+         extraction live in [docs/processes](../processes/README.md)."
     );
     let dir = root.join("docs/diagrams");
     std::fs::create_dir_all(&dir).expect("create docs/diagrams");

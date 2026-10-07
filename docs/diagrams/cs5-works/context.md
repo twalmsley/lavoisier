@@ -21,6 +21,10 @@ flowchart LR
   n_exit_settle_up["settle_up"]:::external
   n_stock_the_rack["stock_the_rack"]:::external
   n_Bin["Bin"]:::external
+  n_PackagingDisposal["PackagingDisposal"]:::external
+  n_Vendor["Vendor"]:::external
+  n_person["person (model-core boundary)"]:::external
+  n_history["History — the execution record (R16)"]:::external
   n_open_the_books -- "Account" --> n_system
   n_Customer -- "CustomerOrder" --> n_system
   n_Customer -- "Money" --> n_system
@@ -28,12 +32,20 @@ flowchart LR
   n_stock_the_rack -- "HousingRack (Housing supplier)" --> n_system
   n_system -- "Packaging" --> n_Bin
   n_system -- "Instrument" --> n_Customer
+  n_system -- "Packaging" --> n_PackagingDisposal
+  n_system -- "PurchaseOrder" --> n_Vendor
+  n_system -- "Euros" --> n_Vendor
+  n_Vendor -- "BoxedComponent (goods)" --> n_system
+  n_person -- "Person (time budget)" --> n_system
+  n_system -- "Labour (expended time)" --> n_history
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/lib.rs#L1" "model/cs5-works/src/lib.rs"
   click n_open_the_books "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L303" "model/cs5-works/src/resources.rs"
   click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L274" "model/cs5-works/src/resources.rs"
   click n_exit_settle_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L315" "model/cs5-works/src/resources.rs"
   click n_stock_the_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L345" "model/cs5-works/src/resources.rs"
   click n_Bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L186" "model/cs5-works/src/resources.rs"
+  click n_PackagingDisposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L350" "model/cs5-supply/src/resources.rs"
+  click n_Vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L237" "model/cs5-supply/src/resources.rs"
 ```
 
 ## Legend — node → source
@@ -46,13 +58,22 @@ flowchart LR
 | `n_exit_settle_up` (settle_up) | external party | [model/cs5-works/src/resources.rs#L315](/model/cs5-works/src/resources.rs#L315) |
 | `n_stock_the_rack` (stock_the_rack) | external party | [model/cs5-works/src/resources.rs#L345](/model/cs5-works/src/resources.rs#L345) |
 | `n_Bin` (Bin) | external party | [model/cs5-works/src/resources.rs#L186](/model/cs5-works/src/resources.rs#L186) |
+| `n_PackagingDisposal` (PackagingDisposal) | external party | [model/cs5-supply/src/resources.rs#L350](/model/cs5-supply/src/resources.rs#L350) |
+| `n_Vendor` (Vendor) | external party | [model/cs5-supply/src/resources.rs#L237](/model/cs5-supply/src/resources.rs#L237) |
+| `n_person` (person (model-core boundary)) | external party | — |
+| `n_history` (History — the execution record (R16)) | external party | — |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
 | `Account` | boundary object | — | [model/cs5-works/src/resources.rs#L75](/model/cs5-works/src/resources.rs#L75) |
+| `BoxedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L125](/model/cs5-supply/src/resources.rs#L125) |
 | `CustomerOrder` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L225](/model/cs5-works/src/resources.rs#L225) |
+| `Euros` | continuous (container) | euro cents | [model/cs5-supply/src/resources.rs#L60](/model/cs5-supply/src/resources.rs#L60) |
 | `Housing` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L108](/model/cs5-works/src/resources.rs#L108) |
 | `HousingRack` | boundary object (placeholder) | — | [model/cs5-works/src/resources.rs#L127](/model/cs5-works/src/resources.rs#L127) |
 | `Instrument` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L162](/model/cs5-works/src/resources.rs#L162) |
+| `Money` | continuous (container) | pence | [model/cs5-supply/src/resources.rs#L47](/model/cs5-supply/src/resources.rs#L47) |
+| `Packaging` | continuous (container) | grams | [model/cs5-supply/src/resources.rs#L163](/model/cs5-supply/src/resources.rs#L163) |
+| `PurchaseOrder` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L178](/model/cs5-supply/src/resources.rs#L178) |

@@ -18,25 +18,78 @@ flowchart LR
   subgraph sg_sources["System boundary — sources and setup"]
     direction TB
     n_tool_up["tool_up"]:::boundary
+    n_BoltBox["BoltBox"]:::boundary
   end
+  subgraph sg_system["Processes"]
+    direction TB
+    n_cut["cut"]:::process
+    n_drill_blank["drill_blank"]:::process
+    n_fasten["fasten"]:::process
+  end
+  subgraph sg_sinks["System boundary — sinks"]
+    direction TB
+    n_FinishedGoods["FinishedGoods"]:::sink
+    n_SwarfBin["SwarfBin"]:::sink
+  end
+  n_PillarDrill["PillarDrill"]:::resource
   n_caller["caller / flow"]:::flowio
-  n_tool_up -- "PillarDrill" --> n_caller
-  n_tool_up -- "Saw" --> n_caller
-  n_tool_up -- "Workbench" --> n_caller
+  n_Saw["Saw"]:::resource
+  n_Workbench["Workbench"]:::resource
+  n_fasten -- "Assembly" --> n_FinishedGoods
+  n_cut -- "Blank" --> n_drill_blank
+  n_drill_blank -- "DrilledPlate" --> n_fasten
+  n_tool_up -- "PillarDrill" --> n_PillarDrill
+  n_PillarDrill -- "PillarDrill" --> n_caller
+  n_tool_up -- "Saw" --> n_Saw
+  n_Saw -- "Saw" --> n_caller
+  n_caller -- "Sheet" --> n_cut
+  n_tool_up -- "Workbench" --> n_Workbench
+  n_Workbench -- "Workbench" --> n_caller
+  n_cut -- "CutSwarf" --> n_SwarfBin
+  n_drill_blank -- "DrillSwarf" --> n_SwarfBin
+  n_BoltBox -- "4 × Bolt" --> n_fasten
+  n_Saw -.- n_cut
+  n_PillarDrill -.- n_drill_blank
+  n_Workbench -.- n_fasten
+  click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L34" "model/cs4-line/src/processes.rs"
+  click n_drill_blank "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L48" "model/cs4-line/src/processes.rs"
+  click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/processes.rs#L69" "model/cs4-line/src/processes.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
+  click n_PillarDrill "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L31" "model/cs4-line/src/resources.rs"
   click n_tool_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L128" "model/cs4-line/src/resources.rs"
+  click n_Saw "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L24" "model/cs4-line/src/resources.rs"
+  click n_Workbench "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L38" "model/cs4-line/src/resources.rs"
+  click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L57" "model/cs4-line/src/resources.rs"
+  click n_BoltBox "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L347" "model/cs4-stores/src/resources.rs"
 ```
 
 ## Legend — node → source
 
 | Node | Kind | Defined at |
 |---|---|---|
+| `n_cut` (cut) | process | [model/cs4-line/src/processes.rs#L34](/model/cs4-line/src/processes.rs#L34) |
+| `n_drill_blank` (drill_blank) | process | [model/cs4-line/src/processes.rs#L48](/model/cs4-line/src/processes.rs#L48) |
+| `n_fasten` (fasten) | process | [model/cs4-line/src/processes.rs#L69](/model/cs4-line/src/processes.rs#L69) |
+| `n_FinishedGoods` (FinishedGoods) | boundary sink | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `n_PillarDrill` (PillarDrill) | shared resource | [model/cs4-line/src/resources.rs#L31](/model/cs4-line/src/resources.rs#L31) |
 | `n_tool_up` (tool_up) | boundary source | [model/cs4-line/src/resources.rs#L128](/model/cs4-line/src/resources.rs#L128) |
 | `n_caller` (caller / flow) | flow input/output | — |
+| `n_Saw` (Saw) | shared resource | [model/cs4-line/src/resources.rs#L24](/model/cs4-line/src/resources.rs#L24) |
+| `n_Workbench` (Workbench) | shared resource | [model/cs4-line/src/resources.rs#L38](/model/cs4-line/src/resources.rs#L38) |
+| `n_SwarfBin` (SwarfBin) | boundary sink | [model/cs4-line/src/resources.rs#L57](/model/cs4-line/src/resources.rs#L57) |
+| `n_BoltBox` (BoltBox) | boundary source | [model/cs4-stores/src/resources.rs#L347](/model/cs4-stores/src/resources.rs#L347) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
+| `Assembly` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L190](/model/cs4-stores/src/resources.rs#L190) |
+| `Blank` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L105](/model/cs4-stores/src/resources.rs#L105) |
+| `Bolt` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L147](/model/cs4-stores/src/resources.rs#L147) |
+| `CutSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L124](/model/cs4-stores/src/resources.rs#L124) |
+| `DrillSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L132](/model/cs4-stores/src/resources.rs#L132) |
+| `DrilledPlate` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L114](/model/cs4-stores/src/resources.rs#L114) |
 | `PillarDrill` | reusable | — | [model/cs4-line/src/resources.rs#L31](/model/cs4-line/src/resources.rs#L31) |
 | `Saw` | reusable | — | [model/cs4-line/src/resources.rs#L24](/model/cs4-line/src/resources.rs#L24) |
+| `Sheet` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L97](/model/cs4-stores/src/resources.rs#L97) |
 | `Workbench` | reusable | — | [model/cs4-line/src/resources.rs#L38](/model/cs4-line/src/resources.rs#L38) |

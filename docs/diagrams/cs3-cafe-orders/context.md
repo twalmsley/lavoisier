@@ -37,6 +37,7 @@ flowchart LR
   n_KnockBox["KnockBox"]:::external
   n_env_SteamOutcome["environment — SteamOutcome trials"]:::external
   n_person["person (model-core boundary)"]:::external
+  n_history["History — the execution record (R16)"]:::external
   n_system -- "MilkBottle" --> n_exit_bottle_back_to_fridge
   n_fill_hopper -- "Hopper" --> n_system
   n_fill_urn -- "Urn" --> n_system
@@ -62,6 +63,7 @@ flowchart LR
   n_env_SteamOutcome -- "SteamOutcome" --> n_system
   n_system -- "SteamOutcome (untried)" --> n_env_SteamOutcome
   n_person -- "Person (time budget)" --> n_system
+  n_system -- "Labour (expended time)" --> n_history
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/lib.rs#L1" "model/cs3-cafe-orders/src/lib.rs"
   click n_exit_bottle_back_to_fridge "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L698" "model/cs3-cafe-orders/src/resources.rs"
   click n_fill_hopper "https://github.com/twalmsley/lavoisier/blob/main/model/cs3-cafe-orders/src/resources.rs#L706" "model/cs3-cafe-orders/src/resources.rs"
@@ -111,6 +113,7 @@ flowchart LR
 | `n_KnockBox` (KnockBox) | external party | [model/cs3-cafe-orders/src/resources.rs#L650](/model/cs3-cafe-orders/src/resources.rs#L650) |
 | `n_env_SteamOutcome` (environment — SteamOutcome trials) | external party | [model/cs3-cafe-orders/src/resources.rs#L510](/model/cs3-cafe-orders/src/resources.rs#L510) |
 | `n_person` (person (model-core boundary)) | external party | — |
+| `n_history` (History — the execution record (R16)) | external party | — |
 
 ## Resources on the edges
 

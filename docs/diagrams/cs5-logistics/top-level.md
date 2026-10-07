@@ -26,6 +26,10 @@ flowchart LR
     n_purchase_at_vendor["purchase_at_vendor"]:::process
     n_hand_over["hand_over"]:::process
   end
+  subgraph sg_sinks["System boundary — sinks"]
+    direction TB
+    n_Vendor["Vendor"]:::sink
+  end
   n_caller["caller / flow"]:::flowio
   n_CourierAtVendor["CourierAtVendor"]:::resource
   n_InboundCourier["InboundCourier"]:::resource
@@ -41,6 +45,7 @@ flowchart LR
   n_consign -- "OutboundCourier" --> n_OutboundCourier
   n_OutboundCourier -- "OutboundCourier" --> n_caller
   n_caller -- "PurchaseOrder" --> n_consign
+  n_purchase_at_vendor -- "PurchaseOrder" --> n_Vendor
   n_OutboundCourier -.- n_carry_to_vendor
   n_InboundCourier -.- n_hand_over
   n_CourierAtVendor -.- n_purchase_at_vendor
@@ -52,6 +57,7 @@ flowchart LR
   click n_CourierAtVendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L70" "model/cs5-logistics/src/resources.rs"
   click n_InboundCourier "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L79" "model/cs5-logistics/src/resources.rs"
   click n_OutboundCourier "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L62" "model/cs5-logistics/src/resources.rs"
+  click n_Vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L237" "model/cs5-supply/src/resources.rs"
 ```
 
 ## Legend — node → source
@@ -67,14 +73,16 @@ flowchart LR
 | `n_CourierAtVendor` (CourierAtVendor) | shared resource | [model/cs5-logistics/src/resources.rs#L70](/model/cs5-logistics/src/resources.rs#L70) |
 | `n_InboundCourier` (InboundCourier) | shared resource | [model/cs5-logistics/src/resources.rs#L79](/model/cs5-logistics/src/resources.rs#L79) |
 | `n_OutboundCourier` (OutboundCourier) | shared resource | [model/cs5-logistics/src/resources.rs#L62](/model/cs5-logistics/src/resources.rs#L62) |
+| `n_Vendor` (Vendor) | boundary sink | [model/cs5-supply/src/resources.rs#L237](/model/cs5-supply/src/resources.rs#L237) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
+| `BoxedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L125](/model/cs5-supply/src/resources.rs#L125) |
 | `CourierAtUk` | boundary object | — | [model/cs5-logistics/src/resources.rs#L36](/model/cs5-logistics/src/resources.rs#L36) |
 | `CourierAtVendor` | boundary object | — | [model/cs5-logistics/src/resources.rs#L70](/model/cs5-logistics/src/resources.rs#L70) |
+| `Euros` | continuous (container) | euro cents | [model/cs5-supply/src/resources.rs#L60](/model/cs5-supply/src/resources.rs#L60) |
 | `InboundCourier` | boundary object | — | [model/cs5-logistics/src/resources.rs#L79](/model/cs5-logistics/src/resources.rs#L79) |
 | `OutboundCourier` | boundary object | — | [model/cs5-logistics/src/resources.rs#L62](/model/cs5-logistics/src/resources.rs#L62) |
-
-<!-- WARN (diagram-gen): purchase_at_vendor: unresolved parameter `consumer of PurchaseOrder` -->
+| `PurchaseOrder` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L178](/model/cs5-supply/src/resources.rs#L178) |

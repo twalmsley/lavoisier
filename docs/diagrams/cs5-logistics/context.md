@@ -17,9 +17,14 @@ flowchart LR
   classDef system fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
   n_system["cs5-logistics — the modelled system"]:::system
   n_courier_reports_for_duty["courier_reports_for_duty"]:::external
+  n_Vendor["Vendor"]:::external
   n_courier_reports_for_duty -- "CourierAtUk" --> n_system
+  n_system -- "PurchaseOrder" --> n_Vendor
+  n_system -- "Euros" --> n_Vendor
+  n_Vendor -- "BoxedComponent (goods)" --> n_system
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/lib.rs#L1" "model/cs5-logistics/src/lib.rs"
   click n_courier_reports_for_duty "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-logistics/src/resources.rs#L103" "model/cs5-logistics/src/resources.rs"
+  click n_Vendor "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L237" "model/cs5-supply/src/resources.rs"
 ```
 
 ## Legend — node → source
@@ -28,9 +33,13 @@ flowchart LR
 |---|---|---|
 | `n_system` (cs5-logistics — the modelled system) | the system | [model/cs5-logistics/src/lib.rs#L1](/model/cs5-logistics/src/lib.rs#L1) |
 | `n_courier_reports_for_duty` (courier_reports_for_duty) | external party | [model/cs5-logistics/src/resources.rs#L103](/model/cs5-logistics/src/resources.rs#L103) |
+| `n_Vendor` (Vendor) | external party | [model/cs5-supply/src/resources.rs#L237](/model/cs5-supply/src/resources.rs#L237) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
+| `BoxedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L125](/model/cs5-supply/src/resources.rs#L125) |
 | `CourierAtUk` | boundary object | — | [model/cs5-logistics/src/resources.rs#L36](/model/cs5-logistics/src/resources.rs#L36) |
+| `Euros` | continuous (container) | euro cents | [model/cs5-supply/src/resources.rs#L60](/model/cs5-supply/src/resources.rs#L60) |
+| `PurchaseOrder` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L178](/model/cs5-supply/src/resources.rs#L178) |

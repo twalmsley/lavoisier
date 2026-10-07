@@ -17,17 +17,21 @@ flowchart LR
   classDef system fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
   n_system["cs4-line — the modelled system"]:::system
   n_tool_up["tool_up"]:::external
-  n_BatchRig["BatchRig"]:::external
+  n_Disposal["Disposal"]:::external
+  n_FinishedGoods["FinishedGoods"]:::external
   n_SwarfBin["SwarfBin"]:::external
   n_tool_up -- "Saw" --> n_system
   n_tool_up -- "PillarDrill" --> n_system
   n_tool_up -- "Workbench" --> n_system
-  n_system -- "CutSwarf" --> n_BatchRig
+  n_system -- "CutSwarf" --> n_Disposal
+  n_system -- "DrillSwarf" --> n_Disposal
+  n_system -- "Assembly" --> n_FinishedGoods
   n_system -- "CutSwarf" --> n_SwarfBin
   n_system -- "DrillSwarf" --> n_SwarfBin
   click n_system "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/lib.rs#L1" "model/cs4-line/src/lib.rs"
   click n_tool_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L128" "model/cs4-line/src/resources.rs"
-  click n_BatchRig "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L63" "model/cs4-line/src/batch.rs"
+  click n_Disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L513" "model/cs4-stores/src/resources.rs"
+  click n_FinishedGoods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L475" "model/cs4-stores/src/resources.rs"
   click n_SwarfBin "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L57" "model/cs4-line/src/resources.rs"
 ```
 
@@ -37,13 +41,17 @@ flowchart LR
 |---|---|---|
 | `n_system` (cs4-line — the modelled system) | the system | [model/cs4-line/src/lib.rs#L1](/model/cs4-line/src/lib.rs#L1) |
 | `n_tool_up` (tool_up) | external party | [model/cs4-line/src/resources.rs#L128](/model/cs4-line/src/resources.rs#L128) |
-| `n_BatchRig` (BatchRig) | external party | [model/cs4-line/src/batch.rs#L63](/model/cs4-line/src/batch.rs#L63) |
+| `n_Disposal` (Disposal) | external party | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
+| `n_FinishedGoods` (FinishedGoods) | external party | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
 | `n_SwarfBin` (SwarfBin) | external party | [model/cs4-line/src/resources.rs#L57](/model/cs4-line/src/resources.rs#L57) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
+| `Assembly` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L190](/model/cs4-stores/src/resources.rs#L190) |
+| `CutSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L124](/model/cs4-stores/src/resources.rs#L124) |
+| `DrillSwarf` | continuous (container) | grams | [model/cs4-stores/src/resources.rs#L132](/model/cs4-stores/src/resources.rs#L132) |
 | `PillarDrill` | reusable | — | [model/cs4-line/src/resources.rs#L31](/model/cs4-line/src/resources.rs#L31) |
 | `Saw` | reusable | — | [model/cs4-line/src/resources.rs#L24](/model/cs4-line/src/resources.rs#L24) |
 | `Workbench` | reusable | — | [model/cs4-line/src/resources.rs#L38](/model/cs4-line/src/resources.rs#L38) |

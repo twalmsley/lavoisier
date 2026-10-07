@@ -383,6 +383,142 @@ flowchart LR
 | `n_RetryOutcome__Retried` (RetryOutcome::Retried) | outcome grouping | [model/pilot-workshop/src/flows.rs#L137](/model/pilot-workshop/src/flows.rs#L137) |
 | `n_RetryOutcome__GaveUp` (RetryOutcome::GaveUp) | outcome grouping | [model/pilot-workshop/src/flows.rs#L137](/model/pilot-workshop/src/flows.rs#L137) |
 
+## Test flow — `flow_order_b_type_checks_and_accounts_for_everything`
+
+Source: [model/pilot-workshop/tests/flows.rs#L136](/model/pilot-workshop/tests/flows.rs#L136)
+
+```mermaid
+flowchart LR
+  classDef process fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
+  classDef boundary fill:#dcfce7,stroke:#166534,color:#14532d;
+  classDef sink fill:#fee2e2,stroke:#991b1b,color:#7f1d1d;
+  classDef helper fill:#f3e8ff,stroke:#6b21a8,color:#581c87;
+  classDef grouping fill:#ffedd5,stroke:#9a3412,color:#7c2d12;
+  classDef flowio fill:#e2e8f0,stroke:#334155,color:#0f172a;
+  classDef resource fill:#fef9c3,stroke:#854d0e,color:#713f12;
+  classDef external fill:#dcfce7,stroke:#166534,color:#14532d;
+  classDef system fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
+  subgraph sg_sources["System boundary — sources and setup"]
+    direction TB
+    n_new_person["new_person"]:::boundary
+    n_qualify["qualify"]:::boundary
+    n_supply_drill["supply_drill"]:::boundary
+    n_supply_guard["supply_guard"]:::boundary
+    n_supply_sheet["supply_sheet"]:::boundary
+    n_full_box["full_box"]:::boundary
+  end
+  subgraph sg_system["Processes"]
+    direction TB
+    n_fit_guard["fit_guard"]:::process
+    n_cut["cut"]:::process
+    n_discard_swarf["discard_swarf"]:::process
+    n_drill_holes["drill_holes"]:::process
+    n_discard_swarf_2["discard_swarf (2)"]:::process
+    n_drill_holes_2["drill_holes (2)"]:::process
+    n_discard_swarf_3["discard_swarf (3)"]:::process
+    n_fasten["fasten"]:::process
+  end
+  subgraph sg_helpers["Time accounting and helpers (model-core)"]
+    direction TB
+    n_new_history["new_history"]:::helper
+    n_record["record drill_holes"]:::helper
+    n_new_history_2["new_history (2)"]:::helper
+    n_record_2["record drill_holes (2)"]:::helper
+    n_merge["merge"]:::helper
+  end
+  subgraph sg_sinks["System boundary — sinks"]
+    direction TB
+    n_new_swarf_bin["new_swarf_bin"]:::sink
+    n_new_customer["new_customer"]:::sink
+    n_dispose_bin["dispose_bin"]:::sink
+  end
+  n_flow_end["flow end — everything accounted"]:::flowio
+  n_new_person -- "Person 10000 ms" --> n_qualify
+  n_supply_guard -- "MachineGuard" --> n_fit_guard
+  n_supply_sheet -- "SteelSheet 2000 grams" --> n_cut
+  n_new_swarf_bin -- "SwarfBin 3" --> n_discard_swarf
+  n_cut -- "Swarf 200 grams" --> n_discard_swarf
+  n_qualify -- "Qualified 10000 ms" --> n_drill_holes
+  n_supply_drill -- "Drill" --> n_drill_holes
+  n_fit_guard -- "FittedGuard" --> n_drill_holes
+  n_cut -- "Plate 900 grams" --> n_drill_holes
+  n_discard_swarf -- "SwarfBin" --> n_discard_swarf_2
+  n_drill_holes -- "Swarf 20 grams" --> n_discard_swarf_2
+  n_new_history -- "History" --> n_record
+  n_drill_holes -- "Labour 2000 ms" --> n_record
+  n_drill_holes -- "Qualified 8000 ms" --> n_drill_holes_2
+  n_drill_holes -- "Drill" --> n_drill_holes_2
+  n_drill_holes -- "FittedGuard" --> n_drill_holes_2
+  n_cut -- "Plate 900 grams" --> n_drill_holes_2
+  n_discard_swarf_2 -- "SwarfBin" --> n_discard_swarf_3
+  n_drill_holes_2 -- "Swarf 20 grams" --> n_discard_swarf_3
+  n_new_history_2 -- "History" --> n_record_2
+  n_drill_holes_2 -- "Labour 2000 ms" --> n_record_2
+  n_drill_holes -- "DrilledPlate 880 grams" --> n_fasten
+  n_drill_holes_2 -- "DrilledPlate 880 grams" --> n_fasten
+  n_full_box -- "BoltBox" --> n_fasten
+  n_fasten -- "Assembly 1760" --> n_new_customer
+  n_discard_swarf_3 -- "SwarfBin" --> n_dispose_bin
+  n_record -- "History" --> n_merge
+  n_record_2 -- "History" --> n_merge
+  n_merge -- "History" --> n_flow_end
+  n_drill_holes_2 -- "Qualified 6000 ms" --> n_flow_end
+  n_drill_holes_2 -- "Drill" --> n_flow_end
+  n_drill_holes_2 -- "FittedGuard" --> n_flow_end
+  n_fasten -- "EmptyBoltBox" --> n_flow_end
+  click n_new_person "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L152" "model/model-core/src/common.rs"
+  click n_qualify "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/common.rs#L166" "model/model-core/src/common.rs"
+  click n_supply_drill "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L430" "model/pilot-workshop/src/resources.rs"
+  click n_supply_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L460" "model/pilot-workshop/src/resources.rs"
+  click n_fit_guard "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L601" "model/pilot-workshop/src/resources.rs"
+  click n_new_swarf_bin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L478" "model/pilot-workshop/src/resources.rs"
+  click n_supply_sheet "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L423" "model/pilot-workshop/src/resources.rs"
+  click n_cut "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L584" "model/pilot-workshop/src/resources.rs"
+  click n_discard_swarf "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
+  click n_drill_holes "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L668" "model/pilot-workshop/src/resources.rs"
+  click n_discard_swarf_2 "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
+  click n_new_history "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L264" "model/model-core/src/history.rs"
+  click n_record "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
+  click n_drill_holes_2 "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L668" "model/pilot-workshop/src/resources.rs"
+  click n_discard_swarf_3 "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L820" "model/pilot-workshop/src/resources.rs"
+  click n_new_history_2 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L264" "model/model-core/src/history.rs"
+  click n_record_2 "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L284" "model/model-core/src/history.rs"
+  click n_full_box "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/catalogue.rs#L229" "model/pilot-workshop/src/catalogue.rs"
+  click n_fasten "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L799" "model/pilot-workshop/src/resources.rs"
+  click n_new_customer "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L487" "model/pilot-workshop/src/resources.rs"
+  click n_dispose_bin "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/src/resources.rs#L534" "model/pilot-workshop/src/resources.rs"
+  click n_merge "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L304" "model/model-core/src/history.rs"
+  click n_flow_end "https://github.com/twalmsley/lavoisier/blob/main/model/pilot-workshop/tests/flows.rs#L136" "model/pilot-workshop/tests/flows.rs"
+```
+
+### Legend — node → source
+
+| Node | Kind | Defined at |
+|---|---|---|
+| `n_new_person` (new_person) | boundary source | [model/model-core/src/common.rs#L152](/model/model-core/src/common.rs#L152) |
+| `n_qualify` (qualify) | boundary source | [model/model-core/src/common.rs#L166](/model/model-core/src/common.rs#L166) |
+| `n_supply_drill` (supply_drill) | boundary source | [model/pilot-workshop/src/resources.rs#L430](/model/pilot-workshop/src/resources.rs#L430) |
+| `n_supply_guard` (supply_guard) | boundary source | [model/pilot-workshop/src/resources.rs#L460](/model/pilot-workshop/src/resources.rs#L460) |
+| `n_fit_guard` (fit_guard) | process | [model/pilot-workshop/src/resources.rs#L601](/model/pilot-workshop/src/resources.rs#L601) |
+| `n_new_swarf_bin` (new_swarf_bin) | boundary sink | [model/pilot-workshop/src/resources.rs#L478](/model/pilot-workshop/src/resources.rs#L478) |
+| `n_supply_sheet` (supply_sheet) | boundary source | [model/pilot-workshop/src/resources.rs#L423](/model/pilot-workshop/src/resources.rs#L423) |
+| `n_cut` (cut) | process | [model/pilot-workshop/src/resources.rs#L584](/model/pilot-workshop/src/resources.rs#L584) |
+| `n_discard_swarf` (discard_swarf) | process | [model/pilot-workshop/src/resources.rs#L820](/model/pilot-workshop/src/resources.rs#L820) |
+| `n_drill_holes` (drill_holes) | process | [model/pilot-workshop/src/resources.rs#L668](/model/pilot-workshop/src/resources.rs#L668) |
+| `n_discard_swarf_2` (discard_swarf (2)) | process | [model/pilot-workshop/src/resources.rs#L820](/model/pilot-workshop/src/resources.rs#L820) |
+| `n_new_history` (new_history) | model-core helper | [model/model-core/src/history.rs#L264](/model/model-core/src/history.rs#L264) |
+| `n_record` (record drill_holes) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_drill_holes_2` (drill_holes (2)) | process | [model/pilot-workshop/src/resources.rs#L668](/model/pilot-workshop/src/resources.rs#L668) |
+| `n_discard_swarf_3` (discard_swarf (3)) | process | [model/pilot-workshop/src/resources.rs#L820](/model/pilot-workshop/src/resources.rs#L820) |
+| `n_new_history_2` (new_history (2)) | model-core helper | [model/model-core/src/history.rs#L264](/model/model-core/src/history.rs#L264) |
+| `n_record_2` (record drill_holes (2)) | model-core helper | [model/model-core/src/history.rs#L284](/model/model-core/src/history.rs#L284) |
+| `n_full_box` (full_box) | boundary source | [model/pilot-workshop/src/catalogue.rs#L229](/model/pilot-workshop/src/catalogue.rs#L229) |
+| `n_fasten` (fasten) | process | [model/pilot-workshop/src/resources.rs#L799](/model/pilot-workshop/src/resources.rs#L799) |
+| `n_new_customer` (new_customer) | boundary sink | [model/pilot-workshop/src/resources.rs#L487](/model/pilot-workshop/src/resources.rs#L487) |
+| `n_dispose_bin` (dispose_bin) | boundary sink | [model/pilot-workshop/src/resources.rs#L534](/model/pilot-workshop/src/resources.rs#L534) |
+| `n_merge` (merge) | model-core helper | [model/model-core/src/history.rs#L304](/model/model-core/src/history.rs#L304) |
+| `n_flow_end` (flow end — everything accounted) | flow input/output | [model/pilot-workshop/tests/flows.rs#L136](/model/pilot-workshop/tests/flows.rs#L136) |
+
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |

@@ -35,6 +35,7 @@ flowchart LR
     direction TB
     n_settle_up["settle_up"]:::sink
     n_Customer["Customer"]:::sink
+    n_PackagingDisposal["PackagingDisposal"]:::sink
     n_Bin["Bin"]:::sink
   end
   n_Account["Account"]:::resource
@@ -51,6 +52,7 @@ flowchart LR
   n_draw_cash -- "Money" --> n_deliver
   n_present_payment -- "Money" --> n_deliver
   n_deliver -- "Instrument" --> n_Customer
+  n_empty_bin -- "Packaging" --> n_PackagingDisposal
   n_inspect -- "Packaging" --> n_Bin
   n_stock_the_rack -- "HousingRack" --> n_HousingRack
   n_Account -.- n_deliver
@@ -67,6 +69,7 @@ flowchart LR
   click n_Customer "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L274" "model/cs5-works/src/resources.rs"
   click n_place_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L329" "model/cs5-works/src/resources.rs"
   click n_present_payment "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L336" "model/cs5-works/src/resources.rs"
+  click n_PackagingDisposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-supply/src/resources.rs#L350" "model/cs5-supply/src/resources.rs"
   click n_Bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L186" "model/cs5-works/src/resources.rs"
   click n_HousingRack "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L127" "model/cs5-works/src/resources.rs"
   click n_stock_the_rack "https://github.com/twalmsley/lavoisier/blob/main/model/cs5-works/src/resources.rs#L345" "model/cs5-works/src/resources.rs"
@@ -88,6 +91,7 @@ flowchart LR
 | `n_Customer` (Customer) | boundary sink | [model/cs5-works/src/resources.rs#L274](/model/cs5-works/src/resources.rs#L274) |
 | `n_place_order` (place_order) | boundary source | [model/cs5-works/src/resources.rs#L329](/model/cs5-works/src/resources.rs#L329) |
 | `n_present_payment` (present_payment) | boundary source | [model/cs5-works/src/resources.rs#L336](/model/cs5-works/src/resources.rs#L336) |
+| `n_PackagingDisposal` (PackagingDisposal) | boundary sink | [model/cs5-supply/src/resources.rs#L350](/model/cs5-supply/src/resources.rs#L350) |
 | `n_Bin` (Bin) | boundary sink | [model/cs5-works/src/resources.rs#L186](/model/cs5-works/src/resources.rs#L186) |
 | `n_HousingRack` (HousingRack) | boundary source | [model/cs5-works/src/resources.rs#L127](/model/cs5-works/src/resources.rs#L127) |
 | `n_stock_the_rack` (stock_the_rack) | boundary source | [model/cs5-works/src/resources.rs#L345](/model/cs5-works/src/resources.rs#L345) |
@@ -97,10 +101,12 @@ flowchart LR
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
 | `Account` | boundary object | — | [model/cs5-works/src/resources.rs#L75](/model/cs5-works/src/resources.rs#L75) |
+| `BoxedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L125](/model/cs5-supply/src/resources.rs#L125) |
 | `Customer` | boundary object (placeholder) | — | [model/cs5-works/src/resources.rs#L274](/model/cs5-works/src/resources.rs#L274) |
 | `CustomerOrder` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L225](/model/cs5-works/src/resources.rs#L225) |
 | `Housing` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L108](/model/cs5-works/src/resources.rs#L108) |
 | `HousingRack` | boundary object (placeholder) | — | [model/cs5-works/src/resources.rs#L127](/model/cs5-works/src/resources.rs#L127) |
+| `InspectedComponent` | discrete (consumable) | — | [model/cs5-supply/src/resources.rs#L142](/model/cs5-supply/src/resources.rs#L142) |
 | `Instrument` | discrete (consumable) | — | [model/cs5-works/src/resources.rs#L162](/model/cs5-works/src/resources.rs#L162) |
-
-<!-- WARN (diagram-gen): empty_bin: unresolved parameter `consumer of Contents` -->
+| `Money` | continuous (container) | pence | [model/cs5-supply/src/resources.rs#L47](/model/cs5-supply/src/resources.rs#L47) |
+| `Packaging` | continuous (container) | grams | [model/cs5-supply/src/resources.rs#L163](/model/cs5-supply/src/resources.rs#L163) |

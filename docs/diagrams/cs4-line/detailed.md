@@ -22,30 +22,33 @@ flowchart LR
   classDef system fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
   subgraph sg_sources["System boundary — sources and setup"]
     direction TB
+    n_place_works_order["place_works_order"]:::boundary
+    n_clock_in["clock_in"]:::boundary
     n_tool_up["tool_up"]:::boundary
+  end
+  subgraph sg_system["Processes"]
+    direction TB
+    n_issue_materials["issue_materials"]:::process
+    n_build_batch["build_batch"]:::process
+    n_reconcile["reconcile"]:::process
   end
   subgraph sg_helpers["Time accounting and helpers (model-core)"]
     direction TB
     n_new_history["new_history"]:::helper
-    n_place_works_order["place_works_order"]:::helper
-    n_clock_in["clock_in"]:::helper
-    n_issue_materials["issue_materials"]:::helper
     n_rig_up["rig_up"]:::helper
-    n_build_batch["build_batch"]:::helper
     n_stand_down["stand_down"]:::helper
-    n_new_finished_goods["new_finished_goods"]:::helper
-    n_new_disposal["new_disposal"]:::helper
-    n_reconcile["reconcile"]:::helper
   end
   subgraph sg_sinks["System boundary — sinks"]
     direction TB
     n_new_swarf_bin["new_swarf_bin"]:::sink
+    n_new_finished_goods["new_finished_goods"]:::sink
+    n_new_disposal["new_disposal"]:::sink
   end
-  n_place_works_order --> n_issue_materials
-  n_clock_in --> n_issue_materials
+  n_place_works_order -- "WorksOrder" --> n_issue_materials
+  n_clock_in -- "Operator 150" --> n_issue_materials
   n_new_history -- "History" --> n_issue_materials
-  n_issue_materials -- "Rack" --> n_rig_up
-  n_issue_materials -- "Bolts" --> n_rig_up
+  n_issue_materials -- "FullSheetRack" --> n_rig_up
+  n_issue_materials -- "FullBoltBox" --> n_rig_up
   n_new_swarf_bin -- "SwarfBin 80" --> n_rig_up
   n_issue_materials -- "IssueNote" --> n_rig_up
   n_tool_up -- "Saw" --> n_rig_up
@@ -54,20 +57,28 @@ flowchart LR
   n_issue_materials -- "Operator" --> n_rig_up
   n_issue_materials -- "History" --> n_rig_up
   n_rig_up -- "StartRig" --> n_build_batch
-  n_rig_up -- "StartRig" --> n_stand_down
-  n_new_finished_goods --> n_reconcile
+  n_build_batch -- "BatchRig" --> n_stand_down
+  n_build_batch -- "assemblies" --> n_reconcile
+  n_new_finished_goods -- "FinishedGoods 25" --> n_reconcile
   n_stand_down -- "Bin" --> n_reconcile
-  n_new_disposal --> n_reconcile
+  n_new_disposal -- "Disposal" --> n_reconcile
   n_stand_down -- "Bolts" --> n_reconcile
   n_stand_down -- "Rack" --> n_reconcile
   n_stand_down -- "IssueNote" --> n_reconcile
   n_stand_down -- "Operator" --> n_reconcile
   n_stand_down -- "History" --> n_reconcile
   click n_new_history "https://github.com/twalmsley/lavoisier/blob/main/model/model-core/src/history.rs#L264" "model/model-core/src/history.rs"
+  click n_place_works_order "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L602" "model/cs4-stores/src/resources.rs"
+  click n_clock_in "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L610" "model/cs4-stores/src/resources.rs"
+  click n_issue_materials "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L961" "model/cs4-stores/src/resources.rs"
   click n_tool_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L128" "model/cs4-line/src/resources.rs"
   click n_new_swarf_bin "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/resources.rs#L136" "model/cs4-line/src/resources.rs"
   click n_rig_up "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L80" "model/cs4-line/src/batch.rs"
+  click n_build_batch "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L133" "model/cs4-line/src/batch.rs"
   click n_stand_down "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-line/src/batch.rs#L99" "model/cs4-line/src/batch.rs"
+  click n_new_finished_goods "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L620" "model/cs4-stores/src/resources.rs"
+  click n_new_disposal "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L629" "model/cs4-stores/src/resources.rs"
+  click n_reconcile "https://github.com/twalmsley/lavoisier/blob/main/model/cs4-stores/src/resources.rs#L1021" "model/cs4-stores/src/resources.rs"
 ```
 
 ### Legend — node → source
@@ -75,31 +86,29 @@ flowchart LR
 | Node | Kind | Defined at |
 |---|---|---|
 | `n_new_history` (new_history) | model-core helper | [model/model-core/src/history.rs#L264](/model/model-core/src/history.rs#L264) |
-| `n_place_works_order` (place_works_order) | model-core helper | — |
-| `n_clock_in` (clock_in) | model-core helper | — |
-| `n_issue_materials` (issue_materials) | model-core helper | — |
+| `n_place_works_order` (place_works_order) | boundary source | [model/cs4-stores/src/resources.rs#L602](/model/cs4-stores/src/resources.rs#L602) |
+| `n_clock_in` (clock_in) | boundary source | [model/cs4-stores/src/resources.rs#L610](/model/cs4-stores/src/resources.rs#L610) |
+| `n_issue_materials` (issue_materials) | process | [model/cs4-stores/src/resources.rs#L961](/model/cs4-stores/src/resources.rs#L961) |
 | `n_tool_up` (tool_up) | boundary source | [model/cs4-line/src/resources.rs#L128](/model/cs4-line/src/resources.rs#L128) |
 | `n_new_swarf_bin` (new_swarf_bin) | boundary sink | [model/cs4-line/src/resources.rs#L136](/model/cs4-line/src/resources.rs#L136) |
 | `n_rig_up` (rig_up) | model-core helper | [model/cs4-line/src/batch.rs#L80](/model/cs4-line/src/batch.rs#L80) |
-| `n_build_batch` (build_batch) | model-core helper | — |
+| `n_build_batch` (build_batch) | process | [model/cs4-line/src/batch.rs#L133](/model/cs4-line/src/batch.rs#L133) |
 | `n_stand_down` (stand_down) | model-core helper | [model/cs4-line/src/batch.rs#L99](/model/cs4-line/src/batch.rs#L99) |
-| `n_new_finished_goods` (new_finished_goods) | model-core helper | — |
-| `n_new_disposal` (new_disposal) | model-core helper | — |
-| `n_reconcile` (reconcile) | model-core helper | — |
-
-<!-- WARN (diagram-gen): unknown callee `place_works_order` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `clock_in` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `issue_materials` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `build_batch` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `new_finished_goods` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `new_disposal` in a traced flow — shown as a plain step -->
-<!-- WARN (diagram-gen): unknown callee `reconcile` in a traced flow — shown as a plain step -->
+| `n_new_finished_goods` (new_finished_goods) | boundary sink | [model/cs4-stores/src/resources.rs#L620](/model/cs4-stores/src/resources.rs#L620) |
+| `n_new_disposal` (new_disposal) | boundary sink | [model/cs4-stores/src/resources.rs#L629](/model/cs4-stores/src/resources.rs#L629) |
+| `n_reconcile` (reconcile) | process | [model/cs4-stores/src/resources.rs#L1021](/model/cs4-stores/src/resources.rs#L1021) |
 
 ## Resources on the edges
 
 | Resource | Kind | Unit | Defined at |
 |---|---|---|---|
+| `BatchRig` | boundary object | — | [model/cs4-line/src/batch.rs#L63](/model/cs4-line/src/batch.rs#L63) |
+| `Disposal` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L513](/model/cs4-stores/src/resources.rs#L513) |
+| `FinishedGoods` | boundary object (placeholder) | — | [model/cs4-stores/src/resources.rs#L475](/model/cs4-stores/src/resources.rs#L475) |
+| `IssueNote` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L216](/model/cs4-stores/src/resources.rs#L216) |
+| `Operator` | boundary object | — | [model/cs4-stores/src/resources.rs#L435](/model/cs4-stores/src/resources.rs#L435) |
 | `PillarDrill` | reusable | — | [model/cs4-line/src/resources.rs#L31](/model/cs4-line/src/resources.rs#L31) |
 | `Saw` | reusable | — | [model/cs4-line/src/resources.rs#L24](/model/cs4-line/src/resources.rs#L24) |
 | `SwarfBin` | boundary object (placeholder) | — | [model/cs4-line/src/resources.rs#L57](/model/cs4-line/src/resources.rs#L57) |
 | `Workbench` | reusable | — | [model/cs4-line/src/resources.rs#L38](/model/cs4-line/src/resources.rs#L38) |
+| `WorksOrder` | discrete (consumable) | — | [model/cs4-stores/src/resources.rs#L206](/model/cs4-stores/src/resources.rs#L206) |
