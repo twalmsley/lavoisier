@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.2 |
+| Specification version | v0.3 (implemented) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -191,6 +191,24 @@ Review decisions (2026-10-07): **all six agreed as proposed** — the stranded s
 with its cup restacked; partial refund (tea still served); the receipt token carries REQ-017;
 energy/temperature out of scope; quantities as drafted; merged-History assertions as drafted
 (Join shape + per-branch counts).
+
+Implementation round-trip feedback (2026-10-07):
+1. **Path 3's fourth branch-A event** is the drained stranded shot's *disposal record*:
+   `record(h_a, "drain_stranded_shot", shot)` — the budget arithmetic (210 000 ms = three
+   draws) rules out a fourth time draw, and R16/F-041 allows recording any consumption. The
+   shot's model sink is therefore the History record (the physical drain is documented); if
+   the drain-as-consumer had been intended, the count would read 3+4. Future specs should
+   name the source of every expected History event.
+2. **"Shot in cup" is a loose pair**, not a holder type: macro payloads are consumption-only
+   (F-040) and the pair splits on path 3 (shot drained, cup restacked) — R9 loose threading.
+3. **The 1000 p tender is a fixed note** (concrete `Money<1000>` at the till), making a wrong
+   tender a pinned E0308 — load-bearing for a test; worth stating in §5 next time.
+4. **"P7 replaces the flat white in P6"** is realized as a sealed two-type order slot
+   (`FlatWhite<186>` or `Money<380>` refund), so P6 runs on all three paths — consistent with
+   the server's 240 000 ms and h_b's four events on path 3.
+5. **Generator convention (F-055 extension):** `match` directly on the fallible call — storing
+   the `Result` in a binding and matching later hides the flow structure from diagram-gen
+   ("assertion-only match" skip). R9's statement-order freedom can obscure diagrams.
 
 Original questions, for the record:
 

@@ -69,7 +69,7 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 CS-2 spec | done (v0.2 agreed) | — | 2026-10-07: Q1–4, 6–7 as proposed; Q5 changed — P4 gets its own 60 000 ms draw |
 | 12 CS-2 model | done (`model/cs2-puncture-repair`, full gate green; diagram-gen multi-type fix) | F-050 extended; F-055 #3 resolved | 2026-10-07: closed (cement encoding approved) |
 | 12 CS-3 spec | done (v0.2 agreed) | — | 2026-10-07: all six as proposed |
-| 12 CS-3 model | in progress | | |
+| 12 CS-3 model | done (`model/cs3-cafe-orders`, full gate green; R16 merge exercised for real) | F-041 and F-055 extended | pending |
 | 9 Process docgen (B) | not started | | |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | not started | | |

@@ -1,0 +1,19 @@
+error[E0277]: this person may not operate the espresso machine: `Person<600000>` is not a trained barista (REQ-015)
+  --> tests/ui/untrained_barista.rs:16:45
+   |
+16 |     let r = pull_espresso::<18, 40, 36, 22, _, _>(
+   |                                             ^ REQ-015: the espresso machine may be operated only by a trained barista
+   |
+   = help: the trait `MachineTrained` is not implemented for `Person<600000>`
+   = note: training is granted at the boundary (R12/R18): `qualify::<MachineTraining, BUDGET>(person)` wraps a `Person` into a `Qualified` barista - the server (a plain `Person`) is refused here
+help: the trait `MachineTrained` is implemented for `Qualified<MachineTraining, MS>`
+  --> src/characteristics.rs
+   |
+   | impl<const MS: u64> MachineTrained for model_core::common::Qualified<MachineTraining, MS> {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Person<600000>` to implement `Req015TrainedBarista`
+note: required by a bound in `pull_espresso`
+  --> src/resources.rs
+   |
+   | ...t SHOT: u64, const PUCK: u64, O: Req015TrainedBarista, K: Consumer<SpentPuck<PUCK>>>(barista: O, machine: EspressoMachine, groun...
+   |                                     ^^^^^^^^^^^^^^^^^^^^ required by this bound in `pull_espresso`

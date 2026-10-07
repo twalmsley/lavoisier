@@ -1,0 +1,34 @@
+# CS-3: café order fulfilment — the third spec→model round trip, and the
+# CONCURRENCY case study. Built from the agreed natural-language specification
+# ../../case-studies/cs3-cafe-orders/SPEC.md (v0.2, agreed), following
+# instructions.md and the cs2-puncture-repair / cs1-pot-of-tea crate layouts.
+
+[package]
+name = "cs3-cafe-orders"
+version = "0.1.0"
+edition = "2024"
+description = "Case study CS-3: a cafe fulfils one order with two staff working genuinely in parallel - two actors, two disjoint branches, per-branch Histories merged at the join into R16's partial order for real, fallible milk steaming (R17) and money at the till including a refund (R19), modelled downstream of model-core from the agreed SPEC.md"
+
+[features]
+# The crate's own downstream-test fixtures (R1, FINDINGS.md F-004): the
+# model-core resource kernel macros expand a `test_fixture()` constructor
+# behind the INVOKING crate's `test-support` feature, so this crate declares
+# the feature too. It is enabled ONLY via the [dev-dependencies]
+# self re-declaration below; ci.sh polices that it never appears under any
+# [dependencies]-like section.
+test-support = []
+
+[dependencies]
+# Production dependency: NO features (the plain `cargo build` in ci.sh is
+# what proves production code cannot reach fixture constructors, F-004).
+model-core = { path = "../model-core" }
+
+[dev-dependencies]
+# Re-declarations for tests only (R1, F-004).
+model-core = { path = "../model-core", features = ["test-support"] }
+cs3-cafe-orders = { path = ".", features = ["test-support"] }
+# trybuild is the one allowed dev-dependency (R4), used ONLY for
+# type-check-time compile-fail cases; conservation/overdraw violations are
+# post-monomorphization (F-001, F-003) and live as rustdoc `compile_fail`
+# doc-tests in src/ instead.
+trybuild = "1"

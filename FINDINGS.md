@@ -10,7 +10,7 @@ through EXP-12 (`experiments/exp1N-*/RESULTS.md`; those three ran against `model
 with `trybuild` still the only external dev-dependency); F-046 extended 2026-10-02 by the
 R17–R19 implementation; F-053…F-054 added 2026-10-03 by the CS-1 (pot of tea) build; F-015 extended 2026-10-03 by
 the learning-materials build; F-055 added 2026-10-06 by the diagram-generator build; F-050 extended and F-055 point 3
-resolved 2026-10-07 by the CS-2 build.
+resolved 2026-10-07 by the CS-2 build; F-041 and F-055 extended 2026-10-07 by the CS-3 build.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -985,6 +985,12 @@ unchanged. Three notes from its implementation (which doubled as its validation)
 **Evidence:** `model/model-core/src/history.rs`; pilot per-branch merge assertions in
 `model/pilot-workshop/tests/flows.rs`.
 
+**Extended (2026-10-07, CS-3 build):** the merge machinery passed its first real two-actor
+exercise with no gaps: `Entry::Join`'s public shape made the "no invented interleaving"
+assertions direct (top-level `[Entry::Join(a, b)]`, every entry inside each branch a flat
+in-order `Event`), and downstream `Recordable` impls let a stranded resource's disposal be
+recorded as a branch event. No model-core changes were needed.
+
 ---
 
 ## F-042 — A fallible process needs one runtime-valued outcome token; selecting the outcome with types collapses fallibility
@@ -1365,4 +1371,11 @@ instead of into `refit_and_inflate`, with no warning. Fixed in `tools/diagram-ge
 requirement bound now resolves to **one input edge per satisfying type**, and the remaining
 single-pick contexts (sink/boundary-object positions) WARN instead of silently taking the
 first. trace.sh itself handled the many-to-many case correctly from the start.
+
+**Extended (2026-10-07, CS-3 build):** a sixth gap — R9's statement-order freedom can hide
+flow structure from tools: a fallible call whose `Result` is stored in a binding and matched
+later is skipped by the flow tracer as an "assertion-only match". Convention adopted: `match`
+directly on the fallible call expression. Also noted: a multi-type *non-requirement* bound
+(CS-3's sealed two-type order slot) is omitted from the top-level graph with a WARN — the
+conservative F-055 behaviour working as designed.
 

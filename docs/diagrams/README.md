@@ -14,6 +14,7 @@ Diagram nodes carry absolute `click` links into the defining source line (GitHub
 |---|---|---|---|
 | `cs1-pot-of-tea` — case study CS-1: making a pot of tea | [context](cs1-pot-of-tea/context.md) | [top-level](cs1-pot-of-tea/top-level.md) | [detailed](cs1-pot-of-tea/detailed.md) |
 | `cs2-puncture-repair` — case study CS-2: bicycle puncture repair | [context](cs2-puncture-repair/context.md) | [top-level](cs2-puncture-repair/top-level.md) | [detailed](cs2-puncture-repair/detailed.md) |
+| `cs3-cafe-orders` — case study CS-3: café order fulfilment | [context](cs3-cafe-orders/context.md) | [top-level](cs3-cafe-orders/top-level.md) | [detailed](cs3-cafe-orders/detailed.md) |
 | `pilot-workshop` — the downstream pilot model | [context](pilot-workshop/context.md) | [top-level](pilot-workshop/top-level.md) | [detailed](pilot-workshop/detailed.md) |
 
 Regenerate after a model change:

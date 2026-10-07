@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/wrong_tender_at_the_till.rs:15:74
+   |
+15 |     let r = take_payment::<300, 0, 700, 600_000, _>(server, open_till(), short_tender, new_customer());
+   |             ---------------------------------------                      ^^^^^^^^^^^^ expected `1000`, found `900`
+   |             |
+   |             arguments to this function are incorrect
+   |
+   = note: expected struct `Money<1000>`
+              found struct `Money<900>`
+note: function defined here
+  --> src/resources.rs
+   |
+   |     pub fn take_payment<const CHANGE: u64, const TILL: u64, const NEW: u64, const B: u64, C: Req018ChangeInFull + Consumer<Money<C...
+   |            ^^^^^^^^^^^^

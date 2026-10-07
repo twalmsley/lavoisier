@@ -1,0 +1,11 @@
+error[E0382]: use of moved value: `server`
+  --> tests/ui/server_in_two_branches.rs:25:72
+   |
+16 |     let server = new_person::<600_000>();
+   |         ------ move occurs because `server` has type `Person<600000>`, which does not implement the `Copy` trait
+...
+21 |         take_payment::<300, 0, 700, 600_000, _>(server, open_till(), cash, customer);
+   |                                                 ------ value moved here
+...
+25 |     let (steam_labour, server) = draw_time::<60_000, 540_000, 600_000>(server);
+   |                                                                        ^^^^^^ value used here after move

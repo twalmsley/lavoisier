@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/serve_burnt_milk.rs:19:77
+   |
+19 |         build_flat_white::<36, 150, 186, 600_000>(barista, shot, new_cup(), burnt);
+   |         -----------------------------------------                           ^^^^^ expected `SteamedMilk<150>`, found `BurntMilk<150>`
+   |         |
+   |         arguments to this function are incorrect
+   |
+   = note: expected struct `SteamedMilk<150>`
+              found struct `BurntMilk<150>`
+note: function defined here
+  --> src/resources.rs
+   |
+   |     pub fn build_flat_white<const SHOT: u64, const MILK: u64, const OUT: u64, const B: u64>(
+   |            ^^^^^^^^^^^^^^^^

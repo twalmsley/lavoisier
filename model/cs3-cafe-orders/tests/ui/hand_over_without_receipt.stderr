@@ -1,0 +1,19 @@
+error[E0277]: the order may not be handed over: `Tray` is not the payment receipt from the till branch (REQ-017: an order may be handed over only after payment)
+  --> tests/ui/hand_over_without_receipt.rs:18:42
+   |
+18 |     let r = hand_over::<303, 600_000, _, _>(
+   |                                          ^ REQ-017: an order may be handed over only after payment
+   |
+   = help: the trait `ProofOfPayment` is not implemented for `Tray`
+   = note: the receipt is minted only by `take_payment` (branch B): the join consumes it, so a flow that never takes payment has nothing to hand `hand_over` - the one deliberate cross-branch dependency
+help: the trait `ProofOfPayment` is implemented for `PaymentReceipt`
+  --> src/resources.rs
+   |
+   | impl ProofOfPayment for PaymentReceipt {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Tray` to implement `Req017PaymentBeforeHandover`
+note: required by a bound in `hand_over`
+  --> src/resources.rs
+   |
+   | ...const B: u64, W: OrderSlot, R: Req017PaymentBeforeHandover>(server: Person<B>, slot: W, tea: PotOfTea<TEA_G>, tray: Tray, recei...
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `hand_over`
