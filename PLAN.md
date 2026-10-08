@@ -78,4 +78,4 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 9 Process docgen (B) | done (`docgen` bin + `tools/docgen.sh`; 166 process docs across all crates; F-055 gaps 1/7 fixed in the shared scanner) | F-055 part-resolved | 2026-10-07: closed — R20 applied; cs5-works naming fixed |
 | 10 DSL (C) | not started | | |
 | 11 Model analysis (D) | done (`modellint` + `tools/lint.sh`; 22 checks; ci.sh step 7 with staleness gate; 3 real R1 gaps found and fixed) | F-058, F-059 | 2026-10-08: closed — R21 applied; R20 conv. 1 clarified |
-| 10 DSL (C) | in progress — EXP-13..15 running | | |
+| 10 DSL (C) | in progress — direction agreed 2026-10-08 (pipeline: spec gate + scaffolding; macro front banned; notation experimental); R22 applied; build stages 1–5 running | F-060..F-064 + 4 extensions | direction agreed |
