@@ -13,7 +13,11 @@ the learning-materials build; F-055 added 2026-10-06 by the diagram-generator bu
 resolved 2026-10-07 by the CS-2 build; F-041 and F-055 extended 2026-10-07 by the CS-3 build; F-056 added and F-001/F-010/F-011/F-055
 extended 2026-10-07 by the CS-4 build; F-057 added and F-054 extended 2026-10-07 by the CS-5
 build; F-055 gaps 1 and 7 (and the flow-naming WARN) resolved 2026-10-07 by the step-9
-extraction work; F-058…F-059 added 2026-10-07 by the step-11 model-analysis build.
+extraction work; F-058…F-059 added 2026-10-07 by the step-11 model-analysis build; F-060…F-064
+added and F-001/F-037/F-040/F-044 extended 2026-10-08 from the `RESULTS.md` files of experiments
+EXP-13 through EXP-15 (`experiments/exp1N-dsl-*/RESULTS.md`; EXP-13/14 ran against `model-core`
+by path with `trybuild` still the only external dev-dependency; the EXP-14 and EXP-15 generators
+are std-only).
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -67,6 +71,18 @@ blast radius is enumerated crate by crate, not in one list. (2) A **top-level
 `const _: () = assert!(…)` item** (CS-4's batch-arithmetic check) IS visible to `cargo check`
 — the post-monomorphization blindness applies to asserts inside *generic* functions, and
 hoisting whole-model arithmetic into concrete const items recovers editor visibility.
+
+**Extended (2026-10-08, EXP-15/EXP-14):** the same boundary, measured from the generation side.
+A process emitted with **literal** const magnitudes (a non-generic fn) has its
+`const { assert!(…) }` evaluated when the library itself is built: a conservation violation
+fails plain `cargo build` of the crate with no instantiation and no test — the
+post-monomorphization caveat is a cost of *generalized* (const-generic) processes, not of the
+asserts per se (trade-off: a literal process serves exactly one worked instance). And for
+notation-authored models the caveat is pre-emptible wholesale: every magnitude in a declarative
+flow is a literal the EXP-14 compiler already tracks (it computes `draw_time`'s LEFT and the
+turbofish decimals), so a notation-level `--check` pass can evaluate balances and overdraws
+with notation spans at generation time, keeping the generated asserts as the Rust backstop
+(F-061).
 
 ---
 
@@ -920,6 +936,15 @@ R10 tag+assert pair is unaffected.
 
 **Evidence:** `pilot-workshop/src/catalogue.rs` (`FasteningBolt`), build report.
 
+**Extended (2026-10-08, EXP-13):** the silent direction scales beyond tags. A sugared macro
+form that emits its doc line as an attribute (`#[doc = …]`) loses the requirement definition to
+trace.sh — loud only when some tag references the lost id (`WARNING: unknown requirement`,
+exit 1); a sugared requirement nobody tags vanishes with no warning at all. Generated
+`#[doc = concat!("Placeholder: ", …)]` lines are likewise invisible to the R12/R20 placeholder
+inventory. And the linter's `E-TAG-MACRO` gate (this finding's dedicated check) recognizes only
+`model_core::`-prefixed invocations, so a tag inside any *other* macro passes unflagged. At
+whole-model scale this failure class becomes F-060.
+
 ---
 
 ## F-038 — Grep-discipline costs of R10 in a real model (extends F-021)
@@ -976,6 +1001,13 @@ extractable contents are a `Consumer` with a sealed disposal path (F-039).
 
 **Evidence:** `model/model-core/src/resource.rs` (payload grammar rustdoc and tests);
 `pilot-workshop/src/resources.rs` (`Assembly`, `SwarfBin` contrast).
+
+**Extended (2026-10-08, EXP-15):** the tripwire/`no_tripwire` choice is mechanically derivable
+from the boundary tables — an item minted into a §4 supplier is untripwired held contents; a
+process-created output is tripwired — and the spec generator's rule reproduced CS-1's
+hand-made choices exactly (`DryTeabag` untripwired, `SpentTeabag` tripwired). Candidate
+template/linter rule rather than per-model judgement; until stated somewhere, it is one of the
+F-062 silent inferences.
 
 ---
 
@@ -1110,6 +1142,14 @@ EXP-12 (`tests/ui/purchase_wrong_price.stderr`).
 (EXP-11's crate-local numbering) and as "(REQ-004)" in the pilot and the technical deck — both
 are real pinned outputs from different crates, not a contradiction. An F-053-adjacent reminder
 that requirement ids are per-workspace, and experiment crates number independently.
+
+**Extended (2026-10-08, EXP-13/EXP-14):** the requirement-trait message survives both viable
+DSL layers unchanged. Through a token-preserving macro front the E0277 is effectively identical
+to hand-written — message, label and note intact, the "required by a bound" note even citing
+the readable DSL `process fn … K: Req002BoilingWater` line (the feared `on_unimplemented` loss
+did not occur). Through generation it survives verbatim: the message/label/note travel as
+notation attributes into `requirement!`'s meta slot, and the rendered error equals the best
+requirement error measured in the project.
 
 ---
 
@@ -1515,4 +1555,175 @@ bounds reports false positives.
 (INFO-graded: downstream crates outside the workspace may legitimately be the consumer).
 
 **Evidence:** `tools/diagram-gen/src/lint.rs` (sink resolution); `docs/analysis/README.md`.
+
+---
+
+## F-060 — A whole-model macro front-end is invisible to the R20/R21 extraction toolchain; the lint gate passes vacuously green
+
+**What couldn't be expressed:** a `model!`-authored model that the documentation generator,
+diagram generator or linter can audit. Run over EXP-13's compliant DSL arm, the real tools
+produced: **0** process documents (hand-written control: 10), a 1-node/0-edge context diagram
+(control: 8/7), "no flow to trace" (the flow exists — inside the invocation), and **two false
+gate-fatal lint ERRORs** (`E-TAG-ASSERT` cannot see the `satisfies!` lines inside the
+invocation). Worse than the false positives is the vacuous clean: every sealing/F-034/F-047
+check passed because the linter sees *no resource types at all*, and `E-TAG-MACRO` (F-037's
+gate) reported clean because it recognizes only `model_core::`-prefixed invocations (the F-055
+point-5 hard-coded kernel table). An unauditable model passes the R21 gate **green** — the
+F-037 silent direction at the scale of the whole model, in the gate built to prevent it.
+
+**What it cost:** the macro-front-end route is rejected. Closing the gap would mean teaching
+every tool a second grammar (the F-055 point-5 coupling multiplied) or converging the DSL's
+surface back onto Rust-shaped lines — which trace.sh compatibility had *already* forced
+(literal `fn`/`trait`/`///`-tag lines at the invocation site; every sugared form is invisible,
+see the F-037 extension) — at which point the front-end buys ~71 code lines per slice-sized
+model and a +10 % flow tax while the interesting constructs still live in escape hatches.
+
+**Workaround adopted (hard rule, candidate R22):** model source is authored as — or generated
+into — ordinary Rust source; a whole-model macro front is never built. The two salvage items:
+grow **model-core's kernel macro family** one declaration-layer construct at a time
+(source/sink/entry generators), staying inside the `model_core::` invocation set the tools
+already parse and taught to the shared scanner in the same change; and the token-preserving
+error precedent (F-063).
+
+**Evidence:** EXP-13 (`experiments/exp13-dsl-macro/RESULTS.md` §Tools and recommendation;
+`toolcheck/docs/**`, `toolcheck/analysis/exp13-dsl.md` vs `…-control.md`).
+
+---
+
+## F-061 — Generating ordinary source preserves both error layers and the whole tool surface; the notation layer owns flow-discipline errors Rust catches only at test time
+
+**What worked:** EXP-14's std-only `.lav` → crate compiler (`lavc`, diagram-gen house style)
+has none of the macro-front failure modes, because generated code is plain committed source.
+Measured on the three canonical violations: conservation E0080s land on the generated assert
+with the custom message leading; requirement E0277s carry the R10-rule-8 phrasing verbatim
+from notation attributes (F-044 ext.); overdraws reproduce the canonical R15 shape because the
+compiler threads every literal magnitude (including the person's running budget, saturating at
+zero). Breadcrumb comments emitted **on the same line as each flow call** make rustc's "while
+instantiating" note render the `.lav` line inside the error itself — the modeller never opens
+the generated file. The real trace.sh (exit 0), modellint (0 ERROR/0 WARN) and docgen (11
+documents, zero WARN comments) all run green over the output: the emitter *is* a codification
+of the house style. Above the Rust layer, the notation checker reports R2 double-use
+("`water` was already used by `fill_kettle` at line 107 - a resource can be in only one
+process at a time (R2)") and R1 leaks ("`heat` is never accounted for") at **generation time**
+with file:line:col, caret and help lines — strictly better than F-025's borrow-checker
+vocabulary, and earlier than the test-time tripwire (F-002/F-032).
+
+**What it cost:** a ~3.2 kLOC one-off std-only compiler covering only the continuous-resource
+core (F-064); plus one emitter gotcha — a generated crate's Cargo.toml must declare
+`test-support = []`, because the kernel macros expand a fixture constructor behind the
+*invoking* crate's feature (else 9 unexpected-`cfg` warnings).
+
+**Workaround adopted (the regeneration discipline):** the `.lav` file is source and the
+generated crate is committed output under a regenerate-and-diff CI gate (byte-identical
+generation makes the gate exact; any hand edit fails it); hand-written code goes **beside, not
+inside** — a separate crate depending on the generated one (the R1/F-055-ext-7 layout);
+promotion to hand-maintained is one-way and explicit (delete the `.lav` and headers in one
+commit) — no merge-on-regenerate middle state. Condition before production use: a
+`lavc --check` pass evaluating literal balances and budget draws at the notation layer,
+pre-empting F-001 for notation-authored models (see the F-001 extension).
+
+**Evidence:** EXP-14 (`experiments/exp14-dsl-external/RESULTS.md` criteria 2/3a/3b/6/7;
+`generated/v-*/` builds; `errors/*.lav` transcripts; `lint-root/` tool output).
+
+---
+
+## F-062 — The agreed spec format mechanically determines ~half a model — all of its structure and none of its error-quality machinery; the enumerated holes are the required syntax of any fuller notation
+
+**What worked / the split:** EXP-15's std-only generator parsed the real CS-1 `SPEC.md`
+unchanged and emitted **51 % of the crate by LOC, 63 % of model items fully** (75 % incl.
+partial): every sealed state type (incl. multi-quantity const parameters), all five boundary
+impls (incl. the F-034 decreasing-space bin and a `SupplyN<N3>` discrete supplier with fill
+machinery), all boundary fns, process signatures with conserving bodies and balance asserts,
+and two **passing** §6 flow tests — full draw/record/History threading, budget type-checked at
+flow end. What the spec cannot determine, emitted as 12 compiler-enumerable **SPEC-HOLE**s
+(`cargo build --features deny-holes` → one `compile_error!` each): requirement bounds on
+signatures (wrong-state errors degrade from the REQ-phrased E0277 to a bare E0308),
+characteristic consts and permit-gated extractions, `Satisfies:` placement, literal-vs-generic
+magnitudes, waste-routing strength, and **all tests** — exactly the half the method's curated
+diagnostics live in. Four further decisions were silent inferences the generator had to invent
+(tripwire choice — now the F-040 extension; state-ownership collisions; "unqualified mention =
+initial state"; assert-vs-structural guessing), and mechanical naming drifts from the
+implementer's (`LoadedTeapot` vs `LoadedPot`) — harmless in a fresh crate, fatal to any
+regeneration round-trip against a hand-touched one.
+
+**Spec validation is its own error class, adoptable independently of generation:** balance
+arithmetic, waste-destination closure (§5 ↔ §4), §3↔§5↔§6 name closure, Satisfies-id closure
+and draw/balance time agreement are all checkable against the *document* in milliseconds, with
+§/line references and modeller phrasing ("a model built from this line cannot compile — fix
+the specification, not the model"). Today an unbalanced spec line surfaces days later as an
+E0080 in the implemented crate. CS-1's §8 feedback items 2/3/5/6 were each re-discovered
+mechanically — the feedback loop captures real under-determination.
+
+**What it cost:** parsing the current template needed ~10 invented conventions — the candidate
+template amendments A1–A10 (headline: every Balances clause marked, mandatory waste routing,
+canonical backticked identifiers, underscore-grouped numbers, structured id allocation).
+
+**Workaround adopted:** the spec stays the human contract and becomes machine-checked; the
+generator's output is **one-shot scaffolding** the implementer completes by filling the
+enumerated holes (promoted to hand-maintained immediately), or the front half of an
+EXP-14-grade notation. Closing the 12 holes *inside* SPEC.md would turn the spec into that
+notation with worse syntax — rejected.
+
+**Evidence:** EXP-15 (`experiments/exp15-dsl-from-spec/RESULTS.md` §1–§4;
+`generated/cs1-gen/`; `tests/fixtures/` + `tests/validation.rs`).
+
+---
+
+## F-063 — Token-preserving macro layers keep the curated error surface; the costs are fixed by stable `macro_rules!` grammar limits
+
+**What worked (contrary to the expected failure mode):** all three canonical violations
+authored through EXP-13's `model!` kept the modeller-visible error **head** (the curated
+assert / `on_unimplemented` message, F-044 ext.) and **tail** (primary span or "while
+instantiating" note on the modeller's own `step` line, decimal magnitudes) identical to the
+hand-written control. The mechanism: `macro_rules!` only *rearranges* the modeller's tokens,
+and spans follow tokens; every violating number and call is written by the modeller inside the
+invocation. Degradation is confined to the middle breadcrumbs where the macro *synthesizes*
+code: the generated-assert E0080 names the whole 67-line invocation as its span and notes into
+the macro's own `$( const { assert!($aexpr, $amsg) }; )*` line — noise a modeller following
+the error-reading guide skips, hostile only to top-to-bottom reading.
+
+**What it cost (the F-013/F-036 walls, designed around rather than hit):** generics in square
+brackets (`process fn boil [const G: u64, …]` — a `<…>` list is not one token tree); every
+derived name modeller-spelled (`enter =`/`draw =`/`assert =` — no identifier synthesis,
+F-013); trait/impl semantics (characteristics, permits, sealed recursion, all of R17/R18)
+surrendered to `rust { }`/`body { }` escape hatches (~40 of the dsl arm's 92 code lines); flow
+sugar isomorphic to `let`-bindings (+10 % LOC — pure syntax tax); and grammar quirks
+(declarative processes return trailing-comma tuples, so a single-output process returns a
+1-tuple `(A,)`; `assert` clauses need `$msg:literal : $expr:expr;`). Net: −44 % declaration-
+layer code LOC (163 → 92) against a 294-line one-off macro.
+
+**Workaround adopted:** the precedent licenses growing model-core's kernel macro family
+(declaration-layer constructs, F-060's salvage path) with confidence that curated errors
+survive — never a second whole-model grammar.
+
+**Evidence:** EXP-13 (`experiments/exp13-dsl-macro/transcripts/*.txt`, `*/tests/ui/*.stderr`
+pairs, `dsl/src/macros.rs`; RESULTS.md LOC and R-coverage tables).
+
+---
+
+## F-064 — The external notation is ~4× denser than the Rust it replaces over the continuous-resource core; every further R-feature grows it toward the language it fronts
+
+**What worked:** 113 notation lines generate a 431-line crate (hand-written control ≈ 455
+lines of cs1), deterministically and idempotently, in < 0.3 s, covering R1–R3, minimal R6,
+R7–R10, unbounded-boundary R12, R15 and single-history R16 — with R10 traceability and the
+R20/R21 tooling fully intact (F-061).
+
+**What couldn't be expressed:** discrete items and finite Peano suppliers/consumers
+(`SupplyN`, contents-keeping bins — the F-016/F-034/F-039 machinery), fallible processes
+(R17), qualifications (R18), money (R19), per-process unit tests and compile-fail regressions
+(R4/R5), and catalogue characteristics (R6 fixed roles). Each is expressible only by growing
+the grammar, checker *and* emitter together — the notation's economy comes precisely from
+hard-coding the kernel's semantics (the F-055 point-5 coupling, now on the generating side).
+Contrast with F-062: one-shot scaffolding *can* emit the discrete/bin structure because its
+gaps are handed to an implementer as enumerated holes; a regenerate-forever notation must
+fully own everything it covers, because nobody may edit its output.
+
+**What it cost / workaround adopted:** scope honesty — the notation route is adopted (if at
+all) only for the continuous-resource core it covers, as one generated crate among
+hand-written ones under the F-061 regeneration discipline; full R13/R17–R19 coverage is not
+chased, since that would regrow Rust's complexity inside the notation and dilute the
+kernel-macro single source of truth.
+
+**Evidence:** EXP-14 (`experiments/exp14-dsl-external/RESULTS.md` criteria 4/5/6; the
+R-coverage table).
 
