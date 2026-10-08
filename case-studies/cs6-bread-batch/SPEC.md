@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Specification version | v0.1 (draft — the first specification authored under the R22 gate from the first line) |
+| Specification version | v0.2 (agreed — the first specification authored under the R22 gate from the first line) |
 | Date | 2026-10-08 |
-| Author | Tony (drafted by Claude) |
-| Status | draft |
+| Author | Tony (drafted by Claude; reviewed and agreed 2026-10-08) |
+| Status | agreed |
 
 ## 1. Purpose and scope
 
@@ -44,19 +44,19 @@ CS-3..CS-5 REQ-015..027).
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
-| `Loaf` | product | mass and embodied energy carried in the type | 2 made | `shaped` (841 g) → `baked` (741 g, 300_000 J); or `scorched` (741 g, 300_000 J) |
+| `Loaf` | product | mass and embodied energy carried in the type | 2 made | `shaped` (841 g) → `baked` (744 g, 300_000 J); or `scorched` (744 g, 300_000 J) |
 | `Dough` | discrete w/ mass | mass carried in the type | 1 batch | `mixed` (1_682 g) → `kneaded` (1_682 g) → `proved` (1_682 g) |
 | `Flour` | continuous | grams | 1_500 g bag, 1_000 g drawn | — |
 | `Water` | continuous | grams | 650 g drawn from the tap | — |
 | `Salt` | continuous | grams | 500 g jar, 18 g drawn | — |
-| `Butter` | continuous | grams | 250 g block, 10 g drawn (5 g per tin) | — |
+| `Butter` | continuous | grams | 250 g block, 12 g drawn (6 g per tin) | — |
 | `YeastSachet` (yeast sachet) | discrete w/ mass | 7 g yeast + 1 g wrapper | 2, boxed | `fresh` (8 g) → `spent` (1 g) |
 | `YeastBox` (yeast box) | discrete container | holds the 2 sachets; box itself 30 g | 1 | `empty` (30 g) |
-| `LoafTin` (loaf tin) | reusable | mass carried in the type | 2, 450 g each | `clean` (450 g) → `greased` (455 g) → `used` (450 g) |
+| `LoafTin` (loaf tin) | reusable | mass carried in the type | 2, 450 g each | `clean` (450 g) → `greased` (456 g) → `used` (453 g) |
 | `Oven` | reusable | bakes one tin at a time | 1 | — |
 | `Baker` (person) | reusable | time budget | 7_200_000 ms (2 h) | budget draws down |
 | `GridEnergy` (oven energy) | continuous | joules | 5_000_000 J drawn from the grid | — |
-| `Steam` | waste | grams | 105 g per bake | — |
+| `Steam` | waste | grams | 100 g per bake | — |
 | `WasteHeat` (waste heat) | waste | joules | 2_200_000 J per bake | — |
 | `BakeOutcome` (bake outcome) | outcome token (R17) | sealed, boundary-injected | 2 provisioned | — |
 
@@ -125,10 +125,10 @@ CS-3..CS-5 REQ-015..027).
 ### P4. Grease the tins
 - **Actor(s) and reusables:** baker (draws 120_000 ms) — returned. Independent of P1–P3:
   the flow's only ordering freedom (§6).
-- **Consumes:** 2 `clean` `LoafTin`s (450 g each), 10 g `Butter`. The butter is drawn
-  from the block, 5 g per tin.
-- **Produces:** 2 `greased` `LoafTin`s (455 g each).
-- **Balances:** mass 450 + 450 + 10 = 455 + 455 (assert); time → History (structural).
+- **Consumes:** 2 `clean` `LoafTin`s (450 g each), 12 g `Butter`. The butter is drawn
+  from the block, 6 g per tin.
+- **Produces:** 2 `greased` `LoafTin`s (456 g each).
+- **Balances:** mass 450 + 450 + 12 = 456 + 456 (assert); time → History (structural).
 - **Satisfies:** — (enables REQ-029).
 
 ### P5. Divide and shape
@@ -143,17 +143,19 @@ CS-3..CS-5 REQ-015..027).
 - **Actor(s) and reusables:** baker (draws 300_000 ms per bake), the `Oven` — returned.
   One oven: the second bake cannot start until the first returns it. **REQ-029 bounds the
   tin.**
-- **Consumes:** 1 `shaped` `Loaf` (841 g), 1 `greased` `LoafTin` (455 g), 2_500_000 J
-  `GridEnergy`, 1 `BakeOutcome` token. The energy is drawn from the grid (§4).
-- **Produces (Ok):** the `baked` `Loaf` (741 g, 300_000 J) + the `used` `LoafTin` (450 g).
-- **Produces (Fail):** the `scorched` `Loaf` (741 g, 300_000 J) + the `used` `LoafTin`
-  (450 g).
-- **Waste:** 1 `Steam` (105 g) → atmosphere (§4); 1 `WasteHeat` (2_200_000 J) →
+- **Consumes:** 1 `shaped` `Loaf` (841 g), 1 `greased` `LoafTin` (456 g), 2_500_000 J
+  `GridEnergy`, 1 `BakeOutcome` token. The energy is drawn from the grid (§4). The tin's
+  6 g of butter splits 50/50: 3 g into the loaf's crust, 3 g remaining on the tin as
+  residue (review decision, §8 item 4).
+- **Produces (Ok):** the `baked` `Loaf` (744 g, 300_000 J) + the `used` `LoafTin` (453 g).
+- **Produces (Fail):** the `scorched` `Loaf` (744 g, 300_000 J) + the `used` `LoafTin`
+  (453 g).
+- **Waste:** 1 `Steam` (100 g) → atmosphere (§4); 1 `WasteHeat` (2_200_000 J) →
   atmosphere (§4).
 - **Waste routing:** consumer parameter (steam and waste heat are fed to the atmosphere
   inside the process and never exist loose); the `scorched` `Loaf` is a Fail-arm product
   routed by the flow to the compost stream (REQ-031).
-- **Balances:** mass 841 + 455 = 741 + 450 + 105 (assert, both arms); energy 2_500_000 =
+- **Balances:** mass 841 + 456 = 744 + 453 + 100 (assert, both arms); energy 2_500_000 =
   300_000 + 2_200_000 (assert); time → History (structural).
 - **Satisfies:** REQ-029, REQ-031.
 - **Failure modes:** the bake scorches. **No rework is possible** — the dough is consumed,
@@ -176,21 +178,25 @@ CS-3..CS-5 REQ-015..027).
   The two bakes are forced sequential by the single `Oven` — attempting both at once is the
   contention error at the exact line (R9).
 - **Everything accounted:** at every combination's end — `baked` loaves at the household
-  (each carrying 741 g and 300_000 J across the boundary), `scorched` loaves at compost,
-  steam (210 g) and waste heat (4_400_000 J) in the atmosphere, 2 `spent` `YeastSachet`s
+  (each carrying 744 g and 300_000 J across the boundary), `scorched` loaves at compost,
+  steam (200 g) and waste heat (4_400_000 J) in the atmosphere, 2 `spent` `YeastSachet`s
   and the `empty` `YeastBox` at recycling, the flour bag (500 g), salt jar (482 g) and
-  butter block (240 g) back as container remainders, both `used` `LoafTin`s and the `Oven`
-  back in the kitchen, the `Baker` back with 900_000 ms remaining, both tokens consumed,
-  and the single History holding one attributed event per draw (P1, P2, P3, P4, P5, P6, P6).
+  butter block (238 g) back as container remainders, both `used` `LoafTin`s (453 g each,
+  butter residue) and the `Oven` back in the kitchen, the `Baker` back with 900_000 ms
+  remaining, both tokens consumed, and the single History holding one attributed event per
+  draw (P1, P2, P3, P4, P5, P6, P6).
 
 ## 7. Assumptions and placeholders
 
 - The atmosphere, compost stream and recycling are unbounded placeholder sinks; the tap and
   grid are unbounded placeholder sources.
 - All quantities are round-number stand-ins, not calibrated measurements (notably the
-  741 + 105 g bake split and the 300_000 J embodied / 2_200_000 J waste-heat split).
+  744 + 100 g bake split and the 300_000 J embodied / 2_200_000 J waste-heat split).
 - Steam carries no embodied energy (simplification; the energy split is accounted wholly to
   the loaf and the waste heat).
+- Each tin's 6 g of grease splits exactly 50/50 at the bake: 3 g into the crust, 3 g
+  residue on the `used` tin (review decision; 6 g rather than 5 g so the halves stay
+  integer grams, R7).
 - The baker's 3_600_000 ms prove draw stands in for the elapsed proving hour (attended
   prove); wall-clock time remains out of scope.
 - Scorch probability is uncalibrated: `BakeOutcome` tokens are boundary-injected (R17), one
@@ -199,6 +205,15 @@ CS-3..CS-5 REQ-015..027).
   includes it).
 
 ## 8. Open questions for the author
+
+Review decisions (2026-10-08): questions 1–3, 5 and 6 — **agreed as proposed** (the bread
+domain; rework-free fallibility with the four-combination outcome grouping; single oven and
+single History; the stand-in quantities; the scaffold regime). Question 4 — **changed:** the
+grease splits 50/50 between the tin and the crust; the per-tin grease was raised from 5 g to
+6 g so the halves stay integer grams (R7). Figures updated throughout: `baked`/`scorched`
+744 g, `greased` 456 g, `used` 453 g, `Steam` 100 g per bake, butter 12 g drawn.
+
+Original questions, for the record:
 
 1. **Domain:** the ladder is complete, so CS-6's stress is the pipeline, and bread was
    chosen for emitter-path breadth per page (discrete exhaustion + container disposal,
