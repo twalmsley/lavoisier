@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.3 (implemented) |
+| Specification version | v0.4 (implemented; format migrated to the R22 machine-checked conventions, 2026-10-08 — no semantic change) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -27,7 +27,8 @@ transit is a state change, not a duration); the vendor's sourcing.
 
 ## 2. Requirements
 
-> Workspace ids: REQ-001..022 are taken; CS-5 starts at REQ-023.
+**Ids:** REQ-023–REQ-027, allocated from the workspace sequence (F-053; REQ-001..022 are
+taken by the pilot and CS-1..CS-4).
 
 - **REQ-023:** Foreign purchases must be paid in the supplier's currency (the vendor accepts
   euro cents only — a GBP payment must not compile).
@@ -42,18 +43,18 @@ transit is a state change, not a duration); the vendor's sourcing.
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
-| Precision component | discrete w/ mass | 400 g; shipped boxed at 450 g | vendor stock: 3 (finite!) | at-vendor → in-transit (boxed) → at-UK (boxed) → inspected (400 g) |
-| Packaging | waste | 50 g | per shipment | → works bin |
-| Housing | discrete w/ mass | 600 g | works rack: 3 | — |
-| Instrument | product | mass in type | 1000 g (600 + 400) | → customer |
-| Pounds (GBP) | continuous (money) | pence | works account 5000 p; customer pays 9000 p | — |
-| Euro cents (EUR) | continuous (money) | ec — **a separate dimension** | 2340 ec minted at the bureau | — |
-| Exchange rate | bureau constant | 117 ec per 100 p (NUM/DEN) | fixed | — |
-| Customer order | evidence token | sealed; REQ-026's key | 1 | placed → fulfilled |
-| Works operator | reusable | time budget | 1 200 000 ms (20 min) | draws down |
-| Courier | reusable **organisation** | `ContractedCourier` (REQ-027) | 1 | at-UK → outbound → at-vendor → inbound → at-UK |
-| Vendor | boundary **organisation** | finite stock (the refined placeholder) | 1 | — |
-| Works bin | contents-keeping consumer | decreasing space | capacity 5 | holds the packaging |
+| `PrecisionComponent` (precision component) | discrete w/ mass | 400 g; shipped boxed at 450 g | vendor stock: 3 (finite!) | at-vendor → `boxed` (450 g, in transit then at the UK site) → `inspected` (400 g) |
+| `Packaging` | waste | 50 g | per shipment | → works bin |
+| `Housing` | discrete w/ mass | 600 g | works rack: 3 | — |
+| `Instrument` | product | mass in type | 1000 g (600 + 400) | → customer |
+| `GBP` (pounds) | continuous (money) | pence | works account 5000 p; customer pays 9000 p | — |
+| `EUR` (euro cents) | continuous (money) | ec — **a separate dimension** | 2340 ec minted at the bureau | — |
+| `ExchangeRate` (exchange rate) | bureau constant | 117 ec per 100 p (NUM/DEN) | fixed | — |
+| `CustomerOrder` (customer order) | evidence token | sealed; REQ-026's key | 1 | placed → fulfilled |
+| `Operator` (works operator) | reusable | time budget | 1_200_000 ms (20 min) | draws down |
+| `Courier` | reusable **organisation** | `ContractedCourier` (REQ-027) | 1 | at-UK → outbound → at-vendor → inbound → at-UK |
+| `Vendor` | boundary **organisation** | finite stock (the refined placeholder) | 1 | — |
+| `WorksBin` (works bin) | contents-keeping consumer | decreasing space | capacity 5 | holds the packaging |
 
 **Subsystem ownership (three team-shaped crates; works depends on logistics and supply,
 logistics depends on supply):**
@@ -65,14 +66,26 @@ logistics depends on supply):**
 
 ## 4. System boundary: suppliers, consumers, sinks
 
-**Inputs:** the customer's order and 9000 p payment (boundary object); works stock (account
-5000 p, 3 housings) and staff/courier at start; the bureau's 2340 ec minted against 2000 p
-(R19 value-equivalence, boundary-only); the vendor's 3-component stock (its hinterland is the
-boundary).
+**Inputs (suppliers / sources):**
 
-**Outputs:** the instrument + any change to the customer; 2340 ec to the vendor (exact
-price); 50 g packaging to the works bin (emptied to disposal at flow end, F-039); expended
-time to a single History; the works account ends at 12 000 p (5000 − 2000 + 9000).
+| What enters | Via | Capacity | Real or placeholder? |
+|---|---|---|---|
+| The `CustomerOrder` and the customer's 9000 p `GBP` payment | the customer (boundary object) | — | placeholder |
+| Works stock: the account (5000 p `GBP`), 3 `Housing`s | works setup at flow start | per §3 | placeholder |
+| `Operator`, `Courier` | shift start | 1 each | placeholder (the courier is contracted, REQ-027) |
+| 2340 ec `EUR` | the bureau, minted against 2000 p (R19 value-equivalence, boundary-only) | — | placeholder |
+| `PrecisionComponent`s | the vendor's own stock (its hinterland is the boundary) | 3 (finite!) | real: the refined organisation (R12) |
+
+**Outputs (consumers / sinks):**
+
+| What leaves | Via | Capacity | Real or placeholder? |
+|---|---|---|---|
+| The `Instrument` + any change | the customer | unbounded | placeholder |
+| 2340 ec `EUR` (the exact price) | the vendor | — | real: the vendor keeps its revenue (F-029) |
+| 50 g `Packaging` | works bin, then disposal at flow end (F-039) | bin holds 5; disposal unbounded | bin real; disposal placeholder |
+| Expended time | History (R16) | unbounded | single History (one operator) |
+
+The works account ends at 12_000 p (5000 − 2000 + 9000).
 
 **The refinement showcase (R12):** every earlier vendor was an unbounded `Next = Self`
 placeholder. CS-5's vendor is the **refined** form: a modelled organisation whose stock is a
@@ -86,56 +99,82 @@ before/after contrast.
 > Draws adjacent, recorded under process names; waste routing named; balances (assert)/(structural).
 
 ### P1. Exchange currency at the bureau — `cs5-supply` (REQ-024)
-- Operator draws 120 000 ms. Account draw 2000 p (5000 → 3000, assert); bureau exchanges
-  2000 p → 2340 ec (OUT × 100 = IN × 117, assert — exact by chosen amounts).
+- **Actor(s) and reusables:** operator (draws 120_000 ms); the bureau — a boundary
+  placeholder, returned.
+- **Consumes:** 2000 p `GBP` drawn from the works account (5000 → 3000).
+- **Produces:** 2340 ec `EUR` (minted at the bureau — R19 value-equivalence, boundary-only).
+- **Balances:** account 5000 = 3000 + 2000 (assert); exchange 2000 × 117 = 2340 × 100
+  (assert — R19 at the stated rate, exact by chosen amounts); time 120_000 ms → History (structural).
 - **Satisfies:** REQ-024.
 
 ### P2. Consign the courier — `cs5-logistics` (REQ-027)
-- Operator draws 60 000 ms. The purchase order is consigned to the contracted courier
-  (payment does **not** travel — see §7); courier state at-UK → outbound (structural).
+- **Actor(s) and reusables:** operator (draws 60_000 ms), the `Courier` — consigned.
+- **Consumes:** —. The purchase order is consigned to the contracted courier; payment does
+  **not** travel (see §7).
+- **Produces:** —. Courier state at-UK → outbound.
+- **Balances:** courier state change only (structural); time 60_000 ms → History (structural).
 - **Satisfies:** REQ-027.
 
 ### P3. Purchase at the vendor — `cs5-supply` + `cs5-logistics` (REQ-023, REQ-027)
-- No operator time (the courier and vendor are the actors). The vendor consumes the
-  **remitted** 2340 ec (REQ-023 structural: euro cents only, exact price — the transfer
-  itself is abstracted, §7) against the courier-presented order, and supplies one boxed
-  component (450 g) from its 3-stock; courier outbound → at-vendor → inbound with the box.
+- **Actor(s) and reusables:** the `Courier` and the `Vendor` are the actors — **no person**
+  (no operator time is drawn).
+- **Consumes:** the remitted 2340 ec `EUR` (REQ-023 structural: euro cents only, exact
+  price — the transfer itself is abstracted, §7). The courier presents the purchase order.
+- **Produces:** 1 `boxed` `PrecisionComponent` (450 g) from the vendor's 3-stock. The courier
+  runs outbound → at-vendor → inbound with the box.
 - **Balances:** money 2340 = 2340 (structural, exact-price impl); goods 1 = 1 (structural).
+- **Satisfies:** REQ-023, REQ-027.
 
 ### P4. Receive at the works — `cs5-works`
-- Operator draws 60 000 ms. Courier inbound → at-UK, surrendering the boxed component
-  (450 g) at the works; courier returned for reuse.
+- **Actor(s) and reusables:** operator (draws 60_000 ms), the `Courier` — returned for reuse.
+- **Consumes:** the `boxed` `PrecisionComponent` (450 g) surrendered by the inbound courier.
+- **Produces:** the `boxed` `PrecisionComponent` (450 g) at the works (courier inbound → at-UK).
+- **Balances:** mass 450 = 450 (structural); time 60_000 ms → History (structural).
 
 ### P5. Goods-in inspection — `cs5-works` (REQ-025)
-- Operator draws 60 000 ms. Boxed component (450 g) → inspected component (400 g).
-- **Waste routing:** packaging (50 g) fed to the works bin **inside the process**.
-- **Balances:** mass 450 = 400 + 50 (assert).
+- **Actor(s) and reusables:** operator (draws 60_000 ms).
+- **Consumes:** the `boxed` `PrecisionComponent` (450 g).
+- **Produces:** the `inspected` `PrecisionComponent` (400 g).
+- **Waste:** 50 g `Packaging` → works bin (§4).
+- **Waste routing:** consumer parameter (fed to the works bin **inside the process**).
+- **Balances:** mass 450 = 400 + 50 (assert); time 60_000 ms → History (structural).
 - **Satisfies:** REQ-025 (produces its state).
 
 ### P6. Assemble the instrument — `cs5-works` (REQ-025)
-- Operator draws 180 000 ms. Housing (600 g, from the rack) + inspected component (400 g) →
-  instrument (1000 g).
-- **Balances:** mass 600 + 400 = 1000 (assert).
+- **Actor(s) and reusables:** operator (draws 180_000 ms).
+- **Consumes:** 1 `Housing` (600 g, from the rack) + the `inspected` `PrecisionComponent`
+  (400 g).
+- **Produces:** 1 `Instrument` (1000 g).
+- **Balances:** mass 600 + 400 = 1000 (assert); time 180_000 ms → History (structural).
 - **Satisfies:** REQ-025 (accepts only the inspected state).
 
 ### P7. Deliver and take payment — `cs5-works` (REQ-026)
-- Operator draws 120 000 ms. Consumes the instrument, the customer's **order token**
-  (REQ-026's key) and the customer's 9000 p; instrument to the customer; 9000 p deposited
-  (account 3000 → 12 000, assert).
+- **Actor(s) and reusables:** operator (draws 120_000 ms).
+- **Consumes:** the `Instrument`, the `CustomerOrder` token (REQ-026's key) and the
+  customer's 9000 p `GBP`.
+- **Produces:** the `Instrument` to the customer; 9000 p `GBP` deposited (account 3000 → 12_000).
+- **Balances:** account 3000 + 9000 = 12_000 (assert); time 120_000 ms → History (structural).
 - **Satisfies:** REQ-026.
 
 ### P8. Empty the bin — `cs5-works`
-- Operator draws 30 000 ms. The bin's packaging (50 g) to disposal via the sealed F-039
-  path; bin returned empty.
-- **Balances:** mass 50 = 50 (assert via contents).
+- **Actor(s) and reusables:** operator (draws 30_000 ms); the bin — returned empty.
+- **Consumes:** the bin's kept contents: 1 `Packaging` (50 g), released via the sealed F-039
+  path.
+- **Produces:** —.
+- **Waste:** 50 g `Packaging` → disposal (§4).
+- **Waste routing:** consumer parameter (the sealed F-039 disposal feeds the boundary).
+- **Balances:** mass 50 = 50 (assert, via the kept contents); time 30_000 ms → History (structural).
 
 ## 6. Flows
 
 - P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8, with the one genuine freedom: **the housing can be
   picked from the rack at any point before P6**, and P8 may run any time after P5 — at least
-  two orderings compile. Total drawn: 630 000 ms (operator ends at 570 000 ms); History: 7
-  attributed events (P3 has no draw).
-- **Everything accounted:** instrument with the customer; account at 12 000 p; vendor paid
+  two orderings compile.
+- **Orders:** (a) P1, P2, P3, P4, P5, P6, P7, P8; (b) P1, P2, P3, P4, P5, P8, P6, P7 (P8 any
+  time after P5; the housing pick may float anywhere before P6).
+- Total drawn: 630_000 ms (operator ends at 570_000 ms); History: 7 attributed events (P3 has
+  no draw).
+- **Everything accounted:** instrument with the customer; account at 12_000 p; vendor paid
   (2340 ec, its dimension closed); vendor stock at 2 with its state accounted; courier home
   and reusable; packaging at disposal; bin empty; order token consumed; rack at 2; History
   with the caller.
@@ -194,3 +233,9 @@ Original questions, for the record:
    (organisations, not people). OK?
 7. Quantities/prices sanity: §3's masses, 5000 p account, 9000 p sale, 2340 ec component,
    20-minute budget, 630 000 ms drawn. Happy?
+
+*(Format note, 2026-10-08: migrated mechanically to the R22 machine-checked conventions —
+backticked canonical identifiers, underscore-grouped numbers, the §2 Ids and §6 Orders fields,
+§4 restructured into the template's Inputs/Outputs tables, and §5's prose blocks restructured
+into the template's field bullets, carrying the same facts. The purchase order stays in prose
+per §8 feedback item 1 (it has no §3 row). No semantic change; §8 kept verbatim.)*

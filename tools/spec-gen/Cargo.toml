@@ -1,0 +1,35 @@
+# tools/spec-gen — the specification gate (R22) and its two binaries:
+# `speccheck` (validates case-studies/*/SPEC.md against SPEC_TEMPLATE.md's
+# conventions — the CI gate behind tools/spec.sh) and `specgen` (the one-shot
+# scaffolding generator: emits the spec-determined structure of a model crate
+# with every under-determined decision as an enumerable SPEC-HOLE).
+#
+# Productionized from experiments/exp15-dsl-from-spec (F-062); the strict
+# conventions it checks are SPEC_TEMPLATE.md amendments A1–A10. The CS-1
+# fuzzy-resolution lexicon survives only behind `speccheck --lenient`, as a
+# migration aid.
+#
+# Deliberately OUTSIDE the model/ workspace (like tools/diagram-gen): this is
+# tooling, not a model crate. It is std-only (no syn, no markdown crates):
+# the template's fixed section/table/field shapes are what make the
+# line-based parsing reliable; it parses SPEC documents, never model source.
+
+[package]
+name = "spec-gen"
+version = "0.1.0"
+edition = "2024"
+description = "Validates model specifications (speccheck, R22) and scaffolds model crates from them (specgen)"
+
+# Standalone on purpose: not a member of the model/ workspace.
+[workspace]
+
+[dependencies]
+# None, deliberately (std-only).
+
+[[bin]]
+name = "speccheck"
+path = "src/bin/speccheck.rs"
+
+[[bin]]
+name = "specgen"
+path = "src/bin/specgen.rs"

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.4 (implemented) |
+| Specification version | v0.5 (implemented; format migrated to the R22 machine-checked conventions, 2026-10-08 — no semantic change) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -27,7 +27,8 @@ cleaning; staff scheduling.
 
 ## 2. Requirements
 
-> Workspace ids: REQ-001..014 are taken (pilot, CS-1, CS-2); CS-3 starts at REQ-015.
+**Ids:** REQ-015–REQ-018, allocated from the workspace sequence (F-053; REQ-001..014 are
+taken by the pilot, CS-1 and CS-2).
 
 - **REQ-015:** The espresso machine may be operated only by a trained barista.
 - **REQ-016:** Burnt milk must be discarded to the drain — it is never re-steamed or served.
@@ -39,22 +40,22 @@ cleaning; staff scheduling.
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
-| Milk | continuous | grams | 300 g bottle; 150 g per steaming attempt | in bottle → steamed(150 g) or burnt(150 g) |
-| Ground coffee | continuous | grams | hopper 500 g; 18 g per dose | hopper → dosed → (in drink / in puck) |
-| Machine water | continuous | grams | tank 200 g; 40 g per shot | — |
-| Espresso shot | product part | 36 g (18 g dose + 40 g water − 22 g puck) | 1 | — |
-| Spent puck | waste | 22 g | per shot | → knock box |
-| Flat white | product | mass in type | 186 g (36 + 150) in cup | — |
-| Urn water | continuous | grams | urn 1000 g; 300 g per pot | — |
-| Teabag | discrete | 3 g | box of 10 | dry → in pot |
-| Pot of tea | product | mass in type | 303 g in pot | — |
-| Cups / teapot / tray | discrete crockery | — | 2 cups, 1 pot, 1 tray | leave with the customer |
-| Cash | continuous (money) | pence | customer tenders 1000 p; order 700 p (flat white 380 + tea 320) | split 700 + 300 |
-| Till | container (money) | pence | starts 0 | 0 → 700 → (320 on refund path) |
-| Payment receipt | evidence token | sealed; REQ-017's key | 1 | — |
-| Barista | reusable | time budget; `MachineTrained` (R18) | 600 000 ms | draws down |
-| Server | reusable | time budget | 600 000 ms | draws down |
-| Steam outcome | outcome token (R17) | sealed, boundary-injected | 2 provisioned | — |
+| `Milk` | continuous | grams | 300 g bottle; 150 g per steaming attempt | in bottle → `steamed` (150 g) or `burnt` (150 g) |
+| `GroundCoffee` (ground coffee) | continuous | grams | hopper 500 g; 18 g per dose | hopper → dosed → (in drink / in puck) |
+| `MachineWater` (machine water) | continuous | grams | tank 200 g; 40 g per shot | — |
+| `EspressoShot` (espresso shot) | product part | 36 g (18 g dose + 40 g water − 22 g puck) | 1 | — |
+| `SpentPuck` (spent puck) | waste | 22 g | per shot | → knock box |
+| `FlatWhite` (flat white) | product | mass in type | 186 g (36 + 150) in cup | — |
+| `UrnWater` (urn water) | continuous | grams | urn 1000 g; 300 g per pot | — |
+| `Teabag` | discrete | 3 g | box of 10 | dry → in pot |
+| `PotOfTea` (pot of tea) | product | mass in type | 303 g in pot | — |
+| `Cup`s / `Teapot` / `Tray` | discrete crockery | — | 2 cups, 1 pot, 1 tray | leave with the customer |
+| `Cash` | continuous (money) | pence | customer tenders 1000 p; order 700 p (flat white 380 + tea 320) | split 700 + 300 |
+| `Till` | container (money) | pence | starts 0 | 0 → 700 → (320 on refund path) |
+| `PaymentReceipt` (payment receipt) | evidence token | sealed; REQ-017's key | 1 | — |
+| `Barista` | reusable | time budget; `MachineTrained` (R18) | 600_000 ms | draws down |
+| `Server` | reusable | time budget | 600_000 ms | draws down |
+| `SteamOutcome` (steam outcome) | outcome token (R17) | sealed, boundary-injected | 2 provisioned | — |
 
 ## 4. System boundary: suppliers, consumers, sinks
 
@@ -62,21 +63,21 @@ cleaning; staff scheduling.
 
 | What enters | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
-| Customer's cash (1000 p) | the customer (boundary object) | — | placeholder |
-| Stock (milk bottle, hopper, tank, urn, teabag box, crockery) | counter setup at flow start | per §3 | placeholder |
-| Staff (barista trained via `qualify`, server) | shift start | 1 + 1 | placeholder: training body |
-| Steam outcomes | boundary constructors / test fixtures | 2 | placeholder until calibrated |
+| The customer's `Cash` (1000 p) | the customer (boundary object) | — | placeholder |
+| Stock (`Milk` bottle, hopper, tank, urn, `Teabag` box, crockery) | counter setup at flow start | per §3 | placeholder |
+| Staff (`Barista` trained via `qualify`, `Server`) | shift start | 1 + 1 | placeholder: training body |
+| `SteamOutcome`s | boundary constructors / test fixtures | 2 | placeholder until calibrated |
 
 **Outputs (consumers / sinks):**
 
 | What leaves | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
-| The served order (tray, drinks, crockery), change, any refund | the customer (`Next = Self`) | unbounded | placeholder |
-| Burnt milk; path 3's stranded shot | the drain | unbounded | placeholder |
-| Spent pucks | knock box | unbounded | placeholder |
-| Payment (700 p) | the till (kept: container, not a sink) | — | real |
+| The served order (`Tray`, drinks, crockery), change, any refund | the customer (`Next = Self`) | unbounded | placeholder |
+| `burnt` `Milk`; path 3's stranded `EspressoShot` | the drain | unbounded | placeholder |
+| `SpentPuck`s | knock box | unbounded | placeholder |
+| `Cash` payment (700 p) | the till (kept: container, not a sink) | — | real |
 | Expended time | **two** Histories (R16) — one per actor — **merged at the join** | — | the per-branch merge, exercised for real at last |
-| Untried steam tokens | boundary exit | — | returned (R17) |
+| Untried `SteamOutcome` tokens | boundary exit | — | returned (R17) |
 
 ## 5. Processes
 
@@ -86,72 +87,77 @@ cleaning; staff scheduling.
 ### Branch A — the barista (own History `h_a`)
 
 ### P1. Pull the espresso
-- **Actor(s) and reusables:** barista (draws 90 000 ms), espresso machine — returned.
+- **Actor(s) and reusables:** barista (draws 90_000 ms), espresso machine — returned.
   **REQ-015 bounds the barista.**
-- **Consumes:** 18 g grounds (hopper draw), 40 g water (tank draw), 1 cup.
-- **Produces:** espresso shot in cup (36 g).
-- **Waste routing:** spent puck (22 g) fed to the knock box **inside the process**.
+- **Consumes:** 18 g `GroundCoffee` (hopper draw), 40 g `MachineWater` (tank draw), 1 `Cup`.
+- **Produces:** the `EspressoShot` in its cup (36 g).
+- **Waste:** 1 `SpentPuck` (22 g) → knock box (§4).
+- **Waste routing:** consumer parameter (the spent puck is fed to the knock box **inside the
+  process**).
 - **Balances:** mass 18 + 40 = 36 + 22 (assert); time → `h_a` (structural).
 - **Satisfies:** REQ-015.
 
 ### P2. Steam the milk — **fallible (R17)**
-- **Actor(s) and reusables:** barista (draws 60 000 ms per attempt) — returned both arms.
-- **Consumes:** 150 g milk (bottle draw), 1 steam outcome token.
-- **Produces (Ok):** steamed milk (150 g, in the jug).
-- **Produces (Fail):** burnt milk (150 g).
-- **Waste routing:** burnt milk fed to the drain **inside the process** (REQ-016 structural —
-  the burnt state's only exit).
-- **Balances (both arms):** mass 150 = 150 (assert each arm); time → `h_a` (structural).
+- **Actor(s) and reusables:** barista (draws 60_000 ms per attempt) — returned both arms.
+- **Consumes:** 150 g `Milk` (bottle draw), 1 `SteamOutcome` token.
+- **Produces (Ok):** the `steamed` `Milk` (150 g, in the jug).
+- **Produces (Fail):** the `burnt` `Milk` (150 g).
+- **Waste:** 150 g `burnt` `Milk` → the drain (§4).
+- **Waste routing:** consumer parameter (the burnt milk is fed to the drain **inside the
+  process** — REQ-016 structural: the burnt state's only exit).
+- **Balances:** mass 150 = 150 (assert, each arm); time → `h_a` (structural).
 - **Satisfies:** REQ-016.
 - **Failure modes:** burnt milk. Provisioned rework: the 300 g bottle allows exactly two
   attempts; a third is inexpressible (R17/F-050).
 
 ### P3. Build the flat white
-- **Actor(s) and reusables:** barista (draws 30 000 ms) — returned.
-- **Consumes:** espresso shot (36 g, in its cup) + steamed milk (150 g).
-- **Produces:** flat white (186 g, in cup).
+- **Actor(s) and reusables:** barista (draws 30_000 ms) — returned.
+- **Consumes:** the `EspressoShot` (36 g, in its cup) + the `steamed` `Milk` (150 g).
+- **Produces:** the `FlatWhite` (186 g, in cup).
 - **Balances:** mass 36 + 150 = 186 (assert); time → `h_a` (structural).
 
 ### Branch B — the server (own History `h_b`)
 
 ### P4. Take payment at the till
-- **Actor(s) and reusables:** server (draws 60 000 ms), till — till keeps the money.
-- **Consumes:** customer's 1000 p, split 700 + 300 (assert); 700 p deposited to the till.
-- **Produces:** payment receipt (the REQ-017 evidence); 300 p change returned to the
-  customer (REQ-018 structural — the split's second output has only the customer exit).
+- **Actor(s) and reusables:** server (draws 60_000 ms), till — till keeps the money.
+- **Consumes:** the customer's 1000 p `Cash`. The tender is split 700 + 300; 700 p is
+  deposited to the `Till`.
+- **Produces:** 1 `PaymentReceipt` (the REQ-017 evidence) and 300 p `Cash` (change, returned
+  to the customer — REQ-018 structural: the split's second output has only the customer exit).
 - **Balances:** money 1000 = 700 + 300 (assert); till 0 + 700 = 700 (assert); time → `h_b` (structural).
 - **Satisfies:** REQ-017 (produces its key), REQ-018.
 
 ### P5. Brew the pot of tea
-- **Actor(s) and reusables:** server (draws 120 000 ms), urn — returned.
-- **Consumes:** 300 g urn water (draw), 1 teabag (3 g), the teapot + 1 cup.
-- **Produces:** pot of tea (303 g, in pot, with cup).
+- **Actor(s) and reusables:** server (draws 120_000 ms), urn — returned.
+- **Consumes:** 300 g `UrnWater` (urn draw), 1 `Teabag` (3 g), the `Teapot` + 1 `Cup`.
+- **Produces:** the `PotOfTea` (303 g, in pot, with cup).
 - **Balances:** mass 300 + 3 = 303 (assert); time → `h_b` (structural).
 
 ### The join
 
 ### P6. Assemble and hand over
-- **Actor(s) and reusables:** server (draws 30 000 ms) — returned.
-- **Consumes:** flat white + pot of tea + **payment receipt** (REQ-017) + tray; **merges
-  `h_a` and `h_b`** (R16).
-- **Produces:** the served order (tray + drinks + crockery) to the customer; the merged
+- **Actor(s) and reusables:** server (draws 30_000 ms) — returned.
+- **Consumes:** the `FlatWhite` + the `PotOfTea` + the `PaymentReceipt` (REQ-017) + the
+  `Tray`. Merges `h_a` and `h_b` (R16).
+- **Produces:** the served order (the `Tray` + drinks + crockery) to the customer. The merged
   History stays with the caller.
 - **Balances:** items 2 drinks + tray = 1 order (structural); time → `h_b` before the merge (structural).
 - **Satisfies:** REQ-017.
 
 ### P7. Refund the flat white — path 3 only
-- **Actor(s) and reusables:** server (draws 30 000 ms), till.
-- **Consumes:** till draw 380 p (till 700 → 320).
-- **Produces:** 380 p refund to the customer; the partial order (tea only) handed over with
-  the receipt.
+- **Actor(s) and reusables:** server (draws 30_000 ms), till.
+- **Consumes:** 380 p `Cash` drawn from the `Till` (700 → 320).
+- **Produces:** 380 p `Cash` (the refund) to the customer. The partial order (tea only) is
+  handed over with the receipt.
 - **Balances:** money 700 = 320 + 380 (assert); time → `h_b` (structural).
 
 ### P8. Drain the stranded shot — path 3 only (branch A)
-- **Actor(s) and reusables:** barista (draws 30 000 ms) — returned.
-- **Consumes:** the stranded espresso shot (36 g) and its cup.
-- **Produces:** the cup back to the counter stack (boundary exit).
-- **Waste routing:** the shot (36 g) fed to the drain **inside the process** —
-  the same Consumer machinery as the burnt milk.
+- **Actor(s) and reusables:** barista (draws 30_000 ms) — returned.
+- **Consumes:** the stranded `EspressoShot` (36 g) and its `Cup`.
+- **Produces:** the `Cup` (back to the counter stack via the boundary exit).
+- **Waste:** the stranded `EspressoShot` (36 g) → the drain (§4).
+- **Waste routing:** consumer parameter (the shot is fed to the drain **inside the process**
+  — the same Consumer machinery as the burnt milk).
 - **Balances:** mass 36 = 36 (structural — the shot is fed whole); time → `h_a` (structural).
 
 ## 6. Flows
@@ -160,6 +166,8 @@ cleaning; staff scheduling.
   B; P6 joins them (and needs P4's receipt — the one deliberate cross-branch dependency,
   REQ-017); P7 replaces the flat white in P6 on path 3, and P8 winds up branch A there
   (the stranded shot to the drain).
+- **Orders:** (a) P1, P2, P3, P4, P5, P6 (branch A, then branch B); (b) P4, P5, P1, P2, P3,
+  P6 (branch B first — the branches share nothing, so any interleaving compiles, R9/R2).
 - **This is the concurrency case study.** The branches share **no** resource — different
   actors, different equipment, different stock — so the compiler permits any interleaving
   (R9/R2). The model must demonstrate it: at least two interleavings of branch A and branch
@@ -172,11 +180,11 @@ cleaning; staff scheduling.
   order). Event counts: path 1 → 3 + 3; path 2 → 4 + 3; path 3 → 4 + 4 (P8 on `h_a`,
   P7 on `h_b`).
 - **Three paths** (a `#[must_use]` outcome grouping, one variant per path):
-  1. **Served, first-try steam:** barista 180 000 ms drawn, server 210 000 ms; bottle at
+  1. **Served, first-try steam:** barista 180_000 ms drawn, server 210_000 ms; bottle at
      150 g; one untried token returned; till 700 p; customer: order + 300 p change.
-  2. **Served, re-steamed:** barista 240 000 ms; bottle empty; 150 g burnt milk in the drain;
+  2. **Served, re-steamed:** barista 240_000 ms; bottle empty; 150 g burnt milk in the drain;
      both tokens used; till 700 p.
-  3. **Tea served, flat white refunded:** both steams fail — barista 240 000 ms
+  3. **Tea served, flat white refunded:** both steams fail — barista 240_000 ms
      (90k + 60k + 60k + P8's 30k; no P3); 300 g burnt milk drained; P7 runs: till 320 p;
      customer: tea, 300 p change **and** 380 p refund; the espresso shot (path 3 waste,
      36 g) goes to the drain in P8 with its cup returned to the counter stack — see §8 Q1.
@@ -240,3 +248,7 @@ Original questions, for the record:
 6. **The merged-History assertions** (Join shape, per-branch event counts, no invented
    interleaving) are the heart of this case study — anything else you want asserted about
    the record (e.g. per-event magnitudes, as CS-2 did)?
+
+*(Format note, 2026-10-08: migrated mechanically to the R22 machine-checked conventions —
+backticked canonical identifiers, underscore-grouped numbers, the §2 Ids and §6 Orders fields,
+split Waste/Waste routing fields. No semantic change; §8 kept verbatim.)*

@@ -77,7 +77,7 @@ REQ-001..005). The mapping is recorded at the definitions in
 
 ### P2. Load the pot
 - **Actor(s) and reusables:** person (draws 20_000 ms), teapot, teabag box — returned (box at 37).
-- **Consumes:** 3 `Teabag`s (one at a time from the box, R12).
+- **Consumes:** 3 `OolongPearl`s (one at a time from the box, R12).
 - **Produces:** `loaded` pot (3 bags, 9 g dry).
 - **Balances:** items 3 = 3 (structural); time 20_000 ms → History (structural).
 - **Satisfies:** REQ-007 (the loaded-pot state exists only at exactly 3 bags).

@@ -8,7 +8,9 @@
 > **How this is used:** the implementer (human or Claude) turns each section into model
 > code mechanically — requirements become `REQ-NNN` traits, resources become sealed types,
 > processes become conserving functions, the boundary becomes suppliers/consumers — and
-> `ci.sh`/`trace.sh` then prove the model matches this document. **Anything this
+> `ci.sh`/`trace.sh` then prove the model matches this document. `tools/spec.sh` validates
+> this document mechanically (R22): balance arithmetic, waste destinations and name closure
+> are checked at spec-review time, before any code exists. **Anything this
 > specification leaves out does not silently default: it comes back as a numbered
 > question.** Under-specification is cheap to fix here and expensive to fix later, but the
 > compiler will catch it either way — a missing waste destination or an unbalanced mass
@@ -42,8 +44,11 @@ failure handling), so its absence is a decision, not an oversight.>
 > need at least one verifying test; if you can't imagine the test, rephrase the
 > requirement.
 
-- **REQ-001:** <e.g. Fastening bolts must be M8 steel, 15 mm long.>
-- **REQ-002:** <…>
+**Ids:** REQ-0NN–REQ-0MM, allocated from the workspace sequence (F-053; check the latest
+trace.sh report for the highest id in use).
+
+- **REQ-0NN:** <e.g. Fastening bolts must be M8 steel, 15 mm long.>
+- **REQ-0NN+1:** <…>
 
 ## 3. Resources
 
@@ -52,18 +57,34 @@ failure handling), so its absence is a decision, not an oversight.>
 > **continuous** — an amount of material/energy/time in a container (R15);
 > **reusable** — moved in and returned, survives the flow (people, tools, locations — R2);
 > **product** — what the model exists to produce.
-> Quantities are integers in the base units (R7): g, mm, ms, mm², mm³, mK, mA, J.
+> Quantities are integers in the base units (R7): g, mm, ms, mm², mm³, mK, mA, J — written
+> with underscore grouping (`550_000`) or ungrouped (`550000`), never space-grouped
+> (`550 000`), so machine parsing needs no lexing heuristics.
 > *States*: list every processing state separately — one type per state (R9), so "plate"
-> and "drilled plate" are two rows or one row listing both states. A state carrying more
-> than one quantity (mass *and* embodied energy, say) lists both; in code the extra
-> quantities ride as further const parameters on the state type
-> (`BoilingKettle<1500, 500_000>`).
+> and "drilled plate" are two rows or one row listing both states. A state carrying
+> quantities lists them in parentheses after the state name, one
+> `quantity unit` term per const parameter in order:
+> `` `filled` (1_500 g) → `boiling` (1_500 g, 500_000 J) ``. In code the quantities ride as
+> const parameters on the state type (`BoilingKettle<1500, 500_000>`); free-form phrasing
+> ("dry mass 3 g each") needed pattern-scraping in EXP-15 and is not machine-safe.
+> **Each Resource cell opens with a backticked canonical identifier** (`` `Teapot` ``), and
+> each state in the States cell is likewise backticked (`` `boiling` ``). §4, §5 and §6 refer
+> to resources and states **by these identifiers verbatim**; surrounding prose is decoration.
+> The validator and generator resolve names only through the identifiers — prose variants
+> ("the loaded pot", "drawn from the grid") were the single biggest parsing fragility in
+> EXP-15 (F-062).
+> Each state name appears on **exactly one** resource row — the quantity-bearing row that
+> owns the type. Do not repeat `boiling` on both the water and the kettle: name the owning
+> row's state and let prose mention the rest.
+> Every waste product named in §5 has its own row here — waste is a resource like any other
+> (R1), and a §5 waste line with no §3 row fails speccheck.
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
-| <Bolt> | discrete | <M8, Steel, 15 mm> | <count: 100 per box> | — |
-| <Steel sheet> | continuous | <grade?> | <5000 g> | <sheet → blanks> |
-| <Person> | reusable | <qualifications?> | <time budget: 30 000 ms> | — |
+| <`Bolt`> | discrete | <M8, Steel, 15 mm> | <count: 100 per box> | — |
+| <`SteelSheet`> | continuous | <grade?> | <5000 g> | <sheet → 2 `blank`s (2_250 g)> |
+| <`Person`> | reusable | <qualifications?> | <time budget: 30_000 ms> | — |
+| <`Swarf`> | waste | <per-cut mass> | <500 g per sheet> | — |
 
 ## 4. System boundary: suppliers, consumers, sinks
 
@@ -99,21 +120,28 @@ failure handling), so its absence is a decision, not an oversight.>
 >   recorded to the History under this process's name; the process itself takes and returns
 >   the person unchanged (F-048). A process needing no person should say so — that is what
 >   creates ordering freedom (§6).
-> - Say where each waste output **goes**: either the process takes its consumer as a
->   requirement-bounded parameter and feeds it internally (the waste never exists loose and
->   the requirement becomes structural), or the flow routes the loose output. Name which.
-> - Mark each Balances line **(assert)** — checked by a `const` assert — or
->   **(structural)** — true by construction (shared consts, a fixed item count). Both are
->   conservation; only asserts carry stated numbers on both sides.
+> - **Every process with waste carries a `Waste routing:` field** naming one of the two
+>   shapes: *consumer parameter* (the process takes its consumer as a requirement-bounded
+>   parameter and feeds it internally — the waste never exists loose and the requirement
+>   becomes structural) or *routed by the flow* (the loose output is the flow's to deliver).
+>   A waste line with no routing field is a speccheck error (hole U-10, F-062).
+> - **Every Balances clause ends in `(assert)`** — checked by a `const` assert — **or
+>   `(structural)`** — true by construction (shared consts, a fixed item count). Both are
+>   conservation; only asserts carry stated numbers on both sides. An unmarked clause is a
+>   speccheck error, not a judgement call: CS-1's unmarked lines each forced the generator to
+>   guess (F-062).
+> - Consumes/Produces/Waste lists contain only items — quantity, canonical identifier,
+>   optional parenthesised R-reference. Explanatory prose ("removed from the pot at the end
+>   of brewing") goes in its own sentence after the list, never trailing inside an item.
 
 ### P1. <cut>
-- **Actor(s) and reusables:** <1 person (≥ 5000 ms of their budget), the saw> — returned.
-- **Consumes:** <steel sheet, 5000 g>.
-- **Produces:** <2 plate blanks (2 × 2250 g)>.
-- **Waste:** <swarf, 500 g → swarf bin (§4)>.
-- **Waste routing:** <taken as a bounded consumer parameter / routed by the flow>.
-- **Balances:** <mass: 5000 = 2250 + 2250 + 500 (assert)>; <time drawn: 5000 ms → History (structural)>.
-- **Satisfies:** <REQ-00N, if any>.
+- **Actor(s) and reusables:** <1 person (draws 5_000 ms), the saw> — returned.
+- **Consumes:** <1 `SteelSheet` (5000 g)>.
+- **Produces:** <2 `blank`s (2250 g each)>.
+- **Waste:** <1 `Swarf` (500 g) → swarf bin (§4)>.
+- **Waste routing:** <consumer parameter / routed by the flow>.
+- **Balances:** <mass 5000 = 2250 + 2250 + 500 (assert)>; <time 5_000 ms → History (structural)>.
+- **Satisfies:** <REQ-0NN, if any>.
 - **Failure modes:** <none modelled / describe — see instructions.md open question 1>.
 
 ### P2. <…>
@@ -127,6 +155,8 @@ failure handling), so its absence is a decision, not an oversight.>
 
 - <P1's blanks feed P2 and P3; P2 and P3 are independent (separate people) and may run
   concurrently; P4 joins their outputs and merges their histories.>
+- **Orders:** (a) <P1, P2, P4>; (b) <P1, P3, P4> — at least two valid orders, each a
+  comma-separated list of §5 process ids; the implementer proves both compile (R9).
 - **Everything accounted:** <at flow end, name where every resource rests: products at the
   customer, swarf bin disposed, empty containers consumed, reusables returned, histories
   merged.>

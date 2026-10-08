@@ -90,7 +90,7 @@ REQ-001..005). The mapping is recorded at the definitions in
 - **Waste:** 50_000 J `WasteHeat` → kitchen air (kettle losses).
 - **Waste routing:** routed by the flow (the flow's `vent_heat` carries the REQ bound — §8
   feedback item 7).
-- **Balances:** mass 1500 = 1500 (structural); energy 550_000 = 500_000 + 50_000 (assert).
+- **Balances:** mass 1500 = 1500 (structural); energy 550_000 = 500_000 + 60_000 (assert).
 - **Satisfies:** —.
 - **Failure modes:** none modelled in CS-1 (the kettle always boils; fallibility is CS-2's
   stress).

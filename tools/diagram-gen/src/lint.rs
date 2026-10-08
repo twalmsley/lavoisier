@@ -129,9 +129,10 @@ const CATALOGUE: &[Check] = &[
     Check {
         id: "E-TAG-MACRO",
         sev: Sev::Error,
-        cites: "F-037; R10 rule 7",
-        what: "a `Satisfies:` tag inside a macro invocation — trace.sh drops it silently \
-               (the gate stays green), so this tool must catch it",
+        cites: "F-037; R10 rule 7; F-060",
+        what: "a `Satisfies:` tag inside ANY macro invocation (kernel or not — broadened from \
+               the `model_core::` set after F-060's vacuous-green run) — trace.sh drops it \
+               silently (the gate stays green), so this tool must catch it",
     },
     Check {
         id: "E-REQ-DIAG",
@@ -157,6 +158,17 @@ const CATALOGUE: &[Check] = &[
                shadows silently (the green-but-wrong direction)",
     },
     // ---- WARN: should fix ---------------------------------------------------
+    Check {
+        id: "W-MACRO-MODEL",
+        sev: Sev::Warn,
+        cites: "F-060; R22",
+        what: "a model-shaped item (`fn`, `trait`, `struct`, `enum`, `impl`) inside a \
+               non-kernel macro invocation — the R20/R21 toolchain parses source, so items \
+               authored through a macro front are invisible to every tool while the gate \
+               stays green (the F-060 vacuous-green direction); model source is only ever \
+               ordinary Rust source (R22), with macro sugar confined to model-core's kernel \
+               macros. Entered as WARN per R21's catalogue-growth rule",
+    },
     Check {
         id: "W-R20-DOC",
         sev: Sev::Warn,
@@ -671,6 +683,38 @@ fn check_crate_attrs(cl: &mut CrateLint, krate: &str) {
     }
 }
 
+/// A block-form macro invocation opener: a comment-stripped line that is
+/// exactly `<path>! {` (or `<path>!{`). Returns (full path, last segment).
+/// A `macro_rules! name {` DEFINITION is not an invocation and is not
+/// matched: its template lines are patterns, not model items; the items a
+/// definition can smuggle in only become real at an invocation site, which
+/// this check does see (F-060).
+fn macro_invocation(code: &str) -> Option<(String, String)> {
+    let head = code.strip_suffix('{')?.trim_end();
+    let path = head.strip_suffix('!')?.trim_end();
+    if path.is_empty()
+        || !path
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_' || c == ':')
+        || path.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(true)
+    {
+        return None;
+    }
+    let mname = path.rsplit("::").next().unwrap_or(path).to_string();
+    Some((path.to_string(), mname))
+}
+
+/// A model-shaped item line (F-060): the shapes the extraction toolchain
+/// recovers model structure from — `fn`, `trait`, `struct`, `enum`, `impl` —
+/// including sugared forms whose keyword is not first (`process fn boil`).
+fn is_model_shaped(code: &str) -> bool {
+    let t = code.trim_start_matches("pub(crate)").trim_start_matches("pub ").trim_start();
+    t.split_whitespace()
+        .take(3)
+        .any(|w| matches!(w, "fn" | "trait" | "struct" | "enum" | "impl"))
+        || t.starts_with("impl<")
+}
+
 /// E-TAG-MACRO, E-REQ-DIAG, E-TAG-ASSERT (plus the WARN-graded unverifiable
 /// tag placements): one pass over the raw lines with macro-block tracking.
 fn check_tags_and_requirements(cl: &mut CrateLint) {
@@ -688,12 +732,11 @@ fn check_tags_and_requirements(cl: &mut CrateLint) {
             let raw = f.lines[i].trim_start();
             let code = f.code[i].trim();
 
-            // Macro invocation block: `model_core::<name>! {`.
-            if code.starts_with("model_core::") && code.contains('!') && code.ends_with('{') {
-                let mname: String = code["model_core::".len()..]
-                    .chars()
-                    .take_while(|c| c.is_alphanumeric() || *c == '_')
-                    .collect();
+            // Macro invocation block: `<path>! {` — ANY macro, not just the
+            // `model_core::` kernel set (F-060: the pre-broadening check
+            // reported a whole-model macro front vacuously clean).
+            if let Some((mpath, mname)) = macro_invocation(code) {
+                let kernel = mpath.starts_with("model_core::");
                 let start = i;
                 let mut depth = 0i64;
                 let mut has_diag = false;
@@ -719,6 +762,29 @@ fn check_tags_and_requirements(cl: &mut CrateLint) {
                             Loc { file: f.rel.clone(), line: i + 1 },
                         ));
                     }
+                    // F-060: model-shaped items inside a NON-kernel macro
+                    // invocation are invisible to the whole R20/R21 toolchain
+                    // while its gates stay green. WARN per R21's
+                    // catalogue-growth rule (new checks enter as WARN).
+                    if i > start && !kernel {
+                        let cl_ = f.code[i].trim();
+                        if is_model_shaped(cl_) {
+                            findings.push((
+                                "W-MACRO-MODEL",
+                                Sev::Warn,
+                                format!(
+                                    "model-shaped item inside the non-kernel `{mname}!` \
+                                     invocation (`{}`) — the extraction toolchain parses \
+                                     source, so this item is invisible to trace.sh, the \
+                                     diagram/document generators and this linter's \
+                                     type-level checks (F-060); model source is only ever \
+                                     ordinary Rust source (R22)",
+                                    cl_.chars().take(60).collect::<String>().replace('|', "/")
+                                ),
+                                Loc { file: f.rel.clone(), line: i + 1 },
+                            ));
+                        }
+                    }
                     if rj.starts_with("#[diagnostic::on_unimplemented") {
                         has_diag = true;
                     }
@@ -727,7 +793,7 @@ fn check_tags_and_requirements(cl: &mut CrateLint) {
                     }
                     i += 1;
                 }
-                if mname == "requirement" && !has_diag {
+                if kernel && mname == "requirement" && !has_diag {
                     findings.push((
                         "E-REQ-DIAG",
                         Sev::Error,
@@ -1761,4 +1827,91 @@ pub fn run(root: &Path, out_dir: &Path, crates: &[String]) -> usize {
         eprintln!("modellint: {fatal} gate-fatal ERROR finding(s) — see the reports");
     }
     fatal
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Block-form macro invocations are recognized for ANY path (the F-060
+    /// broadening), and ordinary blocks are not.
+    #[test]
+    fn macro_invocation_detection() {
+        assert_eq!(
+            macro_invocation("model_core::requirement! {"),
+            Some(("model_core::requirement".into(), "requirement".into()))
+        );
+        assert_eq!(
+            macro_invocation("crate::model! {"),
+            Some(("crate::model".into(), "model".into()))
+        );
+        assert_eq!(macro_invocation("lavoisier::model!{"), Some(("lavoisier::model".into(), "model".into())));
+        assert_eq!(macro_invocation("macro_rules! model {"), None); // two tokens, not a path
+        assert_eq!(macro_invocation("const {"), None);
+        assert_eq!(macro_invocation("match outcome {"), None);
+        assert_eq!(macro_invocation("pub struct Foo {"), None);
+    }
+
+    /// The model-shaped line heuristic catches plain and sugared item forms.
+    #[test]
+    fn model_shaped_detection() {
+        assert!(is_model_shaped("pub trait Boiling: sealed::Sealed {"));
+        assert!(is_model_shaped("fn pour_away(self, permit: BrewPermit) -> Kettle;"));
+        assert!(is_model_shaped("pub struct BrewPermit {"));
+        assert!(is_model_shaped("process fn boil [const G: u64] {"));
+        assert!(is_model_shaped("flow test fn pour_cuppa_balances {"));
+        assert!(is_model_shaped("impl Boiling for KettleAtTheBoil {"));
+        assert!(!is_model_shaped("rust {"));
+        assert!(!is_model_shaped("let kettle = fill_kettle(kettle, water);"));
+        assert!(!is_model_shaped("assert = \"conservation violated\";"));
+        assert!(!is_model_shaped("send drain <- water;"));
+    }
+
+    /// The F-060 negative fixture, read-only: EXP-13's `model!`-authored dsl
+    /// arm — the whole-model macro front the old checks passed vacuously
+    /// green — is flagged by the broadened E-TAG-MACRO (its `Satisfies:` tags
+    /// sit inside the invocation) and by W-MACRO-MODEL (its model-shaped
+    /// items do too).
+    #[test]
+    fn exp13_dsl_arm_is_flagged() {
+        let path = format!(
+            "{}/../../experiments/exp13-dsl-macro/dsl/src/model.rs",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let text = std::fs::read_to_string(&path)
+            .unwrap_or_else(|e| panic!("cannot read the F-060 fixture {path}: {e}"));
+        let lines: Vec<String> = text.lines().map(str::to_string).collect();
+        let code: Vec<String> = lines.iter().map(|l| code_part(l)).collect();
+        let mut cl = CrateLint {
+            cm: CrateModel::default(),
+            files: vec![SrcFile {
+                rel: "experiments/exp13-dsl-macro/dsl/src/model.rs".into(),
+                lines,
+                code,
+            }],
+            findings: Vec::new(),
+            flow_count: 0,
+            crossing: BTreeSet::new(),
+            param_bases: BTreeSet::new(),
+        };
+        check_tags_and_requirements(&mut cl);
+        let tag_errors = cl
+            .findings
+            .iter()
+            .filter(|f| f.check == "E-TAG-MACRO" && f.sev == Sev::Error)
+            .count();
+        let model_shaped = cl
+            .findings
+            .iter()
+            .filter(|f| f.check == "W-MACRO-MODEL" && f.sev == Sev::Warn)
+            .count();
+        assert!(
+            tag_errors >= 2,
+            "the dsl arm's in-invocation Satisfies: tags must be flagged (F-037/F-060), got {tag_errors}"
+        );
+        assert!(
+            model_shaped >= 5,
+            "the dsl arm's in-invocation fn/trait/struct items must be flagged (F-060), got {model_shaped}"
+        );
+    }
 }

@@ -1263,6 +1263,50 @@ fn find_trait_use(header: &str, trait_name: &str) -> Option<usize> {
     None
 }
 
+/// A macro-generated boundary fn entry (the boundary declaration macros and
+/// `outcome_token!` register their fns this way): kind Boundary, placed in
+/// the enclosing module path plus `boundary`, placeholder by grammar.
+fn boundary_fn(
+    name: &str,
+    mods: &[String],
+    loc: &Loc,
+    generics: Vec<GenericP>,
+    params: Vec<(String, String)>,
+    ret: Vec<String>,
+    docs: &[String],
+) -> FnDef {
+    FnDef {
+        name: name.to_string(),
+        module: {
+            let mut m = mods.to_vec();
+            m.push("boundary".to_string());
+            m
+        },
+        loc: loc.clone(),
+        generics,
+        params,
+        ret,
+        kind: FnKind::Boundary,
+        body: None,
+        placeholder: true,
+        docs: docs.to_vec(),
+        should_panic: false,
+    }
+}
+
+/// The `placeholder = "…"` literal of a boundary declaration macro, as the
+/// `Placeholder:` tag text the expansion generates.
+fn placeholder_text_of(inner_code: &[(usize, String)]) -> Vec<String> {
+    inner_code
+        .iter()
+        .filter_map(|(_, c)| {
+            c.trim()
+                .strip_prefix("placeholder = ")
+                .map(|r| r.trim().trim_end_matches(',').trim_matches('"').to_string())
+        })
+        .collect()
+}
+
 #[allow(clippy::too_many_lines)]
 fn scan_macro(
     cm: &mut CrateModel,
@@ -1503,6 +1547,156 @@ fn scan_macro(
                 }
             }
         }
+        // The boundary declaration macros (F-060 salvage): each was taught
+        // here in the same change that added it to model-core (R22, F-055
+        // point 5). All generated fns are boundary fns, placeholders by
+        // grammar (unbounded boundary objects are always placeholders, R15).
+        "boundary_source" => {
+            // `Name,` / `enter = new_x,` / `draw = draw_y -> Out,`
+            let decl = inner_code.first();
+            if let Some((dl, dcode)) = decl {
+                let name = base_name(dcode.trim_end_matches(',').trim());
+                let get = |key: &str| -> String {
+                    inner_code
+                        .iter()
+                        .find_map(|(_, c)| {
+                            c.trim()
+                                .strip_prefix(&format!("{key} = "))
+                                .map(|r| r.trim_end_matches(',').trim().to_string())
+                        })
+                        .unwrap_or_default()
+                };
+                let ph_texts = placeholder_text_of(&inner_code);
+                let loc = Loc { file: cx.file.clone(), line: dl + 1 };
+                if !name.is_empty() {
+                    cm.resources.insert(
+                        name.clone(),
+                        ResourceDef {
+                            kind: ResKind::Reusable,
+                            unit: None,
+                            placeholder: true,
+                            placeholder_text: ph_texts.clone(),
+                            doc_first: inner_docs
+                                .first()
+                                .or(pending_doc.first())
+                                .cloned()
+                                .unwrap_or_default(),
+                            loc: loc.clone(),
+                        },
+                    );
+                }
+                let enter = get("enter");
+                if !enter.is_empty() {
+                    cm.fns.insert(
+                        enter.clone(),
+                        boundary_fn(&enter, mods, &loc, Vec::new(), Vec::new(), vec![name.clone()], &inner_docs),
+                    );
+                }
+                // `draw = draw_y -> Out`
+                let draw_raw = get("draw");
+                let mut halves = draw_raw.splitn(2, "->");
+                let draw = halves.next().unwrap_or("").trim().to_string();
+                let out = base_name(halves.next().unwrap_or("").trim());
+                if !draw.is_empty() && !out.is_empty() {
+                    let mut f = boundary_fn(
+                        &draw,
+                        mods,
+                        &loc,
+                        vec![GenericP { name: "TAKE".into(), is_const: true, bounds: String::new() }],
+                        vec![("source".to_string(), name.clone())],
+                        vec![format!("{out}<TAKE>"), name.clone()],
+                        &inner_docs,
+                    );
+                    f.loc = loc.clone();
+                    cm.fns.insert(draw, f);
+                }
+            }
+        }
+        "boundary_sink" => {
+            // `Name,` / `enter = new_x,` / one-or-more `accepts [..] = In,`
+            let decl = inner_code.first();
+            if let Some((dl, dcode)) = decl {
+                let name = base_name(dcode.trim_end_matches(',').trim());
+                let loc = Loc { file: cx.file.clone(), line: dl + 1 };
+                let ph_texts = placeholder_text_of(&inner_code);
+                if !name.is_empty() {
+                    cm.structs.entry(name.clone()).or_insert(StructInfo {
+                        generics: Vec::new(),
+                        fields: Vec::new(),
+                        loc: loc.clone(),
+                    });
+                    cm.resources.insert(
+                        name.clone(),
+                        ResourceDef {
+                            kind: ResKind::BoundaryObject,
+                            unit: None,
+                            placeholder: true,
+                            placeholder_text: ph_texts,
+                            doc_first: inner_docs
+                                .first()
+                                .or(pending_doc.first())
+                                .cloned()
+                                .unwrap_or_default(),
+                            loc: loc.clone(),
+                        },
+                    );
+                    // One `Consumer` impl per `accepts [..] = In` clause
+                    // (`Next = Self`, R15/F-029).
+                    for (al, c) in &inner_code {
+                        let t = c.trim();
+                        let Some(rest) = t.strip_prefix("accepts") else { continue };
+                        let Some(eq) = rest.find('=') else { continue };
+                        let item = rest[eq + 1..].trim().trim_end_matches(',').trim().to_string();
+                        if !item.is_empty() {
+                            cm.consumers.push(ConsumerImpl {
+                                sink: name.clone(),
+                                item,
+                                loc: Loc { file: cx.file.clone(), line: al + 1 },
+                            });
+                        }
+                    }
+                    let enter = inner_code
+                        .iter()
+                        .find_map(|(_, c)| {
+                            c.trim()
+                                .strip_prefix("enter = ")
+                                .map(|r| r.trim_end_matches(',').trim().to_string())
+                        })
+                        .unwrap_or_default();
+                    if !enter.is_empty() {
+                        cm.fns.insert(
+                            enter.clone(),
+                            boundary_fn(&enter, mods, &loc, Vec::new(), Vec::new(), vec![name.clone()], &inner_docs),
+                        );
+                    }
+                }
+            }
+        }
+        "boundary_entry" => {
+            // `pub fn new_x -> Name,`
+            if let Some((dl, dcode)) =
+                inner_code.iter().find(|(_, c)| c.trim_start().starts_with("pub fn "))
+            {
+                let t = dcode.trim().trim_start_matches("pub fn ").trim();
+                let fname: String =
+                    t.chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+                let out = base_name(
+                    t[fname.len()..]
+                        .trim_start()
+                        .trim_start_matches("->")
+                        .trim()
+                        .trim_end_matches(',')
+                        .trim(),
+                );
+                if !fname.is_empty() && !out.is_empty() {
+                    let loc = Loc { file: cx.file.clone(), line: dl + 1 };
+                    cm.fns.insert(
+                        fname.clone(),
+                        boundary_fn(&fname, mods, &loc, Vec::new(), Vec::new(), vec![out], &inner_docs),
+                    );
+                }
+            }
+        }
         "requirement" => {
             let id = inner_docs.iter().find_map(|d| {
                 let p = d.find("REQ-")?;
@@ -1532,4 +1726,112 @@ fn scan_macro(
         _ => {}
     }
     end
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::FnKind;
+
+    /// The boundary declaration macros (F-060 salvage) are taught to the
+    /// shared scanner in the same change that added them to model-core (R22,
+    /// F-055 point 5): a crate authored with them yields the same extracted
+    /// model surface a hand-written boundary does — the reusable source, the
+    /// sealed sink with one `Consumer` per `accepts` clause, every entry/draw
+    /// fn classified as a boundary fn, and the mandatory placeholders.
+    #[test]
+    fn boundary_declaration_macros_are_extracted() {
+        let tmp = std::env::temp_dir().join(format!(
+            "diagram-gen-scan-test-{}",
+            std::process::id()
+        ));
+        let src = tmp.join("model/demo/src");
+        std::fs::create_dir_all(&src).unwrap();
+        std::fs::write(
+            tmp.join("model/demo/Cargo.toml"),
+            "[package]\nname = \"demo\"\n",
+        )
+        .unwrap();
+        std::fs::write(
+            src.join("lib.rs"),
+            r#"//! # demo — scanner fixture for the boundary declaration macros.
+
+model_core::container_resource! {
+    /// Drawn water, in grams.
+    ColdWater,
+    unit = "grams",
+    must_use = "ColdWater is a conserved resource: pass it on or hand it to a Consumer"
+}
+
+model_core::reusable_resource! {
+    /// A kettle.
+    Kettle,
+    must_use = "Kettle is a reusable resource: pass it on or return it to the caller"
+}
+
+pub mod boundary {
+    model_core::boundary_source! {
+        /// The mains tap.
+        MainsTap,
+        enter = new_mains_tap,
+        draw = draw_cold_water -> ColdWater,
+        must_use = "MainsTap is a boundary resource: pass it on like any other resource",
+        placeholder = "mains supply - assumed unbounded source (R15)"
+    }
+
+    model_core::boundary_sink! {
+        /// The kitchen air.
+        KitchenAir,
+        enter = new_kitchen_air,
+        accepts [const E: u64] = WasteHeat<E>,
+        accepts [] = SpentFilter,
+        must_use = "KitchenAir is a boundary resource: pass it on like any other resource",
+        placeholder = "the atmosphere - assumed unbounded sink (R15)"
+    }
+
+    model_core::boundary_entry! {
+        /// The kettle enters the model at flow start.
+        pub fn new_kettle -> Kettle,
+        placeholder = "kitchen setup at flow start (R12)"
+    }
+}
+"#,
+        )
+        .unwrap();
+
+        let cm = scan_crate(&tmp, "demo");
+        std::fs::remove_dir_all(&tmp).ok();
+
+        // The source object: a reusable, placeholder-tagged resource.
+        let tap = cm.resources.get("MainsTap").expect("MainsTap extracted");
+        assert_eq!(tap.kind, ResKind::Reusable);
+        assert!(tap.placeholder);
+        assert!(tap.placeholder_text.iter().any(|t| t.contains("mains supply")));
+
+        // The sink object: a boundary struct with one Consumer per accepts
+        // clause (Next = Self, R15/F-029).
+        let air = cm.resources.get("KitchenAir").expect("KitchenAir extracted");
+        assert_eq!(air.kind, ResKind::BoundaryObject);
+        assert!(air.placeholder);
+        let sink_items: Vec<&str> = cm
+            .consumers
+            .iter()
+            .filter(|c| c.sink == "KitchenAir")
+            .map(|c| c.item.as_str())
+            .collect();
+        assert_eq!(sink_items, vec!["WasteHeat<E>", "SpentFilter"]);
+
+        // Every generated fn is a boundary fn, placeholder by grammar.
+        for fname in ["new_mains_tap", "new_kitchen_air", "new_kettle", "draw_cold_water"] {
+            let f = cm.fns.get(fname).unwrap_or_else(|| panic!("{fname} extracted"));
+            assert_eq!(f.kind, FnKind::Boundary, "{fname} is a boundary fn");
+            assert!(f.placeholder, "{fname} is a placeholder");
+        }
+        // The draw has the R15 shape: TAKE const generic, source in and out.
+        let draw = &cm.fns["draw_cold_water"];
+        assert_eq!(draw.generics.len(), 1);
+        assert!(draw.generics[0].is_const && draw.generics[0].name == "TAKE");
+        assert_eq!(draw.params, vec![("source".to_string(), "MainsTap".to_string())]);
+        assert_eq!(draw.ret, vec!["ColdWater<TAKE>".to_string(), "MainsTap".to_string()]);
+    }
 }

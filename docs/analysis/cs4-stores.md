@@ -45,10 +45,11 @@ The improvement surface: open placeholders, thin verification, wide processes, m
 | `E-SEAL-MUSTUSE` | ERROR | R1 sealing; F-046/R17 | clean |
 | `E-ATTR` | ERROR | R1; F-007; F-010 | clean |
 | `E-DEBUG-BUNDLE` | ERROR | F-047; R17 | clean |
-| `E-TAG-MACRO` | ERROR | F-037; R10 rule 7 | clean |
+| `E-TAG-MACRO` | ERROR | F-037; R10 rule 7; F-060 | clean |
 | `E-REQ-DIAG` | ERROR | R10 rule 8; F-044 | clean |
 | `E-TAG-ASSERT` | ERROR | R10; F-020 | clean |
 | `E-REQ-DUP` | ERROR | F-053 | clean |
+| `W-MACRO-MODEL` | WARN | F-060; R22 | clean |
 | `W-R20-DOC` | WARN | R20 convention 2 | clean |
 | `W-R20-PLACE` | WARN | R20 convention 1 | clean |
 | `W-R20-RECORD` | WARN | R20 convention 3 | clean |

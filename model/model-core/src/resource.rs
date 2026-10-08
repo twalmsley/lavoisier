@@ -39,6 +39,24 @@
 //! [`crate::draw_process!`] generates the R15 draw process over two container
 //! resources (caller-stated remainder, conservation assert).
 //!
+//! ## The boundary declaration macros (F-060 salvage, R22)
+//!
+//! Three further kernel macros collapse the recurring boundary declarations
+//! (EXP-13 measured ~25 hand-written lines becoming 3–4 per construct):
+//!
+//! | Macro | Shape |
+//! |---|---|
+//! | [`crate::boundary_source!`] | unbounded boundary source: reusable object + entry fn + R15 draw process (F-028) |
+//! | [`crate::boundary_sink!`] | unbounded boundary sink: sealed `Next = Self` `Consumer` (R15, F-029) + entry fn |
+//! | [`crate::boundary_entry!`] | boundary entry fn for an existing resource (R12) |
+//!
+//! All three are **token-preserving** (F-063): every name, type and number in
+//! the expansion is spelled by the modeller inside the invocation, so spans
+//! and curated messages survive; the macros synthesize only around them. Per
+//! R22 (F-055 point 5), each is taught to the shared extraction scanner in
+//! the same change that adds it — macro sugar stays confined to this kernel
+//! family, never a whole-model grammar (F-060).
+//!
 //! ## Generic resources (F-036)
 //!
 //! Each resource macro also accepts a **generic parameter list** — type
@@ -1418,6 +1436,285 @@ macro_rules! outcome_token {
     };
 }
 
+/// Declares an **unbounded boundary source** (R15): a reusable boundary
+/// object, its entry function, and the R15 draw process that mints continuous
+/// material from it — the F-028 shape (an unbounded source of continuous
+/// material is a draw-style boundary process, never a `Supplier` impl).
+///
+/// Unbounded boundary objects are legal **only at the system boundary** (R12)
+/// and are **always placeholders** (R15): the mandatory `placeholder = …`
+/// field becomes the greppable `Placeholder:` tag on every generated item, so
+/// the unbounded assumption stays a named artifact of the model.
+///
+/// Token-preserving (F-063): the object, entry, draw and output names are all
+/// spelled by the modeller; the macro synthesizes only around them, so every
+/// diagnostic (an overdraw's "while instantiating" note, a wrong-type E0308)
+/// lands on the modeller's own tokens. Taught to the shared extraction
+/// scanner in the same change that added it (R22, F-055 point 5).
+///
+/// ## Grammar
+///
+/// ```text
+/// boundary_source! {
+///     /// docs…
+///     Name,
+///     enter = entry_fn,            (returns the boundary object, R12)
+///     draw = draw_fn -> Out,       (fn draw_fn<const TAKE: u64>(Name) -> (Out<TAKE>, Name))
+///     must_use = "…",
+///     placeholder = "…"            (mandatory: unbounded ⇒ placeholder, R15)
+/// }
+/// ```
+///
+/// Limits, all deliberate (the F-036 grammar discipline): `Name` and `Out`
+/// are plain non-generic idents, and `Out` must be a
+/// [`crate::container_resource!`] type **defined in the same crate** (the
+/// draw calls its `pub(crate)` `mint`). The draw takes no conservation assert
+/// because an unbounded source has no remainder to conserve against — a
+/// finite container is drawn with [`crate::draw_process!`] instead.
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// ```
+/// model_core::container_resource! {
+///     /// Drawn mains water, in grams.
+///     ColdWater,
+///     unit = "grams",
+///     must_use = "ColdWater is a conserved resource: pass it on or hand it to a Consumer"
+/// }
+///
+/// model_core::boundary_source! {
+///     /// The mains tap: practically unbounded cold water at the kitchen
+///     /// boundary.
+///     MainsTap,
+///     enter = new_mains_tap,
+///     draw = draw_cold_water -> ColdWater,
+///     must_use = "MainsTap is a boundary resource: pass it on like any other resource",
+///     placeholder = "mains supply — assumed unbounded source (R15)"
+/// }
+///
+/// fn main() {
+///     let tap = new_mains_tap();
+///     let (water, tap) = draw_cold_water::<1_500>(tap);
+///     assert_eq!(ColdWater::<1_500>::VALUE, 1_500);
+///     // A real model hands these on; the boundary defuses the water here
+///     // and the reusable tap stays with the caller (R2).
+///     water.defuse();
+///     let _stays_with_the_caller = tap;
+/// }
+/// ```
+#[macro_export]
+macro_rules! boundary_source {
+    (
+        $(#[$meta:meta])*
+        $Name:ident,
+        enter = $enter:ident,
+        draw = $draw:ident -> $Out:ident,
+        must_use = $msg:literal,
+        placeholder = $ph:literal
+    ) => {
+        $crate::reusable_resource! {
+            $(#[$meta])*
+            ///
+            /// Unbounded boundary source (R15): legal only at the system
+            /// boundary (R12), always a placeholder.
+            #[doc = concat!("Placeholder: ", $ph)]
+            $Name,
+            must_use = $msg
+        }
+
+        #[doc = concat!("The boundary source `", stringify!($Name), "` enters the model (R12).")]
+        ///
+        #[doc = concat!("Placeholder: ", $ph)]
+        pub fn $enter() -> $Name {
+            $Name::mint()
+        }
+
+        #[doc = concat!("Draws `TAKE` of [`", stringify!($Out), "`] from the unbounded [`", stringify!($Name), "`] (R15: an unbounded source of continuous material is a draw-style boundary process, never a `Supplier` impl, F-028). The source object is returned (R2).")]
+        ///
+        #[doc = concat!("Placeholder: ", $ph)]
+        pub fn $draw<const TAKE: u64>(source: $Name) -> ($Out<TAKE>, $Name) {
+            ($Out::mint(), source)
+        }
+    };
+}
+
+/// Declares an **unbounded boundary sink** (R15, F-029): a sealed boundary
+/// object implementing `Consumer<In>` with `Next = Self`, plus its entry
+/// function. The sink necessarily *discards* what it consumes (the one
+/// sanctioned exception to "consumers keep what they consume", F-029) — its
+/// `consume` defuses the item's tripwire, the consumer's sanctioned role
+/// (F-008).
+///
+/// Unbounded sinks are legal **only at the system boundary** (R12) and are
+/// **always placeholders** (R15): the mandatory `placeholder = …` field
+/// becomes the greppable `Placeholder:` tag. Token-preserving (F-063), and
+/// taught to the shared extraction scanner in the same change that added it
+/// (R22, F-055 point 5).
+///
+/// ## Grammar
+///
+/// ```text
+/// boundary_sink! {
+///     /// docs…
+///     Name,
+///     enter = entry_fn,
+///     accepts [ generic params ] = In,    (one `impl<params> Consumer<In>` each;
+///     [accepts [ … ] = In2,  …]            repeat the clause per consumed type)
+///     must_use = "…",
+///     placeholder = "…"
+/// }
+/// ```
+///
+/// Limits, all deliberate: the `accepts` parameter list is passed through
+/// verbatim (`[const E: u64]`, or `[]` for a concrete item type), and every
+/// consumed type must be a **tripwired resource of the same crate** — the
+/// generated `consume` calls its `pub(crate)` `defuse` (an untripwired
+/// `no_tripwire` item has no tripwire to defuse and is kept by a container
+/// instead, F-040; a *contents-keeping* bounded consumer is hand-written —
+/// it needs the F-034 decreasing space parameter and the F-039 disposal
+/// path).
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// ```
+/// model_core::container_resource! {
+///     /// Waste heat, in joules.
+///     WasteHeat,
+///     unit = "joules",
+///     must_use = "WasteHeat is a conserved resource: pass it on or hand it to a Consumer"
+/// }
+///
+/// model_core::consumable_resource! {
+///     /// A spent filter cartridge.
+///     SpentFilter,
+///     must_use = "SpentFilter is a conserved resource: pass it on or hand it to a Consumer"
+/// }
+///
+/// model_core::boundary_sink! {
+///     /// The outside air: absorbs waste heat and takes spent filters.
+///     OutsideAir,
+///     enter = new_outside_air,
+///     accepts [const E: u64] = WasteHeat<E>,
+///     accepts [] = SpentFilter,
+///     must_use = "OutsideAir is a boundary resource: pass it on like any other resource",
+///     placeholder = "the atmosphere — assumed unbounded sink (R15)"
+/// }
+///
+/// fn main() {
+///     let air = new_outside_air();
+///     let heat: WasteHeat<50_000> = WasteHeat::mint();
+///     let air = model_core::boundary::send_to(air, heat);
+///     let filter = SpentFilter::mint();
+///     let air = model_core::boundary::send_to(air, filter);
+///     let _stays_at_the_boundary = air;
+/// }
+/// ```
+#[macro_export]
+macro_rules! boundary_sink {
+    (
+        $(#[$meta:meta])*
+        $Name:ident,
+        enter = $enter:ident,
+        $( accepts [ $($ig:tt)* ] = $In:ty ),+ ,
+        must_use = $msg:literal,
+        placeholder = $ph:literal
+    ) => {
+        $(#[$meta])*
+        ///
+        /// Sealed unbounded boundary sink (R15): `Next = Self`, legal only at
+        /// the system boundary (R12); it necessarily discards what it
+        /// consumes (F-029). Private field, no public constructor, no
+        /// `Clone`/`Copy`/`Default` (R1 sealing).
+        ///
+        #[doc = concat!("Placeholder: ", $ph)]
+        #[must_use = $msg]
+        pub struct $Name {
+            _seal: (),
+        }
+
+        $(
+            #[doc = concat!("The sink accepts `", stringify!($In), "` at any magnitude; `Next = Self` (R15).")]
+            impl< $($ig)* > $crate::boundary::Consumer<$In> for $Name {
+                type Next = $Name;
+                fn consume(self, item: $In) -> $Name {
+                    // Sanctioned consumer role (F-008); an unbounded sink
+                    // discards its intake (F-029).
+                    item.defuse();
+                    self
+                }
+            }
+        )+
+
+        #[doc = concat!("The boundary sink `", stringify!($Name), "` enters the model (R12). An empty unbounded sink holds nothing, so creating one brings no resources into existence (R1).")]
+        ///
+        #[doc = concat!("Placeholder: ", $ph)]
+        pub fn $enter() -> $Name {
+            $Name { _seal: () }
+        }
+    };
+}
+
+/// Declares a **boundary entry function** (R12) for an existing resource of
+/// the same crate: the named place where it enters the model (setup at flow
+/// start, a service intake, a tool store). One declaration replaces the
+/// recurring hand-written `pub fn new_x() -> X { X::mint() }` plus its
+/// placeholder docs.
+///
+/// Token-preserving (F-063): both names are the modeller's. Taught to the
+/// shared extraction scanner in the same change that added it (R22, F-055
+/// point 5). The resource must be defined in the same crate (the entry calls
+/// its `pub(crate)` `mint`); the `placeholder = …` field is mandatory — an
+/// entry whose provenance is settled is a refined supplier and deserves its
+/// hand-written form (R12's refinement path).
+///
+/// ## Grammar
+///
+/// ```text
+/// boundary_entry! {
+///     /// docs…
+///     pub fn entry_fn -> Name,
+///     placeholder = "…"
+/// }
+/// ```
+///
+/// ## Worked example (runs as a doc-test)
+///
+/// ```
+/// model_core::reusable_resource! {
+///     /// A kettle: moved in and returned by every process that uses it.
+///     Kettle,
+///     must_use = "Kettle is a reusable resource: pass it on or return it to the caller"
+/// }
+///
+/// model_core::boundary_entry! {
+///     /// The kettle enters the model at flow start.
+///     pub fn new_kettle -> Kettle,
+///     placeholder = "kitchen setup at flow start (R12)"
+/// }
+///
+/// fn main() {
+///     let kettle = new_kettle();
+///     let _stays_with_the_caller = kettle;
+/// }
+/// ```
+#[macro_export]
+macro_rules! boundary_entry {
+    (
+        $(#[$meta:meta])*
+        pub fn $enter:ident -> $Name:ident,
+        placeholder = $ph:literal
+    ) => {
+        $(#[$meta])*
+        ///
+        #[doc = concat!("`", stringify!($Name), "` enters the model here (R12).")]
+        ///
+        #[doc = concat!("Placeholder: ", $ph)]
+        pub fn $enter() -> $Name {
+            $Name::mint()
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     // The macros expand here, in the defining crate's own test module, so
@@ -1602,6 +1899,67 @@ mod tests {
     fn generic_reusable_outlives_the_flow_quietly() {
         let rig: Rig<Red, 4> = Rig::mint();
         let _stays_with_the_caller = rig;
+    }
+
+    // ---- Boundary declaration macros (F-060 salvage, R22) ----
+
+    crate::boundary_source! {
+        /// A demo unbounded source of [`Stuff`].
+        StuffMain,
+        enter = new_stuff_main,
+        draw = draw_main_stuff -> Stuff,
+        must_use = "StuffMain is a boundary resource: pass it on like any other resource",
+        placeholder = "demo mains - assumed unbounded source (R15)"
+    }
+
+    crate::boundary_sink! {
+        /// A demo unbounded sink taking [`Stuff`] at any magnitude and spent
+        /// [`Widget`]s.
+        StuffDrain,
+        enter = new_stuff_drain,
+        accepts [const G: u64] = Stuff<G>,
+        accepts [] = Widget,
+        must_use = "StuffDrain is a boundary resource: pass it on like any other resource",
+        placeholder = "demo drain - assumed unbounded sink (R15)"
+    }
+
+    crate::boundary_entry! {
+        /// The demo jig enters the model at flow start.
+        pub fn enter_jig -> Jig,
+        placeholder = "demo setup at flow start (R12)"
+    }
+
+    /// A boundary source draws at any magnitude (R15/F-028: a draw-style
+    /// boundary process, not a `Supplier` impl) and returns the source (R2).
+    #[test]
+    fn boundary_source_draws_and_returns_the_source() {
+        let main = new_stuff_main();
+        let (stuff, main) = draw_main_stuff::<300>(main);
+        assert_eq!(Stuff::<300>::VALUE, 300);
+        stuff.defuse();
+        let (more, main) = draw_main_stuff::<5_000>(main);
+        more.defuse();
+        let _stays_with_the_caller = main;
+    }
+
+    /// A boundary sink is `Next = Self` (R15): it absorbs each accepted type
+    /// repeatedly and defuses the consumed tripwires (F-008/F-029) — the
+    /// tripwired items stay quiet.
+    #[test]
+    fn boundary_sink_absorbs_each_accepted_type() {
+        let drain = new_stuff_drain();
+        let drain = crate::boundary::send_to(drain, Stuff::<300>::mint());
+        let drain = crate::boundary::send_to(drain, Stuff::<4_700>::mint());
+        let drain = crate::boundary::send_to(drain, Widget::mint());
+        let _stays_at_the_boundary = drain;
+    }
+
+    /// A boundary entry mints its resource inside the defining crate (R12);
+    /// the reusable then stays with the caller (R2).
+    #[test]
+    fn boundary_entry_mints_the_resource() {
+        let jig = enter_jig();
+        let _stays_with_the_caller = jig;
     }
 
     // ---- Outcome tokens (R17, F-042) ----

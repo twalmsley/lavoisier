@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.3 (implemented) |
+| Specification version | v0.4 (implemented; format migrated to the R22 machine-checked conventions, 2026-10-08 — no semantic change) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -26,7 +26,8 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
 
 ## 2. Requirements
 
-> Workspace ids: pilot owns REQ-001..005, CS-1 owns REQ-006..009; CS-2 starts at REQ-010.
+**Ids:** REQ-010–REQ-014, allocated from the workspace sequence (F-053; the pilot owns
+REQ-001..005, CS-1 owns REQ-006..009).
 
 - **REQ-010:** Workshop tools (the workstand) may be used only by an inducted member.
 - **REQ-011:** Only a located puncture may be patched (no blind patching).
@@ -39,16 +40,16 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
-| Wheel | product | mass carried in the type | 1900 g (rim + tyre) + tube | punctured → open (tube out) → serviceable |
-| Inner tube | discrete w/ mass | mass; `Airtight` marker on ready states | 180 g | punctured → located-puncture → patched(183 g) → checked/ready; or dead (→ recycling) |
-| Patch | discrete | 2 g each | kit holds 2 | dry → spent(3 g, incl. cement) |
-| Cement | continuous | grams | 30 g tube, 1 g per application | — |
-| Patch kit | nested container | holds the 2 patches **and** the cement tube | 1 | draws down; remainder stays with the member |
-| Spare tube | discrete w/ mass | `Airtight` (new) | 180 g, price 650 p | — |
-| Cash | continuous (money) | pence | 1000 p in the wallet | split 650 + 350 on purchase |
-| Member (person) | reusable | time budget; `Inducted` qualification (R18 wrapper) | 1 800 000 ms (30 min) | budget draws down |
-| Workstand, pump | reusable | workstand gated by REQ-010 | 1 each | — |
-| Patch outcome | outcome token (R17) | sealed, boundary-injected | 2 provisioned | — |
+| `Wheel` | product | mass carried in the type | 1900 g (rim + tyre) + tube | `punctured` → `open` (tube out) → `serviceable` |
+| `InnerTube` (inner tube) | discrete w/ mass | mass; `Airtight` marker on ready states | 180 g | punctured (the arriving state — the bare `InnerTube`) → `located-puncture` → `patched` (183 g) → `checked` (ready, airtight); or `dead` (→ recycling) |
+| `Patch` | discrete | 2 g each | kit holds 2 | `dry` → `spent` (3 g, incl. cement) |
+| `Cement` | continuous | grams | 30 g tube, 1 g per application | — |
+| `PatchKit` (patch kit) | nested container | holds the 2 patches **and** the cement tube | 1 | draws down; remainder stays with the member |
+| `SpareTube` (spare tube) | discrete w/ mass | `Airtight` (new) | 180 g, price 650 p | — |
+| `Cash` | continuous (money) | pence | 1000 p in the wallet | split 650 + 350 on purchase |
+| `Member` (person) | reusable | time budget; `Inducted` qualification (R18 wrapper) | 1_800_000 ms (30 min) | budget draws down |
+| `Workstand`, `Pump` | reusable | workstand gated by REQ-010 | 1 each | — |
+| `PatchOutcome` (patch outcome) | outcome token (R17) | sealed, boundary-injected | 2 provisioned | — |
 
 ## 4. System boundary: suppliers, consumers, sinks
 
@@ -56,22 +57,22 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
 
 | What enters | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
-| Punctured wheel | service intake | 1 | placeholder: the member's bike |
-| Member, kit, cash, tools | bay setup at flow start | 1 each | placeholder |
+| `punctured` `Wheel` | service intake | 1 | placeholder: the member's bike |
+| `Member`, `PatchKit`, `Cash`, tools | bay setup at flow start | 1 each | placeholder |
 | Induction | `qualify` boundary process (R18) | — | placeholder: induction body |
-| Spare tube | parts counter (vendor: consumes exact price, supplies tube, `Next = Self`) | unbounded | placeholder: workshop stores |
-| Patch outcomes | boundary constructors / test fixtures | 2 | placeholder until calibrated |
+| `SpareTube` | parts counter (vendor: consumes exact price, supplies tube, `Next = Self`) | unbounded | placeholder: workshop stores |
+| `PatchOutcome`s | boundary constructors / test fixtures | 2 | placeholder until calibrated |
 
 **Outputs (consumers / sinks):**
 
 | What leaves | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
-| Serviceable wheel | the owner | unbounded | placeholder |
-| Failed (spent) patches | workshop waste stream | unbounded (`Next = Self`) | placeholder — deliberately the *other* sink shape from CS-1's finite bin |
-| Dead tube (path 3 only) | rubber recycling | unbounded | placeholder |
-| Payment (path 3 only) | parts counter | — | the vendor consumer above |
+| `serviceable` `Wheel` | the owner | unbounded | placeholder |
+| Failed `spent` `Patch`es | workshop waste stream | unbounded (`Next = Self`) | placeholder — deliberately the *other* sink shape from CS-1's finite bin |
+| `dead` `InnerTube` (path 3 only) | rubber recycling | unbounded | placeholder |
+| `Cash` payment (650 p, path 3 only) | parts counter | — | the vendor consumer above |
 | Expended time | History (R16) | unbounded | single History (one actor); the per-branch merge demo remains deferred to CS-3 |
-| Untried outcome tokens | boundary exit | — | returned to the environment (R17) |
+| Untried `PatchOutcome` tokens | boundary exit | — | returned to the environment (R17) |
 
 ## 5. Processes
 
@@ -79,55 +80,59 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
 > process name; waste routing is named per output; balances are marked (assert)/(structural).
 
 ### P1. Open the wheel (remove the tube)
-- **Actor(s) and reusables:** member (draws 240 000 ms), workstand — returned. **REQ-010
+- **Actor(s) and reusables:** member (draws 240_000 ms), workstand — returned. **REQ-010
   bounds the member.**
-- **Consumes:** punctured wheel (2080 g).
-- **Produces:** open wheel (rim + tyre, 1900 g) + punctured tube (180 g).
+- **Consumes:** 1 `punctured` `Wheel` (2080 g).
+- **Produces:** the `open` `Wheel` (rim + tyre, 1900 g) + 1 `InnerTube` (180 g, punctured).
 - **Balances:** mass 2080 = 1900 + 180 (assert); time → History (structural).
 - **Satisfies:** REQ-010.
 
 ### P2. Find the hole
-- **Actor(s) and reusables:** member (draws 180 000 ms), pump (inflate to listen/feel) — returned.
-- **Consumes:** punctured tube (180 g).
-- **Produces:** located-puncture tube (180 g — a state change, no mass change).
+- **Actor(s) and reusables:** member (draws 180_000 ms), pump (inflate to listen/feel) — returned.
+- **Consumes:** 1 `InnerTube` (180 g, punctured).
+- **Produces:** the `located-puncture` `InnerTube` (180 g — a state change, no mass change).
 - **Balances:** mass 180 = 180 (structural); time → History (structural).
 - **Satisfies:** — (enables REQ-011).
 
 ### P3. Patch the tube — **fallible (R17)**
-- **Actor(s) and reusables:** member (draws 120 000 ms per attempt) — returned in both arms.
-- **Consumes:** located-puncture tube (180 g), 1 patch (2 g) from the kit, 1 g cement drawn
-  from the kit's cement tube, 1 outcome token.
-- **Produces (Ok):** patched tube (183 g).
-- **Produces (Fail):** the tube, still with its located puncture (180 g) + 1 spent patch (3 g).
-- **Waste routing:** the spent patch is fed to the workshop waste stream **inside the
-  process** (requirement-bounded consumer parameter), so failed patches never exist loose —
-  REQ-013 structural.
-- **Balances (both arms):** mass 180 + 2 + 1 = 183 (assert, Ok) and 180 + 2 + 1 = 180 + 3
-  (assert, Fail); cement 1 g per attempt (assert, kit draw); time → History (structural).
+- **Actor(s) and reusables:** member (draws 120_000 ms per attempt) — returned in both arms.
+- **Consumes:** the `located-puncture` `InnerTube` (180 g), 1 `dry` `Patch` (2 g) from the
+  kit, 1 g `Cement` (drawn from the kit's cement tube), 1 `PatchOutcome` token.
+- **Produces (Ok):** the `patched` `InnerTube` (183 g).
+- **Produces (Fail):** the `InnerTube`, still with its `located-puncture` (180 g) + 1 `spent`
+  `Patch` (3 g).
+- **Waste:** 1 `spent` `Patch` (3 g) → workshop waste stream (§4).
+- **Waste routing:** consumer parameter (the spent patch is fed to the workshop waste stream
+  **inside the process**, so failed patches never exist loose — REQ-013 structural).
+- **Balances:** mass 180 + 2 + 1 = 183 (assert, Ok arm); mass 180 + 2 + 1 = 180 + 3
+  (assert, Fail arm); cement 1 g per attempt (assert, kit draw); time → History (structural).
 - **Satisfies:** REQ-011 (accepts only the located-puncture state), REQ-013.
 - **Failure modes:** patch fails to seal. Provisioned rework: the kit holds 2 patches and 2
   outcome tokens are provisioned, so **at most two attempts** are expressible (R17/F-050).
 
 ### P4. Check the patch
-- **Actor(s) and reusables:** member (draws 60 000 ms), pump — returned.
-- **Consumes:** patched tube (183 g).
-- **Produces:** checked, ready tube (183 g) — the `Airtight` patched state (REQ-012).
+- **Actor(s) and reusables:** member (draws 60_000 ms), pump — returned.
+- **Consumes:** the `patched` `InnerTube` (183 g).
+- **Produces:** the `checked` `InnerTube` (183 g) — the `Airtight` patched state (REQ-012).
 - **Balances:** mass 183 = 183 (structural); time → History (structural).
 - **Satisfies:** — (enables REQ-012).
 
 ### P5. Buy a spare tube — path 3 only (R19)
-- **Actor(s) and reusables:** member (draws 120 000 ms) — returned.
-- **Consumes:** 1000 p cash, split 650 + 350 (assert); 650 p to the counter.
-- **Produces:** spare tube (180 g, `Airtight` new), 350 p change (stays in the wallet).
-- **Waste routing:** the dead punctured tube goes to rubber recycling (flow-routed).
+- **Actor(s) and reusables:** member (draws 120_000 ms) — returned.
+- **Consumes:** 1000 p `Cash`. The tender is split 650 + 350; 650 p goes to the counter.
+- **Produces:** 1 `SpareTube` (180 g, `Airtight` new) and 350 p `Cash` (change, stays in
+  the wallet).
+- **Waste:** the `dead` `InnerTube` (180 g) → rubber recycling (§4).
+- **Waste routing:** routed by the flow (the dead punctured tube goes to rubber recycling).
 - **Balances:** money 1000 = 650 + 350 (assert); goods 1 = 1 (structural); time → History (structural).
 - **Satisfies:** REQ-014 (the counter consumes only `Money<650>` — structural, exact-price impl).
 
 ### P6. Refit and inflate
-- **Actor(s) and reusables:** member (draws 300 000 ms), workstand, pump — returned. **REQ-010
+- **Actor(s) and reusables:** member (draws 300_000 ms), workstand, pump — returned. **REQ-010
   bounds the member; REQ-012 bounds the tube.**
-- **Consumes:** open wheel (1900 g) + an `Airtight` tube (183 g patched / 180 g spare).
-- **Produces:** serviceable wheel (2083 g on the patched paths; 2080 g with the spare).
+- **Consumes:** the `open` `Wheel` (1900 g) + an `Airtight` tube: the `checked` `InnerTube`
+  (183 g) or the `SpareTube` (180 g).
+- **Produces:** the `serviceable` `Wheel` (2083 g on the patched paths; 2080 g with the spare).
 - **Balances:** mass 1900 + tube = wheel (assert, per instantiation); time → History (structural).
 - **Satisfies:** REQ-010, REQ-012.
 
@@ -135,15 +140,17 @@ vendor); scheduling; temperature/cure time (R9 — states stand in for "cured").
 
 - Dependencies: P1 → P2 → P3; P3-Ok → P4 → P6; P3-Fail → (second P3) or (P5 → P6). P6 ends
   every path.
+- **Orders:** (a) P1, P2, P3, P4, P6 (path 1 — patched first try); (b) P1, P2, P3, P3, P4,
+  P6 (path 2 — patched on retry); (c) P1, P2, P3, P3, P5, P6 (path 3 — spare fitted).
 - **Three paths** (the flow returns a `#[must_use]` outcome grouping, one variant per path,
   per R17/F-050 — the paths end with *different* wheel masses and wallet states, so the
   variants carry different types):
-  1. **Patched first try:** P1 P2 P3(Ok) P4 P6 — 900 000 ms drawn (5 attributed events);
+  1. **Patched first try:** P1 P2 P3(Ok) P4 P6 — 900_000 ms drawn (5 attributed events);
      wallet 1000 p; 1 spare patch and 1 untried token returned to kit/boundary; 29 g cement
      left.
-  2. **Patched on retry:** P1 P2 P3(Fail) P3(Ok) P4 P6 — 1 020 000 ms (6 events); 1 spent
+  2. **Patched on retry:** P1 P2 P3(Fail) P3(Ok) P4 P6 — 1_020_000 ms (6 events); 1 spent
      patch (3 g) in the waste stream; kit empty of patches; 28 g cement left.
-  3. **Spare fitted:** P1 P2 P3(Fail) P3(Fail) P5 P6 — 1 080 000 ms (6 events); 6 g waste;
+  3. **Spare fitted:** P1 P2 P3(Fail) P3(Fail) P5 P6 — 1_080_000 ms (6 events); 6 g waste;
      dead tube (180 g) to recycling; wallet 350 p; wheel 2080 g.
 - **Ordering freedom is deliberately minimal here** (one actor, a linear repair): the only
   freedoms are trivia such as when the wallet is readied. That is expected — CS-2's stress is
@@ -208,3 +215,9 @@ Original questions, for the record:
 7. **REQ-012 is deliberately multi-type** (patched-and-checked *or* new spare satisfy it) —
    the first real test of the F-055 note that `satisfies!` resolution becomes many-to-many.
    Keep it so?
+
+*(Format note, 2026-10-08: migrated mechanically to the R22 machine-checked conventions —
+backticked canonical identifiers, underscore-grouped numbers, the §2 Ids and §6 Orders fields,
+split Waste/Waste routing fields. The tube's arriving "punctured" state is written unbackticked
+because the wheel row owns the `punctured` identifier (A7): the bare `InnerTube` is the
+arriving state. No semantic change; §8 kept verbatim.)*

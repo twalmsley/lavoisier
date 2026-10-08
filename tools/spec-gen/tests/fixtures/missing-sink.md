@@ -63,7 +63,6 @@ REQ-001..005). The mapping is recorded at the definitions in
 |---|---|---|---|
 | `pot of tea` (with its mass and embodied energy) | the drinker | unbounded | placeholder |
 | `spent` `Teabag`s | food-waste bin, then council food-waste collection (P5) | bin holds 10; collection unbounded | bin real; collection placeholder |
-| `WasteHeat` | kitchen air | unbounded | placeholder |
 | Expended time | History (R16) | unbounded | a single History threaded with the person (one actor serializes all draws); the per-branch merge demonstration is deferred to a later case study |
 
 ## 5. Processes

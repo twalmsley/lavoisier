@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.3 (implemented) |
+| Specification version | v0.4 (implemented; format migrated to the R22 machine-checked conventions, 2026-10-08 — no semantic change) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -27,7 +27,8 @@ energy; machine maintenance; scheduling.
 
 ## 2. Requirements
 
-> Workspace ids: REQ-001..018 are taken; CS-4 starts at REQ-019.
+**Ids:** REQ-019–REQ-022, allocated from the workspace sequence (F-053; REQ-001..018 are
+taken by the pilot and CS-1..CS-3).
 
 - **REQ-019:** Assemblies may be built only from stores-issued materials (provenance: the
   line cannot mint or source materials itself — enforced by the crate boundary).
@@ -41,16 +42,16 @@ energy; machine maintenance; scheduling.
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
-| Steel sheet | discrete w/ mass | 5000 g each | stores stock: 25 (type-level list) | sheet → 2 blanks + swarf |
-| Plate blank | product part | 2250 g | 2 per sheet | blank → drilled (2240 g) |
-| Bolt | discrete | M8 steel, 30 g | one box of 100 (type-level list) | — |
-| Swarf (cut) | waste | 500 g per sheet | 25 pieces | → line bin |
-| Swarf (drill) | waste | 10 g per plate | 50 pieces | → line bin |
-| Swarf bin | contents-keeping consumer | decreasing space (F-034) | capacity 80; ends holding 75 | emptied via stores disposal (F-039) |
-| Assembly | product | mass in type | 4600 g (2 × 2240 + 4 × 30) | → finished goods |
-| Issue note | evidence token | sealed; REQ-021's key | 1 per batch | issued → reconciled |
-| Operator | reusable | time budget | 4 500 000 ms (75 min) | draws down |
-| Workbench, drill, saw | reusable | — | 1 each | — |
+| `SteelSheet` (steel sheet) | discrete w/ mass | 5000 g each | stores stock: 25 (type-level list) | sheet → 2 blanks + swarf |
+| `PlateBlank` (plate blank) | product part | 2250 g | 2 per sheet | blank → `drilled` (2240 g) |
+| `Bolt` | discrete | M8 steel, 30 g | one box of 100 (type-level list) | — |
+| `CutSwarf` (cut swarf) | waste | 500 g per sheet | 25 pieces | → line bin |
+| `DrillSwarf` (drill swarf) | waste | 10 g per plate | 50 pieces | → line bin |
+| `SwarfBin` (swarf bin) | contents-keeping consumer | decreasing space (F-034) | capacity 80; ends holding 75 | emptied via stores disposal (F-039) |
+| `Assembly` | product | mass in type | 4600 g (2 × 2240 + 4 × 30) | → finished goods |
+| `IssueNote` (issue note) | evidence token | sealed; REQ-021's key | 1 per batch | issued → reconciled |
+| `Operator` | reusable | time budget | 4_500_000 ms (75 min) | draws down |
+| `Workbench`, `Drill`, `Saw` | reusable | — | 1 each | — |
 
 **Subsystem ownership (the two crates):**
 
@@ -65,17 +66,17 @@ energy; machine maintenance; scheduling.
 
 | What enters | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
-| Works order for 25 | stores intake | 1 | placeholder |
-| Sheet rack (25 × 5000 g), bolt box (100) | stores stock at batch start | per §3 | placeholder: goods-in not modelled |
-| Operator, tools | shift start | 1 + 3 | placeholder |
+| `WorksOrder` (works order for 25) | stores intake | 1 | placeholder |
+| `SheetRack` (25 × 5000 g sheets), `BoltBox` (100 bolts) | stores stock at batch start | per §3 | placeholder: goods-in not modelled |
+| `Operator`, tools | shift start | 1 + 3 | placeholder |
 
 **Outputs (consumers / sinks):**
 
 | What leaves | Via | Capacity | Real or placeholder? |
 |---|---|---|---|
-| 25 assemblies (4600 g each) | finished-goods stores (in `cs4-stores`) | ≥ 25 | placeholder |
-| 75 swarf pieces (13 000 g total) | line bin → stores disposal at batch end (REQ-020, F-039) | bin 80 | disposal placeholder |
-| Empty bolt box, empty sheet rack, reconciled note | returned to stores | — | real (accounted) |
+| 25 `Assembly`s (4600 g each) | finished-goods stores (in `cs4-stores`) | ≥ 25 | placeholder |
+| 75 swarf pieces, `CutSwarf` + `DrillSwarf` (13_000 g total) | line bin, then stores disposal at batch end (REQ-020, F-039) | bin 80; disposal unbounded | disposal placeholder |
+| Empty `BoltBox`, empty `SheetRack`, reconciled `IssueNote` | returned to stores | — | real (accounted) |
 | Expended time | single History (one operator) | — | per-cycle events, ~100 total |
 
 ## 5. Processes
@@ -83,51 +84,56 @@ energy; machine maintenance; scheduling.
 > Draws adjacent and recorded under process names; waste routing named; balances marked.
 
 ### P1. Issue materials against the works order — `cs4-stores`
-- **Actor(s) and reusables:** operator (draws 120 000 ms at the stores window).
-- **Consumes:** the works order.
-- **Produces:** the sheet rack (25), the bolt box (100), and the **issue note** (REQ-021's
-  key), all handed to the line.
-- **Balances:** items out = stock (structural); time → History (structural).
+- **Actor(s) and reusables:** operator (draws 120_000 ms at the stores window).
+- **Consumes:** the `WorksOrder`.
+- **Produces:** the `SheetRack` (25 sheets), the `BoltBox` (100 bolts) and the **`IssueNote`**
+  (REQ-021's key). All are handed to the line.
+- **Balances:** items out = stock (structural); time 120_000 ms → History (structural).
 - **Satisfies:** REQ-019 (only this boundary creates/releases materials), REQ-021.
 
 ### P2. Cut a sheet — `cs4-line`, 25×
-- **Actor(s) and reusables:** operator (draws 60 000 ms per sheet), saw — returned.
-- **Consumes:** 1 sheet (5000 g).
-- **Produces:** 2 blanks (2250 g each).
-- **Waste routing:** cut swarf (500 g) fed to the line bin **inside the process**.
+- **Actor(s) and reusables:** operator (draws 60_000 ms per sheet), saw — returned.
+- **Consumes:** 1 `SteelSheet` (5000 g).
+- **Produces:** 2 `PlateBlank`s (2250 g each).
+- **Waste:** 1 `CutSwarf` (500 g) → line bin (§4).
+- **Waste routing:** consumer parameter (fed to the line bin **inside the process**).
 - **Balances:** mass 5000 = 2250 + 2250 + 500 (assert); time → History (structural).
 
 ### P3. Drill a blank — `cs4-line`, 50×
-- **Actor(s) and reusables:** operator (draws 30 000 ms per blank), drill — returned.
-- **Consumes:** 1 blank (2250 g).
-- **Produces:** 1 drilled plate (2240 g).
-- **Waste routing:** drill swarf (10 g) fed to the line bin **inside the process**.
+- **Actor(s) and reusables:** operator (draws 30_000 ms per blank), drill — returned.
+- **Consumes:** 1 `PlateBlank` (2250 g).
+- **Produces:** 1 `drilled` plate (2240 g).
+- **Waste:** 1 `DrillSwarf` (10 g) → line bin (§4).
+- **Waste routing:** consumer parameter (fed to the line bin **inside the process**).
 - **Balances:** mass 2250 = 2240 + 10 (assert); time → History (structural).
 
 ### P4. Fasten an assembly — `cs4-line`, 25×
-- **Actor(s) and reusables:** operator (draws 30 000 ms per assembly), workbench — returned.
+- **Actor(s) and reusables:** operator (draws 30_000 ms per assembly), workbench — returned.
   **REQ-021 bounds the flow context (note threaded); REQ-019 is structural (stores types).**
-- **Consumes:** 2 drilled plates + 4 bolts (`SupplyN<N4>` from the one box).
-- **Produces:** 1 assembly (4600 g, bolts conserved inside as payload).
+- **Consumes:** 2 `drilled` plates (2240 g each) + 4 `Bolt`s (`SupplyN<N4>` from the one box).
+- **Produces:** 1 `Assembly` (4600 g, bolts conserved inside as payload).
 - **Balances:** mass 2240 × 2 + 30 × 4 = 4600 (assert); time → History (structural).
 
 ### P5. The batch — `cs4-line`, the scale centrepiece
+- **Actor(s) and reusables:** operator (draws 150_000 ms per cycle), the tools — threaded
+  through all 25 cycles with the box, rack, bin, note and History.
 - **Repetition is type-level recursion** (a `BuildBatch<N>`-style recursive trait, the
   `SupplyN` pattern at batch scale): each cycle takes 1 sheet from the rack, runs P2, P3×2,
-  P4, drawing 150 000 ms per cycle; the box, rack, bin, note, tools, operator and History
+  P4, drawing 150_000 ms per cycle; the box, rack, bin, note, tools, operator and History
   thread through all 25 cycles with their types evolving (box 100→96→…→0). A Rust loop
   cannot express this — the types change every cycle — which is exactly the honesty being
   probed at scale.
-- **Balances:** batch totals (structural from the 25 cycles): 25 sheets in; 25 assemblies,
-  75 swarf pieces, empty rack and box out; 25 × 150 000 = 3 750 000 ms drawn.
+- **Balances:** batch totals from the 25 cycles — 25 sheets in, 25 assemblies + 75 swarf
+  pieces + the empty rack and box out (structural); time 25 × 150_000 = 3_750_000 ms → History
+  (structural).
 
 ### P6. Return and reconcile — `cs4-stores`
-- **Actor(s) and reusables:** operator (draws 120 000 ms).
-- **Consumes:** the 25 assemblies (→ finished goods, REQ-022), the full bin (→ disposal,
-  REQ-020, the F-039 sealed path; bin returned empty to the line), the empty box and rack,
-  and the issue note (reconciled — REQ-021 closed).
-- **Balances:** swarf mass 25 × 500 + 50 × 10 = 13 000 g disposed (assert); items 25 = 25
-  (structural); time → History (structural).
+- **Actor(s) and reusables:** operator (draws 120_000 ms).
+- **Consumes:** the 25 `Assembly`s (→ finished goods, REQ-022), the full `SwarfBin`
+  (→ disposal, REQ-020, the F-039 sealed path; bin returned empty to the line), the empty
+  `BoltBox` and `SheetRack`, and the `IssueNote` (reconciled — REQ-021 closed).
+- **Balances:** swarf mass 25 × 500 + 50 × 10 = 13_000 g disposed (assert); items 25 = 25
+  (structural); time 120_000 ms → History (structural).
 - **Satisfies:** REQ-020, REQ-021, REQ-022.
 
 ## 6. Flows
@@ -135,9 +141,11 @@ energy; machine maintenance; scheduling.
 - P1 → P5 (the 25 recursive cycles) → P6. Within a cycle: cut → drill, drill → fasten; the
   only ordering freedom is trivial within-cycle reordering of the two drills — stated, not
   celebrated (concurrency is out of scope).
-- **Everything accounted at batch end:** 25 assemblies in finished goods; 13 000 g of swarf
+- **Orders:** (a) P1, P5, P6 — each cycle running P2, P3, P3, P4; (b) P1, P5, P6 — with the
+  two P3 drills of each cycle swapped (the only within-cycle freedom, R9).
+- **Everything accounted at batch end:** 25 assemblies in finished goods; 13_000 g of swarf
   at disposal; bin back empty; box and rack back empty; note reconciled; operator back with
-  510 000 ms (4 500 000 − 120k − 3 750k − 120k); tools back; the History holding ~102
+  510_000 ms (4_500_000 − 120k − 3_750k − 120k); tools back; the History holding ~102
   attributed events (2 stores draws + 25 × 4 cycle draws).
 
 ## 7. The change-impact exercise (required deliverable)
@@ -203,3 +211,8 @@ Original questions, for the record:
 5. Quantities/budgets sanity: §3's masses, 150 000 ms per cycle, 75-minute budget. Happy?
 6. **History at ~102 events** stays a single value-level record (R16); assertions on totals
    and spot-checks rather than all 102 events. OK?
+
+*(Format note, 2026-10-08: migrated mechanically to the R22 machine-checked conventions —
+backticked canonical identifiers, underscore-grouped numbers, the §2 Ids and §6 Orders fields,
+split Waste/Waste routing fields, and an Actor field on P5 stating the per-cycle draw already
+described in its prose. No semantic change; §10 kept verbatim.)*
