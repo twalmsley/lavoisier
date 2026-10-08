@@ -13,4 +13,4 @@
 
 [workspace]
 resolver = "2"
-members = ["model-core", "pilot-workshop", "cs1-pot-of-tea", "cs2-puncture-repair", "cs3-cafe-orders", "cs4-stores", "cs4-line", "cs5-supply", "cs5-logistics", "cs5-works"]
+members = ["model-core", "pilot-workshop", "cs1-pot-of-tea", "cs2-puncture-repair", "cs3-cafe-orders", "cs4-stores", "cs4-line", "cs5-supply", "cs5-logistics", "cs5-works", "cs6-bread-batch"]

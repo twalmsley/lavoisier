@@ -1,0 +1,21 @@
+error[E0277]: this dough may not be divided and shaped: `KneadedDough` is not proved dough (REQ-028)
+  --> tests/ui/shape_unproved_dough.rs:23:59
+   |
+23 |     let (baker, loaf_1, loaf_2) = divide_and_shape(baker, kneaded);
+   |                                   ----------------        ^^^^^^^ REQ-028: dough may be divided and shaped only once it is proved
+   |                                   |
+   |                                   required by a bound introduced by this call
+   |
+   = help: the trait `Proved` is not implemented for `KneadedDough`
+   = note: proving is a process (one type per state, R9): `prove` turns a `KneadedDough` into a `ProvedDough` - only that state can be shaped
+help: the trait `Proved` is implemented for `ProvedDough`
+  --> src/resources.rs
+   |
+   | impl Proved for ProvedDough {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `KneadedDough` to implement `Req028ProvedBeforeShaping`
+note: required by a bound in `divide_and_shape`
+  --> src/resources.rs
+   |
+   |     pub fn divide_and_shape<const B: u64, D: Req028ProvedBeforeShaping>(person: Person<B>, dough: D) -> (Person<B>, ShapedLoaf, Sha...
+   |                                              ^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `divide_and_shape`

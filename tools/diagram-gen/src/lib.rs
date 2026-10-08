@@ -614,6 +614,7 @@ pub fn default_crates() -> Vec<String> {
         "cs5-supply",
         "cs5-logistics",
         "cs5-works",
+        "cs6-bread-batch",
         "pilot-workshop",
     ]
     .into_iter()

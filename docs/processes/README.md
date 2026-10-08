@@ -14,6 +14,7 @@ One human-readable document per process, boundary function and composite flow, g
 | `cs5-supply` — case study CS-5, the supply subsystem | 12 | [index](cs5-supply/README.md) |
 | `cs5-logistics` — case study CS-5, the logistics subsystem | 5 | [index](cs5-logistics/README.md) |
 | `cs5-works` — case study CS-5, the works subsystem | 14 | [index](cs5-works/README.md) |
+| `cs6-bread-batch` — case study CS-6: baking a batch of bread | 32 | [index](cs6-bread-batch/README.md) |
 | `pilot-workshop` — the downstream pilot model | 32 | [index](pilot-workshop/README.md) |
 
 Regenerate after a model change:

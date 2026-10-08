@@ -1,0 +1,22 @@
+error[E0277]: this tin may not go in the oven: `CleanTin<450>` is not a greased tin (REQ-029)
+  --> tests/ui/bake_in_ungreased_tin.rs:23:9
+   |
+19 |     let attempt = bake(
+   |                   ---- required by a bound introduced by this call
+...
+23 |         new_clean_tin(),
+   |         ^^^^^^^^^^^^^^^ REQ-029: the oven may bake only a loaf seated in a greased tin
+   |
+   = help: the trait `Greased` is not implemented for `CleanTin<450>`
+   = note: greasing is a process (one type per state, R9): `grease_tins` turns two `CleanTin`s into `GreasedTin`s - only that state can be baked in
+help: the trait `Greased` is implemented for `GreasedTin<V>`
+  --> src/resources.rs
+   |
+   | impl<const V: u64> Greased for GreasedTin<V> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `CleanTin<450>` to implement `Req029GreasedTinInTheOven`
+note: required by a bound in `bake`
+  --> src/resources.rs
+   |
+   |     pub fn bake<const B: u64, T: Req029GreasedTinInTheOven, A: Consumer<Steam<100>, Next = A> + Consumer<WasteHeat<2_200_000>, Next...
+   |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `bake`

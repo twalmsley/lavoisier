@@ -1,0 +1,31 @@
+error[E0382]: use of moved value: `oven`
+  --> tests/ui/second_bake_before_oven_returned.rs:29:9
+   |
+14 |     let oven = new_oven();
+   |         ---- move occurs because `oven` has type `Oven`, which does not implement the `Copy` trait
+...
+19 |         oven,
+   |         ---- value moved here
+...
+29 |         oven,
+   |         ^^^^ value used here after move
+
+warning: unused variable: `grid`
+  --> tests/ui/second_bake_before_oven_returned.rs:16:20
+   |
+16 |     let (energy_2, grid) = draw_grid_energy::<2_500_000>(grid);
+   |                    ^^^^ help: if this is intentional, prefix it with an underscore: `_grid`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `attempt_1`
+  --> tests/ui/second_bake_before_oven_returned.rs:17:9
+   |
+17 |     let attempt_1 = bake(
+   |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_attempt_1`
+
+warning: unused variable: `attempt_2`
+  --> tests/ui/second_bake_before_oven_returned.rs:27:9
+   |
+27 |     let attempt_2 = bake(
+   |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_attempt_2`

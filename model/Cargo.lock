@@ -76,6 +76,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cs6-bread-batch"
+version = "0.1.0"
+dependencies = [
+ "cs6-bread-batch",
+ "model-core",
+ "trybuild",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

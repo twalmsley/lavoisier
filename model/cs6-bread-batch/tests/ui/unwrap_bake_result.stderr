@@ -1,0 +1,14 @@
+error[E0277]: `BakeFail<300000, Atmosphere>` doesn't implement `Debug`
+  --> tests/ui/unwrap_bake_result.rs:24:22
+   |
+24 |     let _ok = result.unwrap();
+   |                      ^^^^^^ the trait `Debug` is not implemented for `BakeFail<300000, Atmosphere>`
+   |
+note: required by a bound in `Result::<T, E>::unwrap`
+  --> $RUST/core/src/result.rs
+   |
+   |     pub fn unwrap(self) -> T
+   |            ------ required by a bound in this associated function
+   |     where
+   |         E: fmt::Debug,
+   |            ^^^^^^^^^^ required by this bound in `Result::<T, E>::unwrap`

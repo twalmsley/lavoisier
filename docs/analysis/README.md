@@ -21,8 +21,9 @@ The model linter (PLAN step 11, candidate R21): one pass over every model crate 
 | `cs5-supply` — case study CS-5, the supply subsystem | 0 | 0 | 0 | 10 | [report](cs5-supply.md) |
 | `cs5-logistics` — case study CS-5, the logistics subsystem | 0 | 0 | 0 | 3 | [report](cs5-logistics.md) |
 | `cs5-works` — case study CS-5, the works subsystem | 0 | 0 | 0 | 6 | [report](cs5-works.md) |
+| `cs6-bread-batch` — case study CS-6: baking a batch of bread | 0 | 0 | 0 | 18 | [report](cs6-bread-batch.md) |
 | `pilot-workshop` — the downstream pilot model | 0 | 0 | 2 | 18 | [report](pilot-workshop.md) |
-| **workspace** | **0** | **0** | **4** | **107** | |
+| **workspace** | **0** | **0** | **4** | **125** | |
 
 ## The check catalogue
 

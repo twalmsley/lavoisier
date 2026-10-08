@@ -20,6 +20,7 @@ Diagram nodes carry absolute `click` links into the defining source line (GitHub
 | `cs5-supply` — case study CS-5, the supply subsystem | [context](cs5-supply/context.md) | [top-level](cs5-supply/top-level.md) | [detailed](cs5-supply/detailed.md) |
 | `cs5-logistics` — case study CS-5, the logistics subsystem | [context](cs5-logistics/context.md) | [top-level](cs5-logistics/top-level.md) | [detailed](cs5-logistics/detailed.md) |
 | `cs5-works` — case study CS-5, the works subsystem | [context](cs5-works/context.md) | [top-level](cs5-works/top-level.md) | [detailed](cs5-works/detailed.md) |
+| `cs6-bread-batch` — case study CS-6: baking a batch of bread | [context](cs6-bread-batch/context.md) | [top-level](cs6-bread-batch/top-level.md) | [detailed](cs6-bread-batch/detailed.md) |
 | `pilot-workshop` — the downstream pilot model | [context](pilot-workshop/context.md) | [top-level](pilot-workshop/top-level.md) | [detailed](pilot-workshop/detailed.md) |
 
 Regenerate after a model change:

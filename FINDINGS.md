@@ -1804,3 +1804,23 @@ review gate.
 `tools/spec-gen/tests/validation.rs` (`d1_…`…`d4_…`, `supplier_box_consume…`,
 `shared_sink…`, `pinned_cs6_scaffold…`); `cargo test` 28/28 green; speccheck output over all
 six specifications byte-identical before and after the fix.
+
+**Extension (2026-10-08, the CS-6 hand-finish):** the fixed scaffold's survival through
+promotion measures the step-10 scope prediction directly: **697 of 1,154 scaffold lines
+(60.4 %) survived verbatim** into the finished 2,547-line crate, concentrated exactly where
+predicted — all 25 resource-kernel macro invocations were essentially commit-ready, the
+sealed `SupplyN` yeast-box machinery was kept untouched, and the flow skeletons' budget and
+remainder arithmetic was perfect for both §6 orders — while the requirement machinery,
+process semantics and flow architecture (the error-quality "soul") were hand-written, as the
+regime says they must be. Hand-finish also surfaced four categories of **emitted-code debt**,
+none silent (each caught by an existing gate layer — the layered defence working as designed)
+but all specgen backlog: (1) the scaffold's pure-literal const asserts
+(`assert!(1_000 + 650 + … == 1_682 + …)`) fail the workspace clippy gate
+(`assertions_on_constants`/`eq_op`) — the scaffold compiles but would not pass ci.sh step 3
+unmodified; (2) `draw_process!` invocations emitted into `boundary` where the house
+convention is `processes` (caught as W-R20-PLACE); (3) a dead parallel `LoafTin` reusable
+object scaffolded beside the Clean/Greased/Used state chain that fully models the tin; and
+(4) U+202F narrow no-break spaces in generated prose numbers, which defeat grep and
+exact-string editing. The generators' hardcoded `default_crates()` list is a fifth, older
+item of the same F-055-point-5 class: a new model crate is invisible to diagrams/docgen/lint
+until the list is extended by hand (one line, done for cs6 in the landing commit).
