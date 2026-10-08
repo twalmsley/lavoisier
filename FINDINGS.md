@@ -1454,8 +1454,6 @@ are defined upstream in cs4-stores) and the traced batch flow WARNs on every sto
 callee. Multi-crate models (the R1 subsystem pattern) need the generator to resolve across a
 dependency, or a merged-workspace mode — queue for step 9.
 
-
-
 **Gaps 1 and 7 RESOLVED, flow discovery generalized (2026-10-07, step-9 build):** the shared
 scanner now loads workspace path-dependencies transitively and resolves upstream types,
 processes and sinks (gap 7: all 24 unknown-callee WARNs died; cs4/cs5 diagrams come out whole

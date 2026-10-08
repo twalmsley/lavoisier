@@ -1,7 +1,8 @@
-# tools/diagram-gen — the model-extraction library and its two generator
-# binaries: `diagram-gen` (the GitHub-viewable Mermaid diagrams in
-# docs/diagrams/, see tools/diagrams.sh) and `docgen` (the per-process
-# documents in docs/processes/, see tools/docgen.sh).
+# tools/diagram-gen — the model-extraction library and its three binaries:
+# `diagram-gen` (the GitHub-viewable Mermaid diagrams in docs/diagrams/, see
+# tools/diagrams.sh), `docgen` (the per-process documents in docs/processes/,
+# see tools/docgen.sh) and `modellint` (the analysis reports in
+# docs/analysis/, see tools/lint.sh).
 #
 # Deliberately OUTSIDE the model/ workspace (like learn/): this is tooling,
 # not a model crate, and nothing in it is gated by model/ci.sh. It is
