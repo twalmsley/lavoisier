@@ -1829,3 +1829,17 @@ process leaves its old document orphaned in `docs/processes/` — unindexed by t
 invisible to the rerun-and-diff idempotence check (a stale file is byte-identical to itself),
 and only caught by comparing the directory listing against a fresh generation (`new_loaf_tin.md`
 survived the dead object it documented by one commit).
+
+**Resolution (2026-10-08, review gate):** the template-rule candidate was decided as option A
+and applied as conventions **A11–A13**: (A11) a `Satisfies:` value's claim segment is the text
+before the first top-level full stop — `—` claims nothing, ids after the stop are informative,
+and a `—` segment still naming a REQ id is a speccheck error; (A12) the three load-bearing
+generator phrasings — `(person)`, `outcome token (R17)`, `(container with remainder)` — are
+documented in the template verbatim; (A13) flow-end rests are explicit §4 output rows marked
+`(flow-end rest)`, the generator emits one `rest_*` exit per declared row and **synthesizes
+none** (an undeclared rest stays loud as a tripwire panic). The four idiom lines migrated
+(CS-2 → v0.5, CS-6 → v0.3, dated notes; CS-1/3/4/5 needed nothing — verified against their
+models and pins). Confirmation of the hazard: the CS-6 pinned scaffold dropped from 14 to 12
+holes, the two vanished holes being exactly the requirement-bound holes on `prove` and
+`grease_tins` that the falsely scraped ids had seeded. spec-gen suite 28 → 31 (A11 red test,
+sanctioned-form test, A13 no-synthesis test); all gates green.

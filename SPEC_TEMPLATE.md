@@ -9,8 +9,9 @@
 > code mechanically — requirements become `REQ-NNN` traits, resources become sealed types,
 > processes become conserving functions, the boundary becomes suppliers/consumers — and
 > `ci.sh`/`trace.sh` then prove the model matches this document. `tools/spec.sh` validates
-> this document mechanically (R22): balance arithmetic, waste destinations and name closure
-> are checked at spec-review time, before any code exists. **Anything this
+> this document mechanically (R22): balance arithmetic, waste destinations, name closure
+> and Satisfies claim segments (A11) are checked at spec-review time, before any code
+> exists. **Anything this
 > specification leaves out does not silently default: it comes back as a numbered
 > question.** Under-specification is cheap to fix here and expensive to fix later, but the
 > compiler will catch it either way — a missing waste destination or an unbalanced mass
@@ -78,6 +79,11 @@ trace.sh report for the highest id in use).
 > row's state and let prose mention the rest.
 > Every waste product named in §5 has its own row here — waste is a resource like any other
 > (R1), and a §5 waste line with no §3 row fails speccheck.
+> Two §3 phrasings are load-bearing for the generator (F-066), so write them verbatim: a
+> **person row** marks itself with the parenthetical alias `(person)` after the resource
+> name (`` `Baker` (person) ``) — the alias binds the row to the kernel Person budget
+> machinery, and an actor row without it scaffolds as a plain reusable with **no time
+> budget**; an **outcome-token row** (R17) writes the Kind `outcome token (R17)` verbatim.
 
 | Resource | Kind | Characteristics (markers/parameters) | Quantity & unit | States |
 |---|---|---|---|---|
@@ -93,6 +99,15 @@ trace.sh report for the highest id in use).
 > **Every waste product in §5 must have a destination row here.** Mark a row *placeholder*
 > if the real supplier/consumer isn't decided yet — that's allowed and visible (R12).
 > Capacity "unbounded" is legal only at the boundary and is always a placeholder (R15).
+> A continuous input whose container enters and leaves with a remainder writes
+> `(container with remainder)` in its Via cell — the phrasing is load-bearing for the
+> generator (F-066): from that cell it emits the container type, its draw process and the
+> remainder arithmetic.
+> **Flow-end rests are boundary exits like any other (A13):** every resource that comes to
+> rest at flow end — a container remainder, a reusable that stays behind — gets one output
+> row here, with `(flow-end rest)` in its Via cell. The generator emits one `rest_*` exit
+> per declared rest row and synthesizes none: an undeclared rest has no exit, and the model
+> surfaces it as a tripwire panic — the designed loud failure.
 
 **Inputs (suppliers / sources):**
 
@@ -107,6 +122,7 @@ trace.sh report for the highest id in use).
 |---|---|---|---|
 | <Finished assembly> | <customer> | unbounded | placeholder |
 | <Swarf> | <swarf bin> | <holds 10> | <real: workshop bin, emptied by disposal> |
+| <The saw> | <workshop rack (flow-end rest)> | — | <real: stays in the workshop> |
 | <Expended time> | History (R16) | unbounded | per-branch, merged at joins |
 
 ## 5. Processes
@@ -115,7 +131,7 @@ trace.sh report for the highest id in use).
 > everything it produces — nothing appears or disappears (R1). **The balances must
 > actually balance**; the compiler checks them, so wrong numbers here fail the build.
 > If a process needs payment, orders or receipts, it is a process chain, not a supplier
-> (R12) — spell out the chain. Three conventions the implementation relies on:
+> (R12) — spell out the chain. Conventions the implementation relies on:
 > - "Actor: person (draws N ms)" means the draw is an **adjacent** `draw_time` step,
 >   recorded to the History under this process's name; the process itself takes and returns
 >   the person unchanged (F-048). A process needing no person should say so — that is what
@@ -133,6 +149,13 @@ trace.sh report for the highest id in use).
 > - Consumes/Produces/Waste lists contain only items — quantity, canonical identifier,
 >   optional parenthesised R-reference. Explanatory prose ("removed from the pot at the end
 >   of brewing") goes in its own sentence after the list, never trailing inside an item.
+> - **A `Satisfies:` value's claim segment is the text before the first full stop** (A11):
+>   either a comma-separated list of REQ ids (each with an optional parenthesised note) or
+>   the single mark `—`, which claims nothing. Anything after the full stop is plain prose —
+>   a REQ id there is informative, never a claim. A claim segment that starts with `—` and
+>   still contains a REQ id is a speccheck error (the scraped id seeded false traceability
+>   tags in generated scaffolds, F-066); write the sanctioned form instead:
+>   `**Satisfies:** —. Enables REQ-011 (P6's bound).`
 
 ### P1. <cut>
 - **Actor(s) and reusables:** <1 person (draws 5_000 ms), the saw> — returned.
@@ -157,9 +180,10 @@ trace.sh report for the highest id in use).
   concurrently; P4 joins their outputs and merges their histories.>
 - **Orders:** (a) <P1, P2, P4>; (b) <P1, P3, P4> — at least two valid orders, each a
   comma-separated list of §5 process ids; the implementer proves both compile (R9).
-- **Everything accounted:** <at flow end, name where every resource rests: products at the
-  customer, swarf bin disposed, empty containers consumed, reusables returned, histories
-  merged.>
+- **Everything accounted:** <at flow end, name where every resource rests, naming only
+  destinations declared in §4 (A13: a flow-end rest needs its own §4 output row): products
+  at the customer, swarf bin disposed, empty containers consumed, reusables returned,
+  histories merged.>
 
 ## 7. Assumptions and placeholders
 

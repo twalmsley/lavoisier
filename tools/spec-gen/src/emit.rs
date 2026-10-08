@@ -315,6 +315,27 @@ pub struct StartObject {
     pub line: usize,
 }
 
+/// A declared §4 flow-end rest row (A13): a resource that comes to rest at
+/// the boundary at flow end — a container remainder, a reusable that stays
+/// behind — written as an output row with `(flow-end rest)` in its Via cell.
+/// Each declared row gets exactly one `rest_*` boundary exit (R12), the
+/// accounted counterpart of a constructor (the CS-2 `take_wallet_home`
+/// shape); the generator synthesizes none (A13): an undeclared rest has no
+/// exit and surfaces at the model as a tripwire panic, the designed loud
+/// failure.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct RestExit {
+    /// The resting type's ident (a continuous item resting in its §4 entry
+    /// container rests as that container, e.g. `Flour` → `PantryBag`).
+    pub ident: String,
+    /// Its const-parameter count.
+    pub n_consts: usize,
+    /// The declared count ("2 `used` `LoafTin`s" rests two).
+    pub count: u64,
+    /// The §4 row's line, for the emitted breadcrumb (F-061).
+    pub line: usize,
+}
+
 pub struct Generator {
     pub spec: Spec,
     pub strict: bool,
@@ -328,11 +349,11 @@ pub struct Generator {
     pub draws: Vec<DrawSource>,
     pub bags: Vec<BagDraw>,
     pub start_objects: Vec<StartObject>,
-    /// (ident, const-param count) of resources the §6 account leaves resting
-    /// at the boundary at flow end: each gets a `rest_*` boundary exit (R12),
-    /// the accounted counterpart of a constructor (the CS-2 wallet shape).
-    /// Filled by the flow emitter, consumed by the boundary emitter.
-    pub rest_exits: Vec<(String, usize)>,
+    /// The declared §4 flow-end rest rows (A13): filled by [`plan_boundary`]
+    /// from the output rows marked `(flow-end rest)`, consumed by the flow
+    /// and boundary emitters — one `rest_*` exit per declared row, never
+    /// synthesized.
+    pub rest_exits: Vec<RestExit>,
     pub plans: Vec<ProcPlan>,
     pub person_budget: u64,
     /// lenient only: containers synthesized from §5 waste lines with no §3
@@ -988,6 +1009,39 @@ impl Generator {
             let via_low = row.via.to_lowercase();
             if via_low.contains("history") || via_low.contains("histories") {
                 continue; // R16 common machinery
+            }
+            if via_low.contains("flow-end rest") {
+                // A13: a declared flow-end rest row — one `rest_*` boundary
+                // exit per row (R12), the accounted counterpart of a
+                // constructor; nothing here is a sink or consumer.
+                match self.resolve(&row.what) {
+                    Some(e) => {
+                        let count = count_of(&parse_quantities(&row.what, strict));
+                        // a continuous item resting in its §4 entry container
+                        // rests as that container (the pantry-bag remainder)
+                        let (ident, n) = match self.bags.iter().find(|b| b.item == e.ident) {
+                            Some(b) => (b.obj_ident.clone(), 1),
+                            None => (e.ident.clone(), n_consts(&e.role)),
+                        };
+                        if !self.rest_exits.iter().any(|r| r.ident == ident) {
+                            self.rest_exits.push(RestExit {
+                                ident,
+                                n_consts: n,
+                                count,
+                                line: row.line,
+                            });
+                        }
+                    }
+                    None => self.err(
+                        row.line,
+                        "§4",
+                        format!(
+                            "flow-end rest '{}' names no §3 resource by its canonical identifier (A4, A13)",
+                            row.what
+                        ),
+                    ),
+                }
+                continue;
             }
             let hops: Vec<String> = row
                 .via

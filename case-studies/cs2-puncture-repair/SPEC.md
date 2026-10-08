@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.4 (implemented; format migrated to the R22 machine-checked conventions, 2026-10-08 — no semantic change) |
+| Specification version | v0.5 (implemented; format migrated to the R22 machine-checked conventions and the A11/A13 conventions, 2026-10-08 — no semantic change) |
 | Date | 2026-10-07 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-07) |
 | Status | agreed |
@@ -73,6 +73,7 @@ REQ-001..005, CS-1 owns REQ-006..009).
 | `Cash` payment (650 p, path 3 only) | parts counter | — | the vendor consumer above |
 | Expended time | History (R16) | unbounded | single History (one actor); the per-branch merge demo remains deferred to CS-3 |
 | Untried `PatchOutcome` tokens | boundary exit | — | returned to the environment (R17) |
+| Unspent `Cash` | the member's wallet (flow-end rest) | — | real: goes home with the member (350 p or 1_000 p per path, §6) |
 
 ## 5. Processes
 
@@ -92,7 +93,7 @@ REQ-001..005, CS-1 owns REQ-006..009).
 - **Consumes:** 1 `InnerTube` (180 g, punctured).
 - **Produces:** the `located-puncture` `InnerTube` (180 g — a state change, no mass change).
 - **Balances:** mass 180 = 180 (structural); time → History (structural).
-- **Satisfies:** — (enables REQ-011).
+- **Satisfies:** —. Enables REQ-011.
 
 ### P3. Patch the tube — **fallible (R17)**
 - **Actor(s) and reusables:** member (draws 120_000 ms per attempt) — returned in both arms.
@@ -115,7 +116,7 @@ REQ-001..005, CS-1 owns REQ-006..009).
 - **Consumes:** the `patched` `InnerTube` (183 g).
 - **Produces:** the `checked` `InnerTube` (183 g) — the `Airtight` patched state (REQ-012).
 - **Balances:** mass 183 = 183 (structural); time → History (structural).
-- **Satisfies:** — (enables REQ-012).
+- **Satisfies:** —. Enables REQ-012.
 
 ### P5. Buy a spare tube — path 3 only (R19)
 - **Actor(s) and reusables:** member (draws 120_000 ms) — returned.
@@ -221,3 +222,8 @@ backticked canonical identifiers, underscore-grouped numbers, the §2 Ids and §
 split Waste/Waste routing fields. The tube's arriving "punctured" state is written unbackticked
 because the wheel row owns the `punctured` identifier (A7): the bare `InnerTube` is the
 arriving state. No semantic change; §8 kept verbatim.)*
+
+*(A11/A13 migration, 2026-10-08: Satisfies notes moved after the full stop; the flow-end
+rest — the unspent cash in the member's wallet (the model's `take_wallet_home` exit) —
+promoted to an explicit §4 output row, formalizing what §6 already stated. No semantic
+change.)*

@@ -1,5 +1,5 @@
 //! `specgen <SPEC.md> <out-dir> [--model-core <path>]` — one-shot scaffolding
-//! (R22). Parses the spec (strict: the A1–A10 conventions are the input
+//! (R22). Parses the spec (strict: the A1–A13 conventions are the input
 //! contract), validates it, and emits the generated model crate. Nothing is
 //! written unless the spec is completely clean — speccheck's gate is the
 //! precondition, not a suggestion.

@@ -806,8 +806,8 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
     for so in &g.start_objects {
         super_names.push(so.ident.clone());
     }
-    for (ident, _) in &g.rest_exits {
-        super_names.push(ident.clone());
+    for r in &g.rest_exits {
+        super_names.push(r.ident.clone());
     }
     for sp in &g.suppliers {
         super_names.push(sp.ident.clone());
@@ -1027,14 +1027,16 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
             sn = snake(&sk.ident)
         );
     }
-    // flow-end rests (R12 exits): §6 leaves these resting at the boundary
+    // flow-end rests (R12 exits): one per declared §4 `(flow-end rest)` row
+    // (A13) — never synthesized
     let mut rests = g.rest_exits.clone();
     rests.sort();
-    for (ident, n) in &rests {
-        let (gen_params, args) = if *n == 0 {
+    for r in &rests {
+        let (ident, n) = (&r.ident, r.n_consts);
+        let (gen_params, args) = if n == 0 {
             (String::new(), String::new())
         } else {
-            let names: Vec<String> = (0..*n).map(|i| format!("C{i}")).collect();
+            let names: Vec<String> = (0..n).map(|i| format!("C{i}")).collect();
             (
                 format!(
                     "<{}>",
@@ -1049,8 +1051,9 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
         };
         let _ = writeln!(
             s,
-            "    /// Flow-end rest for {ident} (R12 exit): the §6 account leaves it resting at\n    /// the boundary (\"everything accounted\"), and an integration test cannot hold a\n    /// tripwired resource past its end — the accounted counterpart of a constructor\n    /// (the CS-2 `take_wallet_home` shape).\n    pub fn rest_{sn}{gen_params}(resting: {ident}{args}) {{\n        resting.defuse(); // the sanctioned boundary exit (R12, F-008)\n    }}\n",
-            sn = snake(ident)
+            "    /// Flow-end rest for {ident} (R12 exit): a §4 output row (SPEC.md §4 line\n    /// {line}, A13) declares it resting at the boundary at flow end, and an\n    /// integration test cannot hold a tripwired resource past its end — the\n    /// accounted counterpart of a constructor (the CS-2 `take_wallet_home` shape).\n    pub fn rest_{sn}{gen_params}(resting: {ident}{args}) {{\n        resting.defuse(); // the sanctioned boundary exit (R12, F-008)\n    }}\n",
+            sn = snake(ident),
+            line = r.line
         );
     }
     let _ = writeln!(s, "}}");
@@ -1609,9 +1612,9 @@ fn emit_resources(g: &mut Generator) -> String {
 // ── flows ────────────────────────────────────────────────────────────────
 
 fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
-    // The test bodies are composed FIRST (into `body`): emitting them
-    // discovers the flow-end `rest_*` exits, which the import list below and
-    // the boundary module both need.
+    // The test bodies are composed first (into `body`), then prefixed with
+    // the import list; the flow-end `rest_*` exits both use are declared by
+    // the §4 `(flow-end rest)` rows (A13), never discovered here.
     let mut body = String::new();
     {
         let s = &mut body;
@@ -1713,8 +1716,8 @@ fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
     for sk in &g.sinks {
         boundary_fns.push(format!("new_{}", snake(&sk.ident)));
     }
-    for (ident, _) in &g.rest_exits {
-        boundary_fns.push(format!("rest_{}", snake(ident)));
+    for r in &g.rest_exits {
+        boundary_fns.push(format!("rest_{}", snake(&r.ident)));
     }
     boundary_fns.sort();
     boundary_fns.dedup();
@@ -2010,33 +2013,30 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
             }
         }
     }
-    // tripwired resources the §6 account leaves RESTING at the boundary (the
-    // container remainders, the used tins) return through their `rest_*`
-    // boundary exits — an integration test cannot hold them past its end
-    let resting: Vec<(String, String, usize)> = live
+    // declared flow-end rests (A13): ONLY resources with a §4 `(flow-end
+    // rest)` output row return through a `rest_*` boundary exit — the
+    // generator synthesizes none, so an undeclared rest keeps no exit and
+    // surfaces at the model as a tripwire panic, the designed loud failure.
+    let mut rest_budget: std::collections::BTreeMap<String, u64> = g
+        .rest_exits
+        .iter()
+        .map(|r| (r.ident.clone(), r.count))
+        .collect();
+    let resting: Vec<(String, String)> = live
         .iter()
         .filter_map(|v| {
             let base = var_ty.get(v)?;
-            if let Some(b) = g.bags.iter().find(|b| &b.obj_ident == base) {
-                return Some((v.clone(), b.obj_ident.clone(), 1));
+            let left = rest_budget.get_mut(base)?;
+            if *left == 0 {
+                return None; // more live than the §4 row declares: left loud
             }
-            let e = g
-                .lexicon
-                .iter()
-                .find(|e| &e.ident == base && !e.alias_only)?;
-            match &e.role {
-                Role::Container { .. } => Some((v.clone(), base.clone(), n_consts(&e.role))),
-                Role::Consumable { tripwire: true, .. } => Some((v.clone(), base.clone(), 0)),
-                _ => None,
-            }
+            *left -= 1;
+            Some((v.clone(), base.clone()))
         })
         .collect();
-    for (v, base, n) in &resting {
+    for (v, base) in &resting {
         let _ = writeln!(s, "    rest_{}({v});", snake(base));
         live.retain(|x| x != v);
-        if !g.rest_exits.iter().any(|(i, _)| i == base) {
-            g.rest_exits.push((base.clone(), *n));
-        }
     }
     let final_budget = remaining;
     let _ = writeln!(
@@ -2212,9 +2212,10 @@ pub fn emit_crate(g: &mut Generator, pkg_name: &str, model_core_path: &str) -> V
     let lib = emit_lib(g, &spec_name);
     let characteristics = emit_characteristics(g);
     let requirements = emit_requirements(g);
-    // flows before resources: the flow emitter discovers which resources the
-    // §6 account leaves resting at flow end, and the boundary emits their
-    // `rest_*` exits (the file order below is unchanged)
+    // The `rest_*` exits are declared up front by the §4 `(flow-end rest)`
+    // rows (A13, planned in `plan_boundary`), so flows and resources no
+    // longer depend on emission order; the historical flows-first order is
+    // kept for byte-stable output.
     let flows = emit_flows(g, &crate_ident);
     let resources = emit_resources(g);
     vec![

@@ -1,10 +1,11 @@
 //! The SPEC_TEMPLATE.md parser: markdown sections §1..§8, std-only.
 //!
 //! Two modes (R22):
-//! - **strict** (the default): the template's machine conventions A1–A10 —
+//! - **strict** (the default): the template's machine conventions A1–A13 —
 //!   backticked canonical identifiers (A4), underscore-grouped or ungrouped
 //!   numbers only (A5), the §2 `**Ids:**` field (A6), the §6 `**Orders:**`
-//!   field (A8) — are relied on and enforced.
+//!   field (A8), the Satisfies claim segment (A11) — are relied on and
+//!   enforced.
 //! - **lenient** (`--lenient`, migration aid only): the EXP-15 fuzzy
 //!   conventions survive — space-grouped thousands, prose remap notes, and
 //!   downstream fuzzy name resolution (F-062).
@@ -834,7 +835,29 @@ fn parse_processes(sec: &Section, strict: bool, errors: &mut Vec<SpecError>) -> 
                 }
                 "satisfies" => {
                     p.satisfies_line = no;
-                    let mut rest = value.as_str();
+                    // A11: the claim segment is the text before the first full
+                    // stop — a comma-separated list of REQ ids (each with an
+                    // optional parenthesised note) or the single mark '—',
+                    // which claims nothing. Anything after the full stop is
+                    // plain prose: REQ ids there are informative, never
+                    // claims. Lenient mode keeps the pre-A11 whole-line scrape.
+                    let claim = if strict {
+                        item_list_part(&value)
+                    } else {
+                        value.as_str()
+                    };
+                    let dash_claim = claim.trim_start().starts_with('—');
+                    if strict && dash_claim && claim.contains("REQ-") {
+                        errors.push(SpecError {
+                            line: no,
+                            section: format!("§5 P{id}"),
+                            message: format!(
+                                "the Satisfies claim segment '{}' starts with '—' but still names a REQ id: '—' claims nothing, so move the informative id after the full stop ('**Satisfies:** —. Enables REQ-011 (P6's bound).') — a REQ id scraped from a '—' segment seeded false traceability tags in generated scaffolds (A11, F-066)",
+                                claim.trim()
+                            ),
+                        });
+                    }
+                    let mut rest = if strict && dash_claim { "" } else { claim };
                     while let Some(i) = rest.find("REQ-") {
                         let digits: String = rest[i + 4..]
                             .chars()

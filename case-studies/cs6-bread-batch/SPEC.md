@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Specification version | v0.2 (agreed — the first specification authored under the R22 gate from the first line) |
+| Specification version | v0.3 (agreed — the first specification authored under the R22 gate from the first line; A11/A13 migration 2026-10-08, see the format note in §8) |
 | Date | 2026-10-08 |
 | Author | Tony (drafted by Claude; reviewed and agreed 2026-10-08) |
 | Status | agreed |
@@ -85,6 +85,10 @@ CS-3..CS-5 REQ-015..027).
 | `WasteHeat` | atmosphere | unbounded | placeholder |
 | `spent` `YeastSachet`s | recycling | unbounded | placeholder |
 | `empty` `YeastBox` | recycling | unbounded | placeholder |
+| `Flour` remainder (500 g) | pantry (flow-end rest) | — | placeholder: pantry |
+| `Salt` remainder (482 g) | pantry (flow-end rest) | — | placeholder: pantry |
+| `Butter` remainder (238 g) | pantry (flow-end rest) | — | placeholder: pantry |
+| 2 `used` `LoafTin`s (453 g each) | kitchen (flow-end rest) | — | real: stay in the kitchen — washing up is out of scope (§1) |
 | Expended time | History (R16) | unbounded | single History (one actor) |
 
 ## 5. Processes
@@ -120,7 +124,7 @@ CS-3..CS-5 REQ-015..027).
 - **Consumes:** the `kneaded` `Dough` (1_682 g).
 - **Produces:** the `proved` `Dough` (1_682 g).
 - **Balances:** mass 1_682 = 1_682 (structural); time → History (structural).
-- **Satisfies:** — (enables REQ-028).
+- **Satisfies:** —. Enables REQ-028.
 
 ### P4. Grease the tins
 - **Actor(s) and reusables:** baker (draws 120_000 ms) — returned. Independent of P1–P3:
@@ -129,7 +133,7 @@ CS-3..CS-5 REQ-015..027).
   from the block, 6 g per tin.
 - **Produces:** 2 `greased` `LoafTin`s (456 g each).
 - **Balances:** mass 450 + 450 + 12 = 456 + 456 (assert); time → History (structural).
-- **Satisfies:** — (enables REQ-029).
+- **Satisfies:** —. Enables REQ-029.
 
 ### P5. Divide and shape
 - **Actor(s) and reusables:** baker (draws 480_000 ms) — returned. **REQ-028 bounds the
@@ -235,3 +239,7 @@ Original questions, for the record:
    agreed spec, record the scaffold's measurements (items emitted, holes enumerated, any
    inference it needed) in FINDINGS, and commit the finished crate with the scaffold
    promoted to hand-maintained in that same change. OK?
+
+*(A11/A13 migration, 2026-10-08: Satisfies notes moved after the full stop; the flow-end
+rests — the three pantry remainders and both `used` tins — promoted to explicit §4 output
+rows, formalizing what §6 already stated. No semantic change.)*

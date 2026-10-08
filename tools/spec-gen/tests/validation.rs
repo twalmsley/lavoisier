@@ -3,7 +3,7 @@
 //! - The real, migrated CS-1 SPEC.md parses strict-clean and completely.
 //! - The ported EXP-15 mutation fixtures (tests/fixtures/*.md) stay red, with
 //!   the modeller-phrased, §/line-referenced errors (F-062's error class).
-//! - Every A1–A10 convention check fires on an in-memory mutation of the real
+//! - Every A1–A13 convention check fires on an in-memory mutation of the real
 //!   CS-1 document, so the checks track the live corpus.
 //! - speccheck is red across files on a duplicated REQ id (F-053).
 //! - specgen obeys the generation regime: deterministic (two runs
@@ -309,6 +309,44 @@ fn no_person_process_drawing_time_is_red() {
     );
 }
 
+/// A11: a Satisfies claim segment that starts with '—' and still contains a
+/// REQ id is an error — the retired "— (enables REQ-0NN)" idiom let the
+/// scraper seed false traceability tags in generated scaffolds (F-066).
+#[test]
+fn a11_dash_claim_segment_with_req_id_is_red() {
+    let t = mutate("- **Satisfies:** —.", "- **Satisfies:** — (enables REQ-006).");
+    let g = analyse(&t, true);
+    let msg = errors_of(&g);
+    assert!(
+        msg.contains("§5 P1")
+            && msg.contains("'—' claims nothing")
+            && msg.contains("A11")
+            && msg.contains("F-066"),
+        "got: {msg}"
+    );
+    // and the false claim is NOT scraped
+    let p1 = g.spec.processes.iter().find(|p| p.id == 1).unwrap();
+    assert!(p1.satisfies.is_empty(), "a '—' claim segment claims nothing");
+}
+
+/// A11: the sanctioned migrated form — ids after the full stop are
+/// informative prose, never claims.
+#[test]
+fn a11_ids_after_the_full_stop_are_informative() {
+    let t = mutate(
+        "- **Satisfies:** —.",
+        "- **Satisfies:** —. Enables REQ-006 (P4's bound).",
+    );
+    let g = analyse(&t, true);
+    assert!(g.errors.is_empty(), "{:#?}", g.errors);
+    assert!(g.warnings.is_empty(), "{:#?}", g.warnings);
+    let p1 = g.spec.processes.iter().find(|p| p.id == 1).unwrap();
+    assert!(
+        p1.satisfies.is_empty(),
+        "REQ ids after the claim segment's full stop are informative, never claims (A11)"
+    );
+}
+
 /// A Satisfies id §2 does not define is an error.
 #[test]
 fn satisfies_naming_unknown_req_is_red() {
@@ -544,6 +582,60 @@ fn supplier_box_consume_is_one_object_with_a_hole() {
     );
 }
 
+/// A13 — flow-end rests are explicit §4 output rows: the generator emits one
+/// `rest_*` boundary exit per declared `(flow-end rest)` row (resource
+/// resolved by canonical identifier, counts respected) and SYNTHESIZES NONE —
+/// deleting a rest row deletes its exit, and the undeclared rest is left
+/// loud (the tripwire panic is the designed failure).
+#[test]
+fn a13_rest_exits_come_only_from_declared_rows() {
+    let tin_row =
+        "| 2 `used` `LoafTin`s (453 g each) | kitchen (flow-end rest) | — | real: stay in the kitchen — washing up is out of scope (§1) |\n";
+    needle(&cs6(), tin_row);
+    needle(&cs6(), "| `Flour` remainder (500 g) | pantry (flow-end rest) |");
+    // the declared rows drive the exits: four rests, the tins counted as 2
+    let (g, files) = emit_cs6();
+    let rests: Vec<(&str, usize, u64)> = g
+        .rest_exits
+        .iter()
+        .map(|r| (r.ident.as_str(), r.n_consts, r.count))
+        .collect();
+    assert_eq!(
+        rests,
+        vec![
+            ("PantryBag", 1, 1),
+            ("PantryJar", 1, 1),
+            ("PantryBlock", 1, 1),
+            ("UsedTin", 1, 2)
+        ],
+        "the §4 rest rows declare the exits, in row order, counts respected (A13)"
+    );
+    let flows = &files["tests/flows.rs"];
+    assert_eq!(flows.matches("rest_used_tin(").count(), 4, "2 tins × 2 flow orders");
+    // no synthesis: without the tin row there is no exit and no call
+    let t = cs6().replacen(tin_row, "", 1);
+    let (spec, errs) = parse_spec(&t, true);
+    assert!(errs.is_empty(), "{errs:#?}");
+    let mut g = Generator::new(spec, true);
+    assert!(g.errors.is_empty() && g.warnings.is_empty(), "{:#?} / {:#?}", g.errors, g.warnings);
+    let files: std::collections::BTreeMap<String, String> =
+        emit_crate(&mut g, "cs6-scaffold", "../../model/model-core")
+            .into_iter()
+            .collect();
+    assert!(
+        !files["src/resources.rs"].contains("pub fn rest_used_tin"),
+        "an undeclared rest gets NO synthesized exit (A13)"
+    );
+    assert!(
+        !files["tests/flows.rs"].contains("rest_used_tin("),
+        "the generated flows call no undeclared rest exit — the tins are left loud"
+    );
+    assert!(
+        files["src/resources.rs"].contains("pub fn rest_pantry_bag"),
+        "the still-declared rests keep their exits"
+    );
+}
+
 /// Two §4 output rows naming one sink: the sink consumes BOTH items (the
 /// defective emitter dropped every row after the first, leaving the
 /// atmosphere unable to take the waste heat at all).
@@ -577,8 +669,8 @@ fn pinned_cs6_scaffold_builds_tests_and_enumerates_holes() {
     let files = emit_crate(&mut g, "pinned-cs6-scaffold", &model_core);
     assert_eq!(
         g.holes.len(),
-        14,
-        "the pinned CS-6 scaffold enumerates exactly 14 SPEC-HOLEs; holes now: {:#?}",
+        12,
+        "the pinned CS-6 scaffold enumerates exactly 12 SPEC-HOLEs (14 before A11: the\n         prove/grease_tins requirement-bound holes were seeded by ids scraped from\n         '— (enables REQ-0NN)' claim segments — exactly the F-066 false tags);\n         holes now: {:#?}",
         g.holes.iter().map(|h| &h.summary).collect::<Vec<_>>()
     );
     for (rel, contents) in &files {
@@ -609,10 +701,10 @@ fn pinned_cs6_scaffold_builds_tests_and_enumerates_holes() {
     let deny = cargo(&["build", "--features", "deny-holes"]);
     assert!(!deny.status.success(), "deny-holes must fail the build");
     let stderr = String::from_utf8_lossy(&deny.stderr);
-    let fired = (1..=14)
+    let fired = (1..=12)
         .filter(|i| stderr.contains(&format!("SPEC-HOLE U-{i:02}")))
         .count();
-    assert_eq!(fired, 14, "exactly the 14 enumerated holes fire:\n{stderr}");
+    assert_eq!(fired, 12, "exactly the 12 enumerated holes fire:\n{stderr}");
 }
 
 // ── the generation regime (R22): determinism + the pinned CS-1 scaffold ──
