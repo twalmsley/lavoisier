@@ -53,6 +53,30 @@ fn words(s: &str) -> Vec<String> {
         .collect()
 }
 
+/// A per-item magnitude ("450 g each"): still a magnitude, never an item
+/// count — a parenthesised magnitude cannot set a count (the D1 defect class).
+pub(crate) fn is_mag_each(u: &str) -> bool {
+    u.strip_suffix(" each").map(is_mag_unit).unwrap_or(false)
+}
+
+/// Magnitude in either spelling ("g" or "g each").
+pub(crate) fn is_magnitude(u: &str) -> bool {
+    is_mag_unit(u) || is_mag_each(u)
+}
+
+/// The item count stated at a mention: the first quantity that is NOT a
+/// magnitude ("2 `clean` …" → 2, bare "3" → 3). A mention stating only
+/// magnitudes ("the `mixed` `Dough` (1_682 g)") counts ONE item — a
+/// parenthesised magnitude is never a count (CS-2 precedent: "the `patched`
+/// `InnerTube` (183 g)" is one tube of 183 g).
+fn count_of(qties: &[Qty]) -> u64 {
+    qties
+        .iter()
+        .find(|q| !is_magnitude(&q.unit))
+        .map(|q| q.value)
+        .unwrap_or(1)
+}
+
 pub(crate) fn camel(s: &str) -> String {
     s.split(|c: char| !c.is_ascii_alphanumeric())
         .filter(|w| !w.is_empty())
@@ -139,6 +163,9 @@ pub enum Role {
         mass_g: Option<u64>,
     },
     Reusable,
+    /// A sealed R17 outcome token (`model_core::outcome_token!`): the §3
+    /// Kind cell says "outcome token (R17)".
+    Outcome,
     /// Lives in model-core (`Person`, `History`): nothing to emit.
     Common,
 }
@@ -200,9 +227,20 @@ pub struct ProcPlan {
     pub reusable_returns: Vec<String>, // base idents returned (e.g. kettle back empty)
     pub consumes: Vec<Item>,
     pub produces: Vec<Item>,
+    /// R17 "Produces (Ok):" items — the success arm's products.
+    pub produces_ok: Vec<Item>,
+    /// R17 "Produces (Fail):" items — the failure arm's products.
+    pub produces_fail: Vec<Item>,
+    /// The consumed R17 outcome token's ident, when the process takes one.
+    pub outcome: Option<String>,
     pub waste: Vec<WasteOut>,
-    /// Some(count, item) when consuming N discrete items via SupplyN
+    /// Some(count, item) when consuming N discrete items via SupplyN —
+    /// only for a genuine multi-item draw from a §4 discrete supplier.
     pub supply_n: Option<(u64, String)>,
+    /// True when the supplier's own container is also listed under Consumes
+    /// (the exhausted box leaves through this process): the supplier
+    /// parameter IS the container, pinned to `Rest = Empty<Supplier>`.
+    pub supplier_consumed: bool,
     /// Some(…) for the bin-disposal shape (the F-039 sealed path)
     pub bin_disposal: Option<BinDisposal>,
 }
@@ -255,6 +293,28 @@ pub struct DrawSource {
     pub line: usize,
 }
 
+/// A §4 bounded continuous source "container with remainder" (the pantry
+/// bag): a container object entering full, drawn down by an R15
+/// `draw_process!`, its remainder accounted at flow end.
+#[derive(Debug, Clone)]
+pub struct BagDraw {
+    pub obj_ident: String,
+    pub fn_name: String,
+    pub item: String,
+    pub capacity: u64,
+    pub slot_unit: String,
+    pub line: usize,
+}
+
+/// A stateful object entering at flow start from a §4 setup row (e.g. the
+/// `clean` tins): a §3 Container state needing a boundary constructor.
+#[derive(Debug, Clone)]
+pub struct StartObject {
+    pub ident: String,
+    pub consts: Vec<u64>,
+    pub line: usize,
+}
+
 pub struct Generator {
     pub spec: Spec,
     pub strict: bool,
@@ -266,6 +326,13 @@ pub struct Generator {
     pub consumers: Vec<BoundedConsumer>,
     pub suppliers: Vec<SupplierPlan>,
     pub draws: Vec<DrawSource>,
+    pub bags: Vec<BagDraw>,
+    pub start_objects: Vec<StartObject>,
+    /// (ident, const-param count) of resources the §6 account leaves resting
+    /// at the boundary at flow end: each gets a `rest_*` boundary exit (R12),
+    /// the accounted counterpart of a constructor (the CS-2 wallet shape).
+    /// Filled by the flow emitter, consumed by the boundary emitter.
+    pub rest_exits: Vec<(String, usize)>,
     pub plans: Vec<ProcPlan>,
     pub person_budget: u64,
     /// lenient only: containers synthesized from §5 waste lines with no §3
@@ -403,6 +470,9 @@ impl Generator {
             consumers: Vec::new(),
             suppliers: Vec::new(),
             draws: Vec::new(),
+            bags: Vec::new(),
+            start_objects: Vec::new(),
+            rest_exits: Vec::new(),
             plans: Vec::new(),
             person_budget: 0,
             synthesized: Vec::new(),
@@ -504,10 +574,13 @@ impl Generator {
             } else {
                 backticks(&r.name)
             };
-            // model-core common resources
+            // model-core common resources: the `Person` row, or a row whose
+            // parenthesised prose alias says "(person)" (CS-2's `Member`,
+            // CS-6's `Baker` — the actor rides model-core's Person budget).
             if low.contains("person")
                 && (low.starts_with("person") || canon.iter().any(|c| c == "Person"))
                 || canon.iter().any(|c| c == "Person")
+                || low.contains("(person)")
             {
                 self.person_budget = parse_quantities(&r.quantity_raw, strict)
                     .first()
@@ -621,6 +694,24 @@ impl Generator {
                             extra_units: vec![],
                             slot_unit: unit,
                         },
+                        line: r.line,
+                    });
+                }
+                // R17 outcome tokens: the §3 Kind cell says so (CS-2's
+                // `PatchOutcome`, CS-6's `BakeOutcome`) — a sealed
+                // `model_core::outcome_token!`, injected at the boundary.
+                Kind::Other(k) if k.to_lowercase().contains("outcome token") => {
+                    self.lexicon.push(TypeEntry {
+                        ident: base_ident.clone(),
+                        resource: low.clone(),
+                        state: None,
+                        canonical_state: None,
+                        canonical_res: canon.clone(),
+                        alias_only: false,
+                        required: vec![],
+                        stems: res_words.clone(),
+                        quantities: parse_quantities(&r.quantity_raw, strict),
+                        role: Role::Outcome,
                         line: r.line,
                     });
                 }
@@ -821,17 +912,49 @@ impl Generator {
             } else if via_low.contains("history") {
                 // common machinery
             } else if let Some((cap, _)) = lex_number(row.capacity.trim(), strict) {
-                // discrete supplier with numeric capacity — only when the
-                // supplied thing is a §3 DISCRETE resource (a "kitchen setup"
-                // row of reusables also has a numeric capacity)
+                // Bounded continuous source "container with remainder" (the
+                // CS-6 pantry rows): a container object enters full, an R15
+                // draw_process! draws it down, the remainder is accounted at
+                // flow end (§6 "back as container remainders").
                 let resolved = self.resolve(&row.what);
+                if via_low.contains("container") {
+                    if let Some(e) = &resolved {
+                        let continuous = matches!(
+                            self.kind_of_entry(e),
+                            Some(Kind::Continuous { .. })
+                        );
+                        if continuous {
+                            if let Role::Container { slot_unit, .. } = &e.role {
+                                let obj = camel(
+                                    split_top_level(&strip_parens(&row.via), &[','])[0].as_str(),
+                                );
+                                self.bags.push(BagDraw {
+                                    obj_ident: obj,
+                                    fn_name: format!(
+                                        "draw_{}",
+                                        snake(&strip_parens(&row.what))
+                                    ),
+                                    item: e.ident.clone(),
+                                    capacity: cap,
+                                    slot_unit: slot_unit.clone(),
+                                    line: row.line,
+                                });
+                                continue;
+                            }
+                        }
+                    }
+                }
                 let discrete = resolved
                     .as_ref()
                     .and_then(|e| self.kind_of_entry(e))
                     .map(|k| matches!(k, Kind::Discrete))
                     .unwrap_or(false);
                 if !discrete {
-                    continue; // reusables entering at flow start: constructors are emitted anyway
+                    // reusables entering at flow start: constructors are
+                    // emitted for every reusable anyway, but a stateful start
+                    // object (the `clean` tins) needs its own constructor
+                    self.plan_start_objects(row);
+                    continue;
                 }
                 if let Some(e) = resolved {
                     let ident = camel(&strip_parens(&row.via));
@@ -856,7 +979,8 @@ impl Generator {
             } else {
                 // "kitchen setup" style row: reusables enter here; the
                 // reusable types already exist, constructors are emitted for
-                // every reusable. Nothing further to plan.
+                // every reusable. A stateful start object still needs one.
+                self.plan_start_objects(row);
             }
         }
         let outputs = self.spec.outputs.clone();
@@ -889,7 +1013,17 @@ impl Generator {
                     } else {
                         vec![] // later hop: wired from §5 waste lines afterwards
                     };
-                    if !self.sinks.iter().any(|s| s.ident == ident) {
+                    if let Some(existing) = self.sinks.iter_mut().find(|s| s.ident == ident) {
+                        // Two §4 rows naming one sink (steam AND waste heat →
+                        // the atmosphere): the sink consumes both — dropping
+                        // the second row's item left the sink unable to take
+                        // it at all.
+                        for c in consumed {
+                            if !existing.consumes.contains(&c) {
+                                existing.consumes.push(c);
+                            }
+                        }
+                    } else {
                         self.sinks.push(Sink {
                             ident,
                             name_words: words(hop_clean),
@@ -917,6 +1051,33 @@ impl Generator {
                             ),
                         ),
                     }
+                }
+            }
+        }
+    }
+
+    /// A §4 setup row ("kitchen setup at flow start") listing a stateful
+    /// start object — a §3 Container STATE like the `clean` tins — plans a
+    /// boundary constructor for it; bare reusables already get one.
+    fn plan_start_objects(&mut self, row: &BoundaryRow) {
+        for part in split_top_level(&row.what, &[',']) {
+            let Some(e) = self.resolve(&part) else { continue };
+            if e.alias_only {
+                continue;
+            }
+            if let Role::Container { .. } = e.role {
+                let consts: Vec<u64> = e
+                    .quantities
+                    .iter()
+                    .filter(|q| is_magnitude(&q.unit))
+                    .map(|q| q.value)
+                    .collect();
+                if !self.start_objects.iter().any(|s| s.ident == e.ident) {
+                    self.start_objects.push(StartObject {
+                        ident: e.ident.clone(),
+                        consts,
+                        line: row.line,
+                    });
                 }
             }
         }
@@ -1017,17 +1178,18 @@ impl Generator {
                 slot_unit,
             } => {
                 // const args in declaration order: prefer the magnitudes
-                // written at THIS mention; fall back to the §3 declaration
+                // written at THIS mention ("456 g" and "456 g each" both
+                // magnitudes); fall back to the §3 declaration
                 let mut consts: Vec<u64> = qties
                     .iter()
-                    .filter(|q| is_mag_unit(&q.unit))
+                    .filter(|q| is_magnitude(&q.unit))
                     .map(|q| q.value)
                     .collect();
                 if consts.is_empty() {
                     consts = entry
                         .quantities
                         .iter()
-                        .filter(|q| is_mag_unit(&q.unit))
+                        .filter(|q| is_magnitude(&q.unit))
                         .map(|q| q.value)
                         .collect();
                 }
@@ -1048,18 +1210,19 @@ impl Generator {
                 Some(Item {
                     ident: entry.ident.clone(),
                     consts,
-                    count: 1,
+                    // "2 `clean` `LoafTin`s (450 g each)" is TWO items of
+                    // 450 g, never one (the D3 defect class)
+                    count: count_of(&qties),
                     discrete: false,
                 })
             }
             Role::Consumable { .. } | Role::Common if entry.ident == "Person" => None,
             Role::Consumable { .. } | Role::Common => {
-                let mut count = qties
-                    .iter()
-                    .find(|q| !is_mag_unit(&q.unit) || q.unit.is_empty())
-                    .map(|q| q.value)
-                    .or_else(|| qties.first().map(|q| q.value))
-                    .unwrap_or(1);
+                // Count = the first stated NON-magnitude quantity; with none,
+                // ONE item — never a magnitude pressed into a count (the D1
+                // defect: "the `mixed` `Dough` (1_682 g)" is one 1_682 g
+                // dough, not 1_682 doughs).
+                let mut count = count_of(&qties);
                 // "loaded pot (3 bags, …)": the 3 counts the HELD contents,
                 // not three pots
                 if let Role::Consumable {
@@ -1080,8 +1243,16 @@ impl Generator {
             Role::Reusable => Some(Item {
                 ident: entry.ident.clone(),
                 consts: vec![],
-                count: 1,
+                // respect a stated count here too (D3): "2 `LoafTin`s" is
+                // two parameters/returns, not one
+                count: count_of(&qties),
                 discrete: false,
+            }),
+            Role::Outcome => Some(Item {
+                ident: entry.ident.clone(),
+                consts: vec![],
+                count: count_of(&qties),
+                discrete: true,
             }),
         }
     }
@@ -1100,8 +1271,12 @@ impl Generator {
                 reusable_returns: Vec::new(),
                 consumes: Vec::new(),
                 produces: Vec::new(),
+                produces_ok: Vec::new(),
+                produces_fail: Vec::new(),
+                outcome: None,
                 waste: Vec::new(),
                 supply_n: None,
+                supplier_consumed: false,
                 bin_disposal: None,
             };
 
@@ -1149,11 +1324,56 @@ impl Generator {
                     if let Some(it) =
                         self.item_from_phrase(&part, p.consumes_line, &section, false)
                     {
-                        if it.discrete && it.count > 1 {
+                        // SupplyN only for a genuine multi-item draw from a
+                        // §4 discrete supplier; any other consumed item —
+                        // whatever its count — stays a by-value parameter
+                        // (the D2 defect: items routed to a supplier that
+                        // does not exist vanished from the signature).
+                        if it.discrete
+                            && it.count > 1
+                            && self.suppliers.iter().any(|sp| sp.item == it.ident)
+                        {
                             plan.supply_n = Some((it.count, it.ident.clone()));
                         }
                         plan.consumes.push(it);
                     }
+                }
+            }
+            // The supplier's own container listed under Consumes (CS-6:
+            // taking both sachets exhausts the box, and the box leaves as the
+            // `empty` state): the supplier parameter IS that container — no
+            // second input parameter, and `Rest` is pinned to the exhausted
+            // supplier so the §3 `empty` state can continue from it.
+            if let Some((_, supply_item)) = &plan.supply_n.clone() {
+                if let Some(sp) = self
+                    .suppliers
+                    .iter()
+                    .find(|sp| &sp.item == supply_item)
+                    .cloned()
+                {
+                    let lexicon = self.lexicon.clone();
+                    let mut consumed_box = false;
+                    plan.consumes.retain(|c| {
+                        let is_box = lexicon.iter().any(|e| {
+                            e.ident == c.ident
+                                && e.canonical_res.iter().any(|t| camel(t) == sp.ident)
+                        });
+                        if is_box {
+                            consumed_box = true;
+                        }
+                        !is_box
+                    });
+                    plan.supplier_consumed = consumed_box;
+                }
+            }
+            // -- the consumed R17 outcome token, if any
+            for c in &plan.consumes {
+                let is_outcome = self
+                    .lexicon
+                    .iter()
+                    .any(|e| e.ident == c.ident && matches!(e.role, Role::Outcome));
+                if is_outcome {
+                    plan.outcome = Some(c.ident.clone());
                 }
             }
             // -- produces (plus R17 variant fields, checked for closure)
@@ -1167,13 +1387,23 @@ impl Generator {
                     }
                 }
             }
-            for (_label, value, vline) in &p.produces_variants.clone() {
+            for (label, value, vline) in &p.produces_variants.clone() {
                 let list = item_list_part(value).to_string();
                 if list.trim() == "—" || list.trim().is_empty() {
                     continue;
                 }
                 for part in item_parts(&list) {
-                    let _ = self.item_from_phrase(&part, *vline, &section, false);
+                    // R17 arms: keep the resolved items — discarding them
+                    // scaffolded a fallible process that returned NOTHING in
+                    // either arm (the D4 defect).
+                    let it = self.item_from_phrase(&part, *vline, &section, false);
+                    if let Some(it) = it {
+                        if label.contains("(ok") {
+                            plan.produces_ok.push(it);
+                        } else if label.contains("(fail") {
+                            plan.produces_fail.push(it);
+                        }
+                    }
                 }
             }
             // -- waste
@@ -1239,9 +1469,15 @@ impl Generator {
                 let state_consumed = plan.consumes.iter().any(|c| {
                     c.ident != e.ident && self.ident_resource(&c.ident) == Some(e.resource.clone())
                 });
-                let state_produced = plan.produces.iter().any(|c| {
-                    c.ident != e.ident && self.ident_resource(&c.ident) == Some(e.resource.clone())
-                });
+                let state_produced = plan
+                    .produces
+                    .iter()
+                    .chain(plan.produces_ok.iter())
+                    .chain(plan.produces_fail.iter())
+                    .any(|c| {
+                        c.ident != e.ident
+                            && self.ident_resource(&c.ident) == Some(e.resource.clone())
+                    });
                 // The vessel enters unless one of its states is already the
                 // consumed input; it returns (bare) unless it continues as a
                 // produced state ("kettle returned empty" in the Actor line).

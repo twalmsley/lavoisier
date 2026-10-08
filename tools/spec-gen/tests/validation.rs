@@ -85,16 +85,17 @@ fn real_cs1_spec_is_strict_clean_and_complete() {
     assert_eq!(g.person_budget, 300_000);
 }
 
-/// All five agreed case-study specs are strict-clean (the stage-2 gate kept
+/// All six agreed case-study specs are strict-clean (the stage-2 gate kept
 /// as a regression).
 #[test]
-fn all_five_case_studies_are_strict_clean() {
+fn all_agreed_case_studies_are_strict_clean() {
     for cs in [
         "cs1-pot-of-tea",
         "cs2-puncture-repair",
         "cs3-cafe-orders",
         "cs4-batch-run",
         "cs5-two-site",
+        "cs6-bread-batch",
     ] {
         let g = analyse(&load(&format!("../../case-studies/{cs}/SPEC.md")), true);
         assert!(g.errors.is_empty(), "{cs}: {:#?}", g.errors);
@@ -383,23 +384,256 @@ fn duplicate_req_across_files_fails_the_binary() {
     );
 }
 
+// ── the CS-6 field-test regressions (the four silent mis-derivations) ────
+//
+// CS-6 was specgen's first real field test and exposed four generator
+// defects, every one of them SILENT (the scaffold compiled or nearly
+// compiled while minting or vanishing resources). Each test below pins the
+// fixed behaviour against the live CS-6 document, asserting first that the
+// triggering phrasing is still in the spec (the mutation-needle discipline),
+// then that the emitted crate carries the right shape.
+
+fn cs6() -> String {
+    load("../../case-studies/cs6-bread-batch/SPEC.md")
+}
+
+/// Emits the CS-6 scaffold in memory: (generator, file → contents).
+fn emit_cs6() -> (Generator, std::collections::BTreeMap<String, String>) {
+    let (spec, errs) = parse_spec(&cs6(), true);
+    assert!(errs.is_empty(), "{errs:#?}");
+    let mut g = Generator::new(spec, true);
+    assert!(g.errors.is_empty() && g.warnings.is_empty(), "{:#?} / {:#?}", g.errors, g.warnings);
+    let files = emit_crate(&mut g, "cs6-scaffold", "../../model/model-core");
+    (g, files.into_iter().collect())
+}
+
+fn needle(text: &str, n: &str) {
+    assert!(text.contains(n), "regression needle no longer in CS-6 SPEC.md: '{n}'");
+}
+
+/// D1 — a parenthesised magnitude is never an item count: "the `mixed`
+/// `Dough` (1_682 g)" is ONE 1_682 g dough, not 1_682 doughs (the defective
+/// scaffold emitted a 1_682-element tuple and a nonexistent `N1682` alias).
+#[test]
+fn d1_parenthesised_magnitude_is_one_item_not_a_count() {
+    needle(&cs6(), "the `mixed` `Dough` (1_682 g)");
+    let (_, files) = emit_cs6();
+    let res = &files["src/resources.rs"];
+    assert!(
+        res.contains("pub fn mix_dough") && !res.contains("MixedDough, MixedDough"),
+        "mix_dough must produce exactly one MixedDough"
+    );
+    assert!(!res.contains("N1682"), "no magnitude-sized nat alias may appear");
+    assert!(
+        res.contains("pub fn knead<const B: u64>(person: Person<B>, mixed_dough: MixedDough) -> (Person<B>, KneadedDough)"),
+        "knead takes the one dough by value and returns the one kneaded dough:\n{res}"
+    );
+}
+
+/// D2 — a consumed item may never vanish from the signature: every §5
+/// Consumes item is a by-value parameter, and SupplyN is reserved for a
+/// genuine multi-item draw from a §4 discrete supplier (the defective
+/// scaffold emitted `knead(person, baker)` with no dough anywhere).
+#[test]
+fn d2_consumed_items_are_by_value_parameters() {
+    needle(&cs6(), "**Consumes:** the `kneaded` `Dough` (1_682 g)");
+    needle(&cs6(), "2 `fresh` `YeastSachet`s");
+    let (g, files) = emit_cs6();
+    let res = &files["src/resources.rs"];
+    assert!(
+        res.contains("pub fn prove<const B: u64>(person: Person<B>, kneaded_dough: KneadedDough) -> (Person<B>, ProvedDough)"),
+        "prove must consume the kneaded dough by value:\n{res}"
+    );
+    assert!(
+        res.contains("proved_dough: ProvedDough") && res.contains("pub fn divide_and_shape"),
+        "divide_and_shape must consume the proved dough by value"
+    );
+    assert!(
+        res.contains("flour: Flour<1_000>, water: Water<650>, salt: Salt<18>"),
+        "mix_dough must take every continuous draw by value"
+    );
+    // SupplyN only for the genuine supplier draw (the 2 sachets from the box)
+    let p1 = g.plans.iter().find(|p| p.p.id == 1).unwrap();
+    assert_eq!(p1.supply_n, Some((2, "FreshSachet".into())));
+    for p in &g.plans {
+        if p.p.id != 1 {
+            assert_eq!(p.supply_n, None, "P{} must not route items via SupplyN", p.p.id);
+        }
+    }
+    assert!(res.contains("Taken = Cons<FreshSachet, Cons<FreshSachet, Nil>>"));
+}
+
+/// D3 — a stated count on a reusable's state is respected: "2 `clean`
+/// `LoafTin`s (450 g each)" is two parameters, "2 `greased` `LoafTin`s
+/// (456 g each)" two returns (the defective scaffold hardcoded one).
+#[test]
+fn d3_counts_on_reusable_states_are_respected() {
+    needle(&cs6(), "2 `clean` `LoafTin`s (450 g each)");
+    needle(&cs6(), "2 `greased` `LoafTin`s (456 g each)");
+    let (_, files) = emit_cs6();
+    let res = &files["src/resources.rs"];
+    assert!(
+        res.contains("clean_tin_1: CleanTin<450>, clean_tin_2: CleanTin<450>"),
+        "grease_tins must take both clean tins:\n{res}"
+    );
+    assert!(
+        res.contains("-> (Person<B>, GreasedTin<456>, GreasedTin<456>)"),
+        "grease_tins must return both greased tins"
+    );
+}
+
+/// D4 — a fallible (R17) process scaffolds the CS-2 dual-arm shape: a
+/// `Result` of two conserving bundles, the outcome token realised in a match
+/// with BOTH arms constructed, and the generated flows handling both arms
+/// (the defective scaffold returned no loaf in any arm and defused the
+/// token).
+#[test]
+fn d4_fallible_process_scaffolds_both_arms() {
+    needle(&cs6(), "**Produces (Ok):** the `baked` `Loaf` (744 g, 300_000 J)");
+    needle(&cs6(), "**Produces (Fail):** the `scorched` `Loaf` (744 g, 300_000 J)");
+    let (_, files) = emit_cs6();
+    let res = &files["src/resources.rs"];
+    assert!(
+        res.contains("bake_outcome: BakeOutcome) -> Result<BakeOk<B>, BakeFail<B>>"),
+        "bake must return the dual-arm Result:\n{res}"
+    );
+    assert!(res.contains("match bake_outcome.consume_kind()"));
+    assert!(res.contains("BakeOutcomeKind::Success => Ok(BakeOk"));
+    assert!(res.contains("BakeOutcomeKind::Failure => Err(BakeFail"));
+    // each arm carries its loaf, the used tin, the reusables and the waste
+    assert!(res.contains("pub baked_loaf: BakedLoaf"));
+    assert!(res.contains("pub scorched_loaf: ScorchedLoaf"));
+    assert!(res.contains("pub used_tin: UsedTin<453>"));
+    assert!(res.contains("pub steam: Steam<100>"));
+    assert!(res.contains("pub waste_heat: WasteHeat<2_200_000>"));
+    // the outcome token is an outcome_token!, not a consumable
+    assert!(res.contains("model_core::outcome_token!"));
+    // the generated flows handle BOTH arms, routing each arm's loaf
+    let flows = &files["tests/flows.rs"];
+    assert!(flows.contains("Ok(BakeOk { person, baked_loaf, used_tin, oven, steam, waste_heat })"));
+    assert!(flows.contains("Err(BakeFail { person, scorched_loaf, used_tin, oven, steam, waste_heat })"));
+    assert!(flows.contains("send_to(household, baked_loaf)"));
+    assert!(flows.contains("send_to(compost_stream, scorched_loaf)"));
+}
+
+/// The supplier-box consume: "1 `YeastBox` (30 g)" under Consumes names the
+/// same object §4 names as the sachets' supplier — the scaffold reads them
+/// as ONE object (the supplier parameter IS the box, pinned to
+/// `Rest = EmptyYeastBox`), the exhausted shell continues as the `empty`
+/// state, and the decision is surfaced as a SPEC-HOLE (the defective
+/// scaffold represented the box three times).
+#[test]
+fn supplier_box_consume_is_one_object_with_a_hole() {
+    needle(&cs6(), "1 `YeastBox` (30 g)");
+    needle(&cs6(), "the `YeastBox` (discrete supplier, exhausted to empty)");
+    let (g, files) = emit_cs6();
+    let res = &files["src/resources.rs"];
+    assert!(
+        !res.contains("empty_box: EmptyBox"),
+        "the box must not be a second input parameter"
+    );
+    assert!(res.contains("Rest = EmptyYeastBox"));
+    assert!(res.contains("let YeastBox(Nil) = rest;"));
+    assert!(
+        res.contains("-> (Person<B>, MixedDough, SpentSachet, SpentSachet, EmptyBox)"),
+        "the empty box leaves exactly once, as the declared waste output:\n{res}"
+    );
+    assert!(
+        g.holes.iter().any(|h| h.summary.contains("exhausted supplier")),
+        "the one-object reading is an enumerated SPEC-HOLE"
+    );
+}
+
+/// Two §4 output rows naming one sink: the sink consumes BOTH items (the
+/// defective emitter dropped every row after the first, leaving the
+/// atmosphere unable to take the waste heat at all).
+#[test]
+fn shared_sink_consumes_every_routed_item() {
+    needle(&cs6(), "| `Steam` | atmosphere |");
+    needle(&cs6(), "| `WasteHeat` | atmosphere |");
+    let (_, files) = emit_cs6();
+    let res = &files["src/resources.rs"];
+    assert!(res.contains("Consumer<Steam<C0>> for Atmosphere"));
+    assert!(res.contains("Consumer<WasteHeat<C0>> for Atmosphere"));
+    assert!(res.contains("Consumer<SpentSachet> for Recycling"));
+    assert!(res.contains("Consumer<EmptyBox> for Recycling"));
+}
+
+/// The pinned CS-6 scaffold regression (the field-test result, kept): the
+/// scaffold builds clean against model-core, both generated flow tests pass
+/// (every input a parameter, every output accounted, both P6 arms handled),
+/// and `--features deny-holes` fires exactly the enumerated SPEC-HOLEs.
+#[test]
+fn pinned_cs6_scaffold_builds_tests_and_enumerates_holes() {
+    let manifest = env!("CARGO_MANIFEST_DIR");
+    let out_dir = format!("{manifest}/target/pinned-cs6-scaffold");
+    let model_core = format!("{manifest}/../../model/model-core");
+    let _ = std::fs::remove_dir_all(&out_dir);
+
+    let (spec, errs) = parse_spec(&cs6(), true);
+    assert!(errs.is_empty(), "{errs:#?}");
+    let mut g = Generator::new(spec, true);
+    assert!(g.errors.is_empty() && g.warnings.is_empty());
+    let files = emit_crate(&mut g, "pinned-cs6-scaffold", &model_core);
+    assert_eq!(
+        g.holes.len(),
+        14,
+        "the pinned CS-6 scaffold enumerates exactly 14 SPEC-HOLEs; holes now: {:#?}",
+        g.holes.iter().map(|h| &h.summary).collect::<Vec<_>>()
+    );
+    for (rel, contents) in &files {
+        let path = std::path::Path::new(&out_dir).join(rel);
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(&path, contents).unwrap();
+    }
+
+    let cargo = |args: &[&str]| {
+        std::process::Command::new("cargo")
+            .args(args)
+            .current_dir(&out_dir)
+            .output()
+            .expect("run cargo")
+    };
+    let build = cargo(&["build"]);
+    assert!(
+        build.status.success(),
+        "scaffold must build clean:\n{}",
+        String::from_utf8_lossy(&build.stderr)
+    );
+    let test = cargo(&["test"]);
+    assert!(
+        test.status.success(),
+        "the generated flow tests must pass:\n{}",
+        String::from_utf8_lossy(&test.stderr)
+    );
+    let deny = cargo(&["build", "--features", "deny-holes"]);
+    assert!(!deny.status.success(), "deny-holes must fail the build");
+    let stderr = String::from_utf8_lossy(&deny.stderr);
+    let fired = (1..=14)
+        .filter(|i| stderr.contains(&format!("SPEC-HOLE U-{i:02}")))
+        .count();
+    assert_eq!(fired, 14, "exactly the 14 enumerated holes fire:\n{stderr}");
+}
+
 // ── the generation regime (R22): determinism + the pinned CS-1 scaffold ──
 
 /// Two generations from the same spec are byte-identical (deterministic and
-/// idempotent — the regeneration-gate precondition).
+/// idempotent — the regeneration-gate precondition), for both scaffolded
+/// case studies.
 #[test]
 fn generation_is_deterministic() {
-    let text = cs1();
-    let emit_once = || {
-        let (spec, errs) = parse_spec(&text, true);
-        assert!(errs.is_empty());
-        let mut g = Generator::new(spec, true);
-        assert!(g.errors.is_empty() && g.warnings.is_empty());
-        emit_crate(&mut g, "cs1-scaffold", "../../model/model-core")
-    };
-    let a = emit_once();
-    let b = emit_once();
-    assert_eq!(a, b, "two runs must be byte-identical (R22)");
+    for (text, pkg) in [(cs1(), "cs1-scaffold"), (cs6(), "cs6-scaffold")] {
+        let emit_once = || {
+            let (spec, errs) = parse_spec(&text, true);
+            assert!(errs.is_empty());
+            let mut g = Generator::new(spec, true);
+            assert!(g.errors.is_empty() && g.warnings.is_empty());
+            emit_crate(&mut g, pkg, "../../model/model-core")
+        };
+        let a = emit_once();
+        let b = emit_once();
+        assert_eq!(a, b, "{pkg}: two runs must be byte-identical (R22)");
+    }
 }
 
 /// The pinned CS-1 scaffold regression (the EXP-15 result, kept): generated

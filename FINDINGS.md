@@ -17,7 +17,8 @@ extraction work; F-058…F-059 added 2026-10-07 by the step-11 model-analysis bu
 added and F-001/F-037/F-040/F-044 extended 2026-10-08 from the `RESULTS.md` files of experiments
 EXP-13 through EXP-15 (`experiments/exp1N-dsl-*/RESULTS.md`; EXP-13/14 ran against `model-core`
 by path with `trybuild` still the only external dev-dependency; the EXP-14 and EXP-15 generators
-are std-only).
+are std-only); F-065…F-066 added 2026-10-08 by the CS-6 (bread batch) field test of the R22
+spec→scaffold pipeline.
 All experiments ran on the same toolchain: **`rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)`**,
 stable channel, `cargo 1.98.1`, macOS (Darwin 24.6.0, Apple Silicon). Dependencies were limited
 to `trybuild` as a dev-dependency.
@@ -1726,3 +1727,80 @@ kernel-macro single source of truth.
 **Evidence:** EXP-14 (`experiments/exp14-dsl-external/RESULTS.md` criteria 4/5/6; the
 R-coverage table).
 
+
+## F-065 — Authoring a specification under the R22 gate catches the item-grammar error class at the document, on the first pass, at zero downstream cost
+
+**What worked:** CS-6 is the first specification *authored* under the speccheck gate from the
+first line (CS-1..CS-5 were migrated to it after agreement). A careful first pass, written in
+the house style by an author who knows the conventions, still drew **5 errors and 1 warning**:
+prose trailing inside Consumes/Produces item lists three times (A9 — "which is exhausted",
+"no mass change", "drawn from the grid"), a §4/§5 energy input with no §3 canonical-identifier
+row (A4 — `GridEnergy` was referenced before it existed), a space-grouped number in §2's prose
+(A5), and a parenthesised aside ("drawn from the block, 5 g per tin") parsed as a second
+magnitude on a one-magnitude resource. Every one is a real document defect of exactly the
+class that previously surfaced days later as implementation round-trip feedback (the CS-1 §8
+items behind F-062, CS-2's "a state change must have an owning process"). All were fixed at
+the document in minutes; the second pass was clean, before any reviewer saw the draft.
+
+**What it cost:** the A9 item-purity discipline genuinely fights natural prose — the instinct
+to qualify an item inline ("taken from the box, which is exhausted") loses every time, and
+the explanation moves to its own sentence. That is the trade R22 bought deliberately: the
+items are machine-resolved, the prose is decoration.
+
+**Evidence:** the CS-6 draft commit (`d565256`) records the first-pass error list verbatim;
+`./tools/spec.sh case-studies/cs6-bread-batch/SPEC.md` before and after.
+
+## F-066 — A speccheck-clean specification can still scaffold silently wrong code: where specgen's item grammar met unexercised phrasings it guessed instead of holing — four mis-derivation classes found, fixed and pinned at CS-6
+
+**What happened:** the first real `specgen` run (CS-6, the R22 pipeline's designated field
+test) produced a 5,913-line scaffold that compiled-shaped code violating conservation — the
+F-037/F-060 green-but-wrong class, inside the very tool the generation regime governs. Four
+silent mis-derivation classes:
+
+1. **A parenthesised magnitude became an item count** ("the `mixed` `Dough` (1_682 g)" →
+   a tuple of 1,682 `MixedDough::mint()` calls, and an import of the nonexistent `N1682`):
+   the count fallback took the first stated quantity even when it carried a magnitude unit.
+2. **Consumed items vanished from signatures** (`knead`, `prove`, `divide_and_shape` took no
+   dough at all while minting their outputs from nothing): a count>1 consume was routed to
+   `SupplyN` even with no §4 supplier, then silently skipped at signature emission.
+3. **Counts on reusables were hardcoded to 1** ("2 `clean` `LoafTin`s (450 g each)" → one
+   parameter, one return).
+4. **Fallible (R17) Produces (Ok)/(Fail) arms were parsed, name-checked and discarded** —
+   the scaffolded `bake` returned no loaf in any arm and defused the outcome token.
+
+Six further latent gaps had to be closed for a compiling, conserving scaffold: shared §4
+sinks dropped every row after the first; the "`Baker` (person)" alias fell through to a plain
+reusable (person budget 0, underflowed draw consts); "container with remainder" inputs had no
+emission at all; stateful start objects lacked boundary constructors; §6 flow-end rests had
+no exits (tripwire panics); repeated processes (P6 ×2) broke flow emission.
+
+**Why the gate missed it:** speccheck validates the *document* (it was clean, and stayed
+clean — F-065); the generator's "never guess" obligation was implemented only for constructs
+it *recognized* as under-determined (the enumerated holes). Unrecognized phrasings fell
+through to wrong code instead of holes. EXP-15's pinned regression covered CS-1 alone, which
+exercises none of these phrasings — fallibility, multi-count reusables, article-plus-magnitude
+items and person aliases all arrived with CS-6. The field test did exactly what it was for.
+
+**What it cost / workaround adopted:** fixes in `tools/spec-gen` (emit layer), with the
+regression suite grown 21 → 28: one pinned fixture per defect class in the CS-6 phrasing
+(mutation-needle discipline), a pinned CS-6 scaffold regression (builds clean, generated flow
+tests pass, exactly 14 holes enumerate) beside the CS-1 pin, and determinism extended to
+CS-6. The regenerated scaffold is 1,154 lines (from 5,913 defective), builds with zero
+warnings, passes its 2 generated flow tests, and both `bake` arms conserve. Holes grew 12 →
+14 (U-08: the exhausted supplier continuing as the declared empty state is a generator
+convention surfaced to the author; U-14: R17 refinements beyond the scaffolded dual-arm
+shape). The regime rule this sharpens: **what the generator does not positively recognize
+must become a hole, never code** — silence is the failure mode, not conservatism.
+
+**Template-rule candidate (for review, agreed-before-committed):** the house idiom
+"Satisfies: — (enables REQ-0NN)" is scraped by the §5 parser as a *real* Satisfies entry
+(CS-2's P2/P4 carry it too), seeding wrong traceability claims in scaffold doc tags — an
+F-053-class green-but-wrong hazard at the generator surface. Either the template rules the
+phrasing ("a Satisfies value beginning '—' claims nothing; put 'enables' notes in prose") or
+the parser is taught the idiom; deciding which changes agreed documents, so it goes to the
+review gate.
+
+**Evidence:** the defective scaffold's signatures (quoted in the fix commit);
+`tools/spec-gen/tests/validation.rs` (`d1_…`…`d4_…`, `supplier_box_consume…`,
+`shared_sink…`, `pinned_cs6_scaffold…`); `cargo test` 28/28 green; speccheck output over all
+six specifications byte-identical before and after the fix.

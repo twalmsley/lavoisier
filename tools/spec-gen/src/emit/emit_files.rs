@@ -61,6 +61,69 @@ fn is_container(g: &Generator, ident: &str) -> bool {
         .any(|e| e.ident == ident && !e.alias_only && matches!(e.role, Role::Container { .. }))
 }
 
+/// Untripwired consumable (F-040): it has no `defuse`, so a conserving
+/// transform consumes it by destructuring (the CS-2 `DryPatch` shape).
+fn is_untripwired(g: &Generator, ident: &str) -> bool {
+    g.lexicon.iter().any(|e| {
+        e.ident == ident
+            && !e.alias_only
+            && matches!(e.role, Role::Consumable { tripwire: false, .. })
+    })
+}
+
+/// The R17 dual-arm shape is scaffoldable when the process states both arms
+/// and consumes exactly one outcome token (and no SupplyN rides along — that
+/// interaction is not derivable and becomes a hole instead).
+fn fallible(plan: &ProcPlan) -> bool {
+    plan.outcome.is_some()
+        && !plan.produces_ok.is_empty()
+        && !plan.produces_fail.is_empty()
+        && plan.supply_n.is_none()
+}
+
+/// Bundle names, mechanically from the process name (F-062): `bake` →
+/// (`BakeOk`, `BakeFail`).
+fn bundle_names(plan: &ProcPlan) -> (String, String) {
+    let base = camel(&plan.fn_name);
+    (format!("{base}Ok"), format!("{base}Fail"))
+}
+
+/// One arm bundle's fields, in deterministic order: the person, the arm's
+/// products, the returned reusables, the waste outputs. Shared by the bundle
+/// struct emitter, the process body and the flow emitter, so the three always
+/// agree.
+fn bundle_fields(plan: &ProcPlan, ok: bool) -> Vec<(String, String)> {
+    let mut fields: Vec<(String, String)> = Vec::new();
+    if plan.person {
+        fields.push(("person".into(), "Person<B>".into()));
+    }
+    let items = if ok { &plan.produces_ok } else { &plan.produces_fail };
+    let push_item = |fields: &mut Vec<(String, String)>, it: &Item| {
+        if it.count > 1 {
+            for i in 1..=it.count {
+                fields.push((format!("{}_{i}", snake(&it.ident)), ty_of(it)));
+            }
+        } else {
+            fields.push((snake(&it.ident), ty_of(it)));
+        }
+    };
+    for it in items {
+        push_item(&mut fields, it);
+    }
+    for r in &plan.reusable_returns {
+        fields.push((snake(r), r.clone()));
+    }
+    for w in &plan.waste {
+        if w.duplicate_of_produce {
+            continue;
+        }
+        if let Some(it) = &w.item {
+            push_item(&mut fields, it);
+        }
+    }
+    fields
+}
+
 pub fn build_sig(g: &Generator, plan: &ProcPlan) -> Sig {
     let mut sig = Sig {
         generics: Vec::new(),
@@ -70,7 +133,10 @@ pub fn build_sig(g: &Generator, plan: &ProcPlan) -> Sig {
     if plan.person {
         sig.generics.push("const B: u64".into());
         sig.params.push(("person".into(), "Person<B>".into()));
-        sig.returns.push(("person".into(), "Person<B>".into()));
+        if !fallible(plan) {
+            // in the R17 dual-arm shape the person rides the bundles instead
+            sig.returns.push(("person".into(), "Person<B>".into()));
+        }
     }
     if let Some(d) = &plan.bin_disposal {
         let list = cons_list(&d.item, d.count);
@@ -90,27 +156,58 @@ pub fn build_sig(g: &Generator, plan: &ProcPlan) -> Sig {
         sig.params.push((snake(r), r.clone()));
     }
     for c in &plan.consumes {
-        if c.discrete && c.count > 1 {
+        if plan
+            .supply_n
+            .as_ref()
+            .map(|(_, item)| item == &c.ident)
+            .unwrap_or(false)
+        {
             continue; // supplied via SupplyN
         }
-        sig.params.push((snake(&c.ident), ty_of(c)));
+        if c.count > 1 {
+            // N consumed items are N by-value parameters (D2/D3): a consumed
+            // input may never vanish from the signature
+            for i in 1..=c.count {
+                sig.params.push((format!("{}_{i}", snake(&c.ident)), ty_of(c)));
+            }
+        } else {
+            sig.params.push((snake(&c.ident), ty_of(c)));
+        }
     }
     let mut supplier_var = None;
     if let Some((n, item)) = &plan.supply_n {
         if let Some(sp) = g.suppliers.iter().find(|s| &s.item == item) {
+            // a supplier whose container is itself consumed is pinned to its
+            // exhausted state, so the §3 `empty` state can continue from it
+            let rest = if plan.supplier_consumed {
+                format!(", Rest = Empty{}", sp.ident)
+            } else {
+                String::new()
+            };
             sig.generics.push(format!(
-                "S: SupplyN<N{n}, Taken = {}>",
+                "S: SupplyN<N{n}, Taken = {}{rest}>",
                 cons_list(item, *n)
             ));
             supplier_var = Some(snake(&sp.ident));
             sig.params.push((supplier_var.clone().unwrap(), "S".into()));
         }
     }
+    if fallible(plan) {
+        // The R17 dual-arm shape (the CS-2 patch_tube pattern): one Result,
+        // each arm a bundle carrying that arm's products plus every conserved
+        // participant.
+        let (ok_name, fail_name) = bundle_names(plan);
+        let b = if plan.person { "<B>" } else { "" };
+        sig.returns.push((
+            "attempt".into(),
+            format!("Result<{ok_name}{b}, {fail_name}{b}>"),
+        ));
+        return sig;
+    }
     for p in &plan.produces {
-        if p.discrete && p.count > 1 {
+        if p.count > 1 {
             for i in 1..=p.count {
-                sig.returns
-                    .push((format!("{}_{i}", snake(&p.ident)), p.ident.clone()));
+                sig.returns.push((format!("{}_{i}", snake(&p.ident)), ty_of(p)));
             }
         } else {
             sig.returns.push((snake(&p.ident), ty_of(p)));
@@ -120,14 +217,22 @@ pub fn build_sig(g: &Generator, plan: &ProcPlan) -> Sig {
         sig.returns.push((snake(r), r.clone()));
     }
     if let Some(v) = supplier_var {
-        sig.returns.push((v, "S::Rest".into()));
+        if !plan.supplier_consumed {
+            sig.returns.push((v, "S::Rest".into()));
+        }
     }
     for w in &plan.waste {
         if w.duplicate_of_produce {
             continue;
         }
         if let Some(it) = &w.item {
-            sig.returns.push((snake(&it.ident), ty_of(it)));
+            if it.count > 1 {
+                for i in 1..=it.count {
+                    sig.returns.push((format!("{}_{i}", snake(&it.ident)), ty_of(it)));
+                }
+            } else {
+                sig.returns.push((snake(&it.ident), ty_of(it)));
+            }
         }
     }
     sig
@@ -315,6 +420,9 @@ fn must_use_for(ident: &str, role: &Role) -> String {
         Role::Reusable => {
             format!("{ident} is a reusable resource: pass it on or return it to the caller")
         }
+        Role::Outcome => format!(
+            "{ident} is a boundary token: run it through exactly one fallible process or return it to the environment"
+        ),
         Role::Common => String::new(),
     }
 }
@@ -415,6 +523,22 @@ fn emit_resource_types(g: &mut Generator, s: &mut String) {
                 let _ = writeln!(s, "}}");
                 let _ = writeln!(s);
             }
+            Role::Outcome => {
+                let sn = snake(&e.ident);
+                let _ = writeln!(s, "model_core::outcome_token! {{");
+                let _ = writeln!(s, "    /// Generated from {breadcrumb} — one trial of the");
+                let _ = writeln!(s, "    /// environment (R17, F-042): sealed, injected only at the boundary (the");
+                let _ = writeln!(s, "    /// constructors below stay placeholders until calibrated), realised by");
+                let _ = writeln!(s, "    /// exactly one fallible process. A flow cannot read it: the only way to");
+                let _ = writeln!(s, "    /// learn the outcome is to run the process and handle both `Result` arms.");
+                let _ = writeln!(s, "    {}({}Kind),", e.ident, e.ident);
+                let _ = writeln!(s, "    success = {sn}_will_succeed,");
+                let _ = writeln!(s, "    failure = {sn}_will_fail,");
+                let _ = writeln!(s, "    exit = return_{sn},");
+                let _ = writeln!(s, "    must_use = \"{}\"", must_use_for(&e.ident, &e.role));
+                let _ = writeln!(s, "}}");
+                let _ = writeln!(s);
+            }
             Role::Common => {}
         }
     }
@@ -437,6 +561,99 @@ fn emit_resource_types(g: &mut Generator, s: &mut String) {
         );
         let _ = writeln!(s, "}}");
         let _ = writeln!(s);
+    }
+    // bounded continuous sources with remainder (the pantry containers, §4):
+    // a container type drawn down by an R15 draw process in `boundary`
+    let bags = g.bags.clone();
+    for b in &bags {
+        let _ = writeln!(s, "model_core::container_resource! {{");
+        let _ = writeln!(
+            s,
+            "    /// Generated from SPEC.md §4 line {}: a bounded source of {} with",
+            b.line, b.item
+        );
+        let _ = writeln!(
+            s,
+            "    /// remainder — enters full (capacity {}), drawn down via [`boundary::{}`],"
+            , lit(b.capacity), b.fn_name
+        );
+        let _ = writeln!(s, "    /// and its remainder is accounted at flow end (SPEC.md §6).");
+        let _ = writeln!(s, "    {},", b.obj_ident);
+        let _ = writeln!(s, "    unit = \"{} remaining\",", unit_name(&b.slot_unit));
+        let _ = writeln!(
+            s,
+            "    must_use = \"{} is a conserved resource: even an exhausted container must be accounted for\"",
+            b.obj_ident
+        );
+        let _ = writeln!(s, "}}");
+        let _ = writeln!(s);
+    }
+}
+
+/// The R17 arm bundles (the CS-2 `PatchOk`/`PatchFail` shape): a grouping
+/// (R1), not a sealed resource (F-046) — public fields, buildable only from
+/// already-held resources, `#[must_use]`, and deliberately **no `Debug`**
+/// (F-047) so `.unwrap()`/`.expect()` on the process `Result` cannot compile.
+fn emit_bundles(g: &mut Generator, s: &mut String) {
+    let plans = g.plans.clone();
+    for plan in &plans {
+        if !fallible(plan) {
+            continue;
+        }
+        let (ok_name, fail_name) = bundle_names(plan);
+        for (name, ok) in [(&ok_name, true), (&fail_name, false)] {
+            let arm = if ok { "Ok" } else { "Fail" };
+            let vline = plan
+                .p
+                .produces_variants
+                .iter()
+                .find(|(l, _, _)| l.contains(if ok { "(ok" } else { "(fail" }))
+                .map(|(_, _, l)| *l)
+                .unwrap_or(plan.p.line);
+            let _ = writeln!(
+                s,
+                "/// Everything P{}'s {arm} arm produces (R17, SPEC.md §5 'Produces ({arm})',",
+                plan.p.id
+            );
+            let _ = writeln!(
+                s,
+                "/// line {vline}): the arm's products plus every conserved participant — the"
+            );
+            let _ = writeln!(
+                s,
+                "/// person returns at the same budget in both arms (the time draw is adjacent,"
+            );
+            let _ = writeln!(
+                s,
+                "/// F-048), reusables return in both arms (R2), and the stated waste leaves in"
+            );
+            let _ = writeln!(s, "/// both arms.");
+            let _ = writeln!(s, "///");
+            let _ = writeln!(
+                s,
+                "/// A grouping (R1), not a sealed resource (F-046): public fields the handling"
+            );
+            let _ = writeln!(
+                s,
+                "/// arm destructures, buildable only from already-held resources. Deliberately"
+            );
+            let _ = writeln!(
+                s,
+                "/// **no `Debug`** (F-047): `.unwrap()`/`.expect()` on the process `Result` do"
+            );
+            let _ = writeln!(s, "/// not compile — the flow must `match` both arms.");
+            let _ = writeln!(
+                s,
+                "#[must_use = \"{name} bundles conserved outputs: every field must be accounted for\"]"
+            );
+            let generics = if plan.person { "<const B: u64>" } else { "" };
+            let _ = writeln!(s, "pub struct {name}{generics} {{");
+            for (fname, fty) in bundle_fields(plan, ok) {
+                let _ = writeln!(s, "    pub {fname}: {fty},");
+            }
+            let _ = writeln!(s, "}}");
+            let _ = writeln!(s);
+        }
     }
 }
 
@@ -580,6 +797,18 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
             super_names.push(d.item.clone());
         }
     }
+    for b in &g.bags {
+        super_names.push(b.obj_ident.clone());
+        if !super_names.contains(&b.item) {
+            super_names.push(b.item.clone());
+        }
+    }
+    for so in &g.start_objects {
+        super_names.push(so.ident.clone());
+    }
+    for (ident, _) in &g.rest_exits {
+        super_names.push(ident.clone());
+    }
     for sp in &g.suppliers {
         super_names.push(sp.ident.clone());
         if !super_names.contains(&sp.item) {
@@ -592,13 +821,46 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
     for sk in &g.sinks {
         super_names.push(sk.ident.clone());
     }
-    super_names.push("PhantomData".into());
+    if !g.consumers.is_empty() {
+        super_names.push("PhantomData".into());
+    }
     super_names.sort();
     super_names.dedup();
     let _ = writeln!(s, "    use super::{{{}}};", super_names.join(", "));
-    let _ = writeln!(s, "    use model_core::list::{{Cons, Nil}};");
-    let _ = writeln!(s, "    use model_core::nat::{{Succ, Zero}};");
+    if !g.suppliers.is_empty() || !g.consumers.is_empty() {
+        let _ = writeln!(s, "    use model_core::list::{{Cons, Nil}};");
+    }
+    if !g.suppliers.is_empty() {
+        let _ = writeln!(s, "    use model_core::nat::{{Succ, Zero}};");
+    }
     let _ = writeln!(s);
+    // outcome tokens: their constructors and exits are generated by
+    // `model_core::outcome_token!` at the family level; re-exported so flows
+    // find every boundary entry point here (R12)
+    let outcome_fns: Vec<String> = {
+        let mut v: Vec<String> = g
+            .lexicon
+            .iter()
+            .filter(|e| matches!(e.role, Role::Outcome) && !e.alias_only)
+            .flat_map(|e| {
+                let sn = snake(&e.ident);
+                vec![
+                    format!("{sn}_will_fail"),
+                    format!("{sn}_will_succeed"),
+                    format!("return_{sn}"),
+                ]
+            })
+            .collect();
+        v.sort();
+        v
+    };
+    if !outcome_fns.is_empty() {
+        let _ = writeln!(
+            s,
+            "    /// The outcome tokens' boundary constructors and exits (R17), generated by\n    /// `model_core::outcome_token!` at the family level and re-exported here so the\n    /// creation boundary stays the single entry point (R12).\n    pub use super::{{{}}};\n",
+            outcome_fns.join(", ")
+        );
+    }
     // reusable constructors
     let reusables: Vec<String> = g
         .lexicon
@@ -611,6 +873,27 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
             s,
             "    /// {r} enters the model at flow start (R12).\n    ///\n    /// Placeholder: setup at flow start (SPEC.md §4).\n    pub fn new_{sn}() -> {r} {{\n        {r}::mint()\n    }}\n",
             sn = snake(&r)
+        );
+    }
+    // stateful start objects (a §3 Container state entering at flow start,
+    // e.g. the clean tins)
+    let start_objects = g.start_objects.clone();
+    for so in &start_objects {
+        let ty = if so.consts.is_empty() {
+            so.ident.clone()
+        } else {
+            format!(
+                "{}<{}>",
+                so.ident,
+                so.consts.iter().map(|c| lit(*c)).collect::<Vec<_>>().join(", ")
+            )
+        };
+        let _ = writeln!(
+            s,
+            "    /// {ident} enters the model at flow start, at its §3-declared magnitudes\n    /// (R12; SPEC.md §4 line {line}).\n    ///\n    /// Placeholder: setup at flow start (SPEC.md §4).\n    pub fn new_{sn}() -> {ty} {{\n        {ident}::mint()\n    }}\n",
+            ident = so.ident,
+            sn = snake(&so.ident),
+            line = so.line
         );
     }
     // draw sources
@@ -630,6 +913,27 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
             obj = d.obj_ident,
             fname = d.fn_name,
             line = d.line
+        );
+    }
+    // bounded continuous sources with remainder (R15 draw processes over the
+    // §4 pantry containers)
+    let bags = g.bags.clone();
+    for b in &bags {
+        let _ = writeln!(
+            s,
+            "    /// The {obj} enters the model full (R12): a bounded continuous source with\n    /// remainder, capacity {cap} (SPEC.md §4 line {line}).\n    ///\n    /// Placeholder: vendor/stock not modelled (SPEC.md §4).\n    pub fn new_{sn}() -> {obj}<{cap}> {{\n        {obj}::mint()\n    }}\n",
+            obj = b.obj_ident,
+            sn = snake(&b.obj_ident),
+            cap = lit(b.capacity),
+            line = b.line
+        );
+        let _ = writeln!(
+            s,
+            "    model_core::draw_process! {{\n        /// Draws `TAKE` of {item} from the {obj} (R15), leaving `LEFT` of `FULL`\n        /// (SPEC.md §4 line {line}); the remainder is caller-stated and checked at\n        /// compile time (F-022, F-030).\n        pub fn {fname}: {obj} => {item},\n        assert = \"conservation violated in {fname} (R15): TAKE + LEFT must equal FULL — is the draw larger than the container's remaining contents?\"\n    }}\n",
+            item = b.item,
+            obj = b.obj_ident,
+            fname = b.fn_name,
+            line = b.line
         );
     }
     // supplier fill machinery
@@ -723,6 +1027,32 @@ fn emit_boundary_mod(g: &mut Generator, s: &mut String) {
             sn = snake(&sk.ident)
         );
     }
+    // flow-end rests (R12 exits): §6 leaves these resting at the boundary
+    let mut rests = g.rest_exits.clone();
+    rests.sort();
+    for (ident, n) in &rests {
+        let (gen_params, args) = if *n == 0 {
+            (String::new(), String::new())
+        } else {
+            let names: Vec<String> = (0..*n).map(|i| format!("C{i}")).collect();
+            (
+                format!(
+                    "<{}>",
+                    names
+                        .iter()
+                        .map(|n| format!("const {n}: u64"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                ),
+                format!("<{}>", names.join(", ")),
+            )
+        };
+        let _ = writeln!(
+            s,
+            "    /// Flow-end rest for {ident} (R12 exit): the §6 account leaves it resting at\n    /// the boundary (\"everything accounted\"), and an integration test cannot hold a\n    /// tripwired resource past its end — the accounted counterpart of a constructor\n    /// (the CS-2 `take_wallet_home` shape).\n    pub fn rest_{sn}{gen_params}(resting: {ident}{args}) {{\n        resting.defuse(); // the sanctioned boundary exit (R12, F-008)\n    }}\n",
+            sn = snake(ident)
+        );
+    }
     let _ = writeln!(s, "}}");
 }
 
@@ -733,6 +1063,23 @@ fn structural_only(b: &Balance) -> bool {
         // lenient-only guess (strict mode errors on Unmarked before emission):
         // identical single terms ⇒ structural
         BalanceMark::Unmarked => b.lhs.len() == 1 && b.rhs.len() == 1 && b.lhs == b.rhs,
+    }
+}
+
+/// Consumes one input inside a process body: tripwired resources defuse (the
+/// sanctioned forget, F-008); untripwired consumables have no `defuse`, so
+/// they are consumed by destructuring (F-032, the CS-2 `DryPatch` shape).
+fn consume_stmt(g: &Generator, s: &mut String, ident: &str, var: &str) {
+    if is_untripwired(g, ident) {
+        let _ = writeln!(
+            s,
+            "        let {ident} {{ _seal: _ }} = {var}; // conserving transform (untripwired, F-040): its magnitudes continue in the outputs (checked by the asserts above)"
+        );
+    } else {
+        let _ = writeln!(
+            s,
+            "        {var}.defuse(); // conserving transform: its magnitudes continue in the outputs (checked by the asserts above)"
+        );
     }
 }
 
@@ -811,6 +1158,39 @@ fn emit_process(g: &mut Generator, s: &mut String, plan: &ProcPlan) {
                 "SPEC.md §5 P{} routes waste as a consumer parameter (the STRONG reading:\nthe process takes its consumer as a requirement-bounded parameter and feeds\nit internally, so the waste never exists loose). The scaffold emits the WEAK\nreading — loose outputs routed by the flow — because the bounded-consumer\nparameter design (which bound, fed where) is implementation judgement.",
                 p.id
             ),
+        ));
+    }
+    if plan.supplier_consumed {
+        if let Some((_, item)) = &plan.supply_n {
+            if let Some(sp) = g.suppliers.iter().find(|s| &s.item == item).cloned() {
+                s.push_str(&hole_block(
+                    g,
+                    "    ",
+                    &format!("{fname}: the exhausted supplier continues as the declared empty state by generator convention"),
+                    &format!(
+                        "The Consumes list names the {} that §4 also names as this process's\ndiscrete supplier. The scaffold reads them as ONE object: the supplier\nparameter IS the container (no second input parameter), `Rest` is pinned to\nEmpty{} so exhaustion is total, and the exhausted shell is destructured so the\n§3 empty state can be minted as the declared output. Whether the empty\ncontainer is the supplier's remainder or a separate object of its own mass is\nthe author's call — say so in the specification.",
+                        sp.ident, sp.ident
+                    ),
+                ));
+            }
+        }
+    }
+    if fallible(plan) {
+        let (ok_name, fail_name) = bundle_names(plan);
+        s.push_str(&hole_block(
+            g,
+            "    ",
+            &format!("{fname}: R17 refinements beyond the scaffolded dual-arm shape are not derivable"),
+            &format!(
+                "The scaffold realises the outcome token in a match and returns\nResult<{ok_name}, {fail_name}> with every conserved participant carried in both\narms (the CS-2 patch_tube shape). Not derivable from the spec: per-arm\ngeneralized const parameters with independent per-arm asserts (F-045),\nrequirement bounds on the arms, outcome calibration (the boundary constructors\nstay placeholders), and the flow-level #[must_use] outcome grouping over the\nstated outcome combinations (F-050) — the generated flows inject success\ntokens only."
+            ),
+        ));
+    } else if !p.produces_variants.is_empty() {
+        s.push_str(&hole_block(
+            g,
+            "    ",
+            &format!("{fname}: the R17 dual-arm shape could not be scaffolded"),
+            "This process states Produces (Ok)/(Fail) variants, but the scaffoldable\ndual-arm shape needs both arms non-empty, exactly one consumed outcome token,\nand no SupplyN draw in the same process. The variant items are name-checked\nonly; the dual-arm Result shape is left to the implementer.",
         ));
     }
     let mixed_state = plan.consumes.iter().any(|c| {
@@ -926,7 +1306,7 @@ fn emit_process(g: &mut Generator, s: &mut String, plan: &ProcPlan) {
     }
     // supply destructure
     if let Some((n, item)) = &plan.supply_n {
-        if let Some(sp) = g.suppliers.iter().find(|s| &s.item == item) {
+        if let Some(sp) = g.suppliers.iter().find(|s| &s.item == item).cloned() {
             let mut pat = "Nil".to_string();
             for i in (1..=*n).rev() {
                 pat = format!("Cons(i{i}, {pat})");
@@ -936,18 +1316,47 @@ fn emit_process(g: &mut Generator, s: &mut String, plan: &ProcPlan) {
                 "        let ({pat}, rest) = {}.supply_n(); // one at a time via SupplyN (R12, F-014)",
                 snake(&sp.ident)
             );
+            // supplied items not kept by a held output are consumed here
+            let held_used = sig.returns.iter().any(|(_, t)| {
+                let base = t.split('<').next().unwrap_or(t).trim();
+                held_of(g, base)
+                    .map(|(_, held_item)| &held_item == item)
+                    .unwrap_or(false)
+            });
+            if !held_used {
+                for i in 1..=*n {
+                    consume_stmt(g, s, item, &format!("i{i}"));
+                }
+            }
+            if plan.supplier_consumed {
+                let _ = writeln!(
+                    s,
+                    "        let {}(Nil) = rest; // the exhausted supplier's shell (Rest = Empty{}): its mass continues as the empty-state output",
+                    sp.ident, sp.ident
+                );
+            }
         }
     }
     // consumed values
     for c in &plan.consumes {
-        if c.discrete && c.count > 1 {
-            continue;
+        if plan
+            .supply_n
+            .as_ref()
+            .map(|(_, item)| item == &c.ident)
+            .unwrap_or(false)
+        {
+            continue; // consumed via the SupplyN destructure above
         }
-        let var = snake(&c.ident);
-        let _ = writeln!(
-            s,
-            "        {var}.defuse(); // conserving transform: its magnitudes continue in the outputs (checked by the asserts above)"
-        );
+        if fallible(plan) && plan.outcome.as_deref() == Some(&c.ident) {
+            continue; // the outcome token is realised by the match below
+        }
+        if c.count > 1 {
+            for i in 1..=c.count {
+                consume_stmt(g, s, &c.ident, &format!("{}_{i}", snake(&c.ident)));
+            }
+        } else {
+            consume_stmt(g, s, &c.ident, &snake(&c.ident));
+        }
     }
     for r in &plan.reusable_params {
         // a vessel that continues as a produced state is destructured; a
@@ -959,6 +1368,47 @@ fn emit_process(g: &mut Generator, s: &mut String, plan: &ProcPlan) {
                 var = snake(r)
             );
         }
+    }
+    // R17 dual-arm body: the outcome token is realised here and nowhere else;
+    // both arms are constructed, so neither can be left unwritten (F-042)
+    if fallible(plan) {
+        let (ok_name, fail_name) = bundle_names(plan);
+        let outcome = plan.outcome.clone().unwrap_or_default();
+        let kind = format!("{outcome}Kind");
+        let ovar = snake(&outcome);
+        let _ = writeln!(s, "        match {ovar}.consume_kind() {{");
+        for (variant, name, wrap, ok) in [
+            ("Success", &ok_name, "Ok", true),
+            ("Failure", &fail_name, "Err", false),
+        ] {
+            let _ = writeln!(s, "            {kind}::{variant} => {wrap}({name} {{");
+            for (field, fty) in bundle_fields(plan, ok) {
+                let base = fty.split('<').next().unwrap_or(&fty).trim().to_string();
+                let expr = if field == "person" {
+                    "person".to_string()
+                } else if plan.reusable_returns.contains(&base)
+                    && plan.reusable_params.contains(&base)
+                {
+                    // passthrough reusable: moved in, returned in both arms (R2)
+                    field.clone()
+                } else if plan.reusable_returns.contains(&base) {
+                    // the consumed state's vessel returns to its bare state
+                    format!("{base}::mint()")
+                } else {
+                    format!("{base}::mint()")
+                };
+                if expr == field {
+                    let _ = writeln!(s, "                {field},");
+                } else {
+                    let _ = writeln!(s, "                {field}: {expr},");
+                }
+            }
+            let _ = writeln!(s, "            }}),");
+        }
+        let _ = writeln!(s, "        }}");
+        let _ = writeln!(s, "    }}");
+        let _ = writeln!(s);
+        return;
     }
     // return tuple
     let mut ret_exprs: Vec<String> = Vec::new();
@@ -1010,10 +1460,21 @@ fn emit_resources(g: &mut Generator) -> String {
         "//! GENERATED sealed resource family (R1), boundary (R12) and processes\n//! (SPEC.md §3, §4, §5). Layout per F-006/F-031: types here, with `boundary`\n//! and `processes` child modules."
     );
     let _ = writeln!(s);
-    let _ = writeln!(s, "use core::marker::PhantomData;");
-    let _ = writeln!(s, "use model_core::boundary::{{Consumer, Supplier}};");
-    let _ = writeln!(s, "use model_core::list::{{Cons, Len, Nil}};");
-    let _ = writeln!(s, "use model_core::nat::{{Succ, Zero}};");
+    if !g.consumers.is_empty() {
+        let _ = writeln!(s, "use core::marker::PhantomData;");
+    }
+    if !g.suppliers.is_empty() {
+        let _ = writeln!(s, "use model_core::boundary::{{Consumer, Supplier}};");
+        let _ = writeln!(s, "use model_core::list::{{Cons, Len, Nil}};");
+    } else {
+        let _ = writeln!(s, "use model_core::boundary::Consumer;");
+    }
+    if !g.consumers.is_empty() {
+        let _ = writeln!(s, "use model_core::nat::{{Succ, Zero}};");
+    }
+    if g.plans.iter().any(|p| fallible(p) && p.person) {
+        let _ = writeln!(s, "use model_core::common::Person;");
+    }
     let _ = writeln!(s);
     s.push_str(&hole_block(
         g,
@@ -1023,6 +1484,7 @@ fn emit_resources(g: &mut Generator) -> String {
     ));
     let _ = writeln!(s);
     emit_resource_types(g, &mut s);
+    emit_bundles(g, &mut s);
     let suppliers = g.suppliers.clone();
     for sp in &suppliers {
         emit_supplier(g, &mut s, sp);
@@ -1050,7 +1512,9 @@ fn emit_resources(g: &mut Generator) -> String {
         let sig = build_sig(g, plan);
         for (_, t) in sig.params.iter().chain(sig.returns.iter()) {
             let base = t.split('<').next().unwrap_or(t).trim().to_string();
-            if base != "S" && base != "S::Rest" && base != "Person" && !base.is_empty() {
+            if base != "S" && base != "S::Rest" && base != "Person" && base != "Result"
+                && !base.is_empty()
+            {
                 names.push(base);
             }
         }
@@ -1060,6 +1524,31 @@ fn emit_resources(g: &mut Generator) -> String {
         }
         if let Some((_, item)) = &plan.supply_n {
             names.push(item.clone());
+            if plan.supplier_consumed {
+                if let Some(sp) = g.suppliers.iter().find(|s| &s.item == item) {
+                    // the Rest bound and the exhausted-shell destructure
+                    names.push(format!("Empty{}", sp.ident));
+                    names.push(sp.ident.clone());
+                }
+            }
+        }
+        if fallible(plan) {
+            let (ok_name, fail_name) = bundle_names(plan);
+            names.push(ok_name);
+            names.push(fail_name);
+            if let Some(o) = &plan.outcome {
+                names.push(format!("{o}Kind"));
+            }
+            // the arms' minted products and waste are not in the signature
+            for (_, t) in bundle_fields(plan, true)
+                .iter()
+                .chain(bundle_fields(plan, false).iter())
+            {
+                let base = t.split('<').next().unwrap_or(t).trim().to_string();
+                if base != "Person" && !base.is_empty() {
+                    names.push(base);
+                }
+            }
         }
         for pr in &plan.produces {
             if let Some((_, held_item)) = held_of(g, &pr.ident) {
@@ -1067,13 +1556,32 @@ fn emit_resources(g: &mut Generator) -> String {
             }
         }
     }
-    names.push("PhantomData".into());
+    let any_disposal = plans.iter().any(|p| p.bin_disposal.is_some());
+    let any_supply = plans.iter().any(|p| p.supply_n.is_some());
+    if any_disposal {
+        names.push("PhantomData".into());
+    }
     names.sort();
     names.dedup();
     let _ = writeln!(s, "    use super::{{{}}};", names.join(", "));
-    let _ = writeln!(s, "    use model_core::boundary::{{SupplyN, send_to}};");
-    let _ = writeln!(s, "    use model_core::common::Person;");
-    let _ = writeln!(s, "    use model_core::list::{{Cons, Nil}};");
+    match (any_supply, any_disposal) {
+        (true, true) => {
+            let _ = writeln!(s, "    use model_core::boundary::{{SupplyN, send_to}};");
+        }
+        (true, false) => {
+            let _ = writeln!(s, "    use model_core::boundary::SupplyN;");
+        }
+        (false, true) => {
+            let _ = writeln!(s, "    use model_core::boundary::send_to;");
+        }
+        (false, false) => {}
+    }
+    if plans.iter().any(|p| p.person) {
+        let _ = writeln!(s, "    use model_core::common::Person;");
+    }
+    if any_supply || any_disposal {
+        let _ = writeln!(s, "    use model_core::list::{{Cons, Nil}};");
+    }
     // nat aliases used
     let mut aliases: Vec<String> = Vec::new();
     for plan in &plans {
@@ -1101,6 +1609,61 @@ fn emit_resources(g: &mut Generator) -> String {
 // ── flows ────────────────────────────────────────────────────────────────
 
 fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
+    // The test bodies are composed FIRST (into `body`): emitting them
+    // discovers the flow-end `rest_*` exits, which the import list below and
+    // the boundary module both need.
+    let mut body = String::new();
+    {
+        let s = &mut body;
+        let orders = g.spec.flows.orders.clone();
+        let flows_line = g.spec.flows.line;
+        let mut names_seen = Vec::new();
+        for (oi, order) in orders.iter().enumerate() {
+            let letter = (b'a' + oi as u8) as char;
+            let name = format!("flow_order_{letter}_type_checks_and_accounts_for_everything");
+            if names_seen.contains(&name) {
+                continue;
+            }
+            names_seen.push(name.clone());
+            let order_str = order
+                .iter()
+                .map(|p| format!("P{p}"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            let _ = writeln!(
+                s,
+                "/// GENERATED flow order ({letter}) from SPEC.md §6 (line {flows_line}): {order_str}."
+            );
+            let verifies: Vec<String> = {
+                let mut v: Vec<u32> = g
+                    .spec
+                    .processes
+                    .iter()
+                    .flat_map(|p| p.satisfies.iter())
+                    .map(|sid| {
+                        g.spec
+                            .requirements
+                            .iter()
+                            .find(|r| r.spec_id == *sid)
+                            .map(|r| r.impl_id)
+                            .unwrap_or(*sid)
+                    })
+                    .collect();
+                v.sort();
+                v.dedup();
+                v.iter().map(|id| format!("REQ-{id:03}")).collect()
+            };
+            if !verifies.is_empty() {
+                let _ = writeln!(s, "///");
+                let _ = writeln!(s, "/// Verifies: {}", verifies.join(", "));
+            }
+            let _ = writeln!(s, "#[test]");
+            let _ = writeln!(s, "fn {name}() {{");
+            emit_flow_body(g, s, order);
+            let _ = writeln!(s, "}}");
+            let _ = writeln!(s);
+        }
+    }
     let mut s = String::new();
     let _ = writeln!(
         s,
@@ -1125,6 +1688,22 @@ fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
         boundary_fns.push(format!("new_{}", snake(&d.obj_ident)));
         boundary_fns.push(d.fn_name.clone());
     }
+    for b in &g.bags {
+        boundary_fns.push(format!("new_{}", snake(&b.obj_ident)));
+        boundary_fns.push(b.fn_name.clone());
+    }
+    for so in &g.start_objects {
+        boundary_fns.push(format!("new_{}", snake(&so.ident)));
+    }
+    for e in g
+        .lexicon
+        .iter()
+        .filter(|e| matches!(e.role, Role::Outcome) && !e.alias_only)
+    {
+        // the scaffolded flows inject success tokens (placeholder; see the
+        // process's SPEC-HOLE for the outcome-combination design)
+        boundary_fns.push(format!("{}_will_succeed", snake(&e.ident)));
+    }
     for sp in &g.suppliers {
         boundary_fns.push(sp.fill_fn.clone());
     }
@@ -1133,6 +1712,9 @@ fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
     }
     for sk in &g.sinks {
         boundary_fns.push(format!("new_{}", snake(&sk.ident)));
+    }
+    for (ident, _) in &g.rest_exits {
+        boundary_fns.push(format!("rest_{}", snake(ident)));
     }
     boundary_fns.sort();
     boundary_fns.dedup();
@@ -1147,6 +1729,24 @@ fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
         "use {crate_ident}::resources::processes::{{{}}};",
         proc_fns.join(", ")
     );
+    let mut bundle_imports: Vec<String> = g
+        .plans
+        .iter()
+        .filter(|p| fallible(p))
+        .flat_map(|p| {
+            let (ok_name, fail_name) = bundle_names(p);
+            vec![fail_name, ok_name]
+        })
+        .collect();
+    bundle_imports.sort();
+    bundle_imports.dedup();
+    if !bundle_imports.is_empty() {
+        let _ = writeln!(
+            s,
+            "use {crate_ident}::resources::{{{}}};",
+            bundle_imports.join(", ")
+        );
+    }
     let _ = writeln!(s, "use model_core::boundary::send_to;");
     let _ = writeln!(s, "use model_core::common::Person;");
     let _ = writeln!(s, "use model_core::common::boundary::new_person;");
@@ -1166,54 +1766,7 @@ fn emit_flows(g: &mut Generator, crate_ident: &str) -> String {
         let _ = writeln!(s, "use model_core::nat::aliases::{{{}}};", aliases.join(", "));
     }
     let _ = writeln!(s);
-    let orders = g.spec.flows.orders.clone();
-    let flows_line = g.spec.flows.line;
-    let mut names_seen = Vec::new();
-    for (oi, order) in orders.iter().enumerate() {
-        let letter = (b'a' + oi as u8) as char;
-        let name = format!("flow_order_{letter}_type_checks_and_accounts_for_everything");
-        if names_seen.contains(&name) {
-            continue;
-        }
-        names_seen.push(name.clone());
-        let order_str = order
-            .iter()
-            .map(|p| format!("P{p}"))
-            .collect::<Vec<_>>()
-            .join(", ");
-        let _ = writeln!(
-            s,
-            "/// GENERATED flow order ({letter}) from SPEC.md §6 (line {flows_line}): {order_str}."
-        );
-        let verifies: Vec<String> = {
-            let mut v: Vec<u32> = g
-                .spec
-                .processes
-                .iter()
-                .flat_map(|p| p.satisfies.iter())
-                .map(|sid| {
-                    g.spec
-                        .requirements
-                        .iter()
-                        .find(|r| r.spec_id == *sid)
-                        .map(|r| r.impl_id)
-                        .unwrap_or(*sid)
-                })
-                .collect();
-            v.sort();
-            v.dedup();
-            v.iter().map(|id| format!("REQ-{id:03}")).collect()
-        };
-        if !verifies.is_empty() {
-            let _ = writeln!(s, "///");
-            let _ = writeln!(s, "/// Verifies: {}", verifies.join(", "));
-        }
-        let _ = writeln!(s, "#[test]");
-        let _ = writeln!(s, "fn {name}() {{");
-        emit_flow_body(g, &mut s, order);
-        let _ = writeln!(s, "}}");
-        let _ = writeln!(s);
-    }
+    s.push_str(&body);
     s
 }
 
@@ -1242,7 +1795,25 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
     for sk in &g.sinks {
         live.push(snake(&sk.ident));
     }
-    let mut created: Vec<String> = live.clone();
+    // running remainder per bounded container source (the pantry rows)
+    let mut bag_left: std::collections::BTreeMap<String, u64> = std::collections::BTreeMap::new();
+    // each live binding's base type, for the flow-end rest accounting
+    let mut var_ty: std::collections::BTreeMap<String, String> =
+        std::collections::BTreeMap::new();
+    // a fresh binding name: never shadow a live resource (shadowing leaks it)
+    let fresh = |live: &[String], name: &str| -> String {
+        if !live.iter().any(|v| v == name) {
+            return name.to_string();
+        }
+        let mut k = 2;
+        loop {
+            let cand = format!("{name}_{k}");
+            if !live.iter().any(|v| v == &cand) {
+                return cand;
+            }
+            k += 1;
+        }
+    };
     let plans = g.plans.clone();
     for pid in order {
         let Some(plan) = plans.iter().find(|p| p.p.id == *pid) else {
@@ -1256,23 +1827,34 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
             clean(&plan.p.title),
             plan.p.line
         );
-        // material draws + constructors for params not yet live
+        // resolve each parameter to a live value, drawing/constructing
+        // boundary objects where the spec provides a source
+        let mut args: Vec<String> = Vec::new();
         for (pname, pty) in &sig.params {
-            if created.contains(pname) {
+            if live.contains(pname) {
+                args.push(pname.clone());
+                continue;
+            }
+            // a produced batch feeds repeated runs: take the next numbered
+            // item still live (shaped_loaf → shaped_loaf_1, then _2)
+            if let Some(v) = (1..=16u64)
+                .map(|k| format!("{pname}_{k}"))
+                .find(|v| live.contains(v))
+            {
+                args.push(v);
                 continue;
             }
             let base = pty.split('<').next().unwrap_or(pty).trim();
             if let Some(d) = g.draws.iter().find(|d| d.item == base) {
                 let src = snake(&d.obj_ident);
-                if !created.contains(&src) {
+                if !live.contains(&src) {
                     let _ = writeln!(s, "    let {src} = new_{src}();");
-                    created.push(src.clone());
                     live.push(src.clone());
                 }
-                let amount = plans
+                let amount = plan
+                    .consumes
                     .iter()
-                    .find(|p| p.p.id == *pid)
-                    .and_then(|p| p.consumes.iter().find(|c| c.ident == base))
+                    .find(|c| c.ident == base)
                     .and_then(|c| c.consts.first().copied())
                     .unwrap_or(0);
                 let _ = writeln!(
@@ -1281,12 +1863,41 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
                     d.fn_name,
                     lit(amount)
                 );
-                created.push(pname.clone());
                 live.push(pname.clone());
+                var_ty.insert(pname.clone(), base.to_string());
+            } else if let Some(b) = g.bags.iter().find(|b| b.item == base) {
+                // bounded container source: draw with the caller-stated
+                // remainder (F-030); the generator re-derives the running
+                // balance the §6 account states
+                let src = snake(&b.obj_ident);
+                if !live.contains(&src) {
+                    let _ = writeln!(s, "    let {src} = new_{src}();");
+                    live.push(src.clone());
+                    var_ty.insert(src.clone(), b.obj_ident.clone());
+                    bag_left.insert(src.clone(), b.capacity);
+                }
+                let amount = plan
+                    .consumes
+                    .iter()
+                    .find(|c| c.ident == base)
+                    .and_then(|c| c.consts.first().copied())
+                    .unwrap_or(0);
+                let full = bag_left.get(&src).copied().unwrap_or(b.capacity);
+                let left = full.saturating_sub(amount);
+                bag_left.insert(src.clone(), left);
+                let _ = writeln!(
+                    s,
+                    "    let ({pname}, {src}) = {}::<{}, {}, {}>({src});",
+                    b.fn_name,
+                    lit(amount),
+                    lit(left),
+                    lit(full)
+                );
+                live.push(pname.clone());
+                var_ty.insert(pname.clone(), base.to_string());
             } else if pty == "S" {
                 if let Some(sp) = g.suppliers.iter().find(|sp| snake(&sp.ident) == *pname) {
                     let _ = writeln!(s, "    let {pname} = {}::<N{}>();", sp.fill_fn, sp.capacity);
-                    created.push(pname.clone());
                     live.push(pname.clone());
                 }
             } else if g
@@ -1295,62 +1906,78 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
                 .any(|e| e.ident == base && !e.alias_only && matches!(e.role, Role::Reusable))
             {
                 let _ = writeln!(s, "    let {pname} = new_{pname}();");
-                created.push(pname.clone());
+                live.push(pname.clone());
+            } else if let Some(so) = g.start_objects.iter().find(|so| so.ident == base) {
+                let _ = writeln!(s, "    let {pname} = new_{}();", snake(&so.ident));
+                live.push(pname.clone());
+                var_ty.insert(pname.clone(), base.to_string());
+            } else if g
+                .lexicon
+                .iter()
+                .any(|e| e.ident == base && !e.alias_only && matches!(e.role, Role::Outcome))
+            {
+                let _ = writeln!(s, "    let {pname} = {}_will_succeed();", snake(base));
                 live.push(pname.clone());
             }
+            args.push(pname.clone());
         }
-        // the call
-        let args = sig
-            .params
-            .iter()
-            .map(|(n, _)| n.clone())
-            .collect::<Vec<_>>()
-            .join(", ");
-        let outs = sig
-            .returns
-            .iter()
-            .map(|(n, _)| n.clone())
-            .collect::<Vec<_>>()
-            .join(", ");
-        for (pn, _) in &sig.params {
-            live.retain(|v| v != pn);
+        for a in &args {
+            live.retain(|v| v != a);
         }
-        if sig.returns.len() == 1 {
-            let _ = writeln!(s, "    let {outs} = {}({args});", plan.fn_name);
+        let args = args.join(", ");
+        if fallible(plan) {
+            emit_flow_fallible_call(g, s, plan, &args, &mut live, &mut var_ty, &fresh);
         } else {
-            let _ = writeln!(s, "    let ({outs}) = {}({args});", plan.fn_name);
-        }
-        for (rn, _) in &sig.returns {
-            if !live.contains(rn) {
-                live.push(rn.clone());
+            // fresh output bindings: rebinding a live resource would shadow
+            // (and so leak) it
+            let mut out_names: Vec<String> = Vec::new();
+            for (rn, rt) in &sig.returns {
+                let name = fresh(&live, rn);
+                out_names.push(name.clone());
+                live.push(name.clone());
+                let base = rt.split('<').next().unwrap_or(rt).trim().to_string();
+                var_ty.insert(name, base);
             }
-            if !created.contains(rn) {
-                created.push(rn.clone());
-            }
-        }
-        // route loose waste (and waste-duplicated produce) to its sink
-        for w in &plan.waste {
-            let Some(sink_var) = &w.sink_var else { continue };
-            let Some(item) = &w.item else { continue };
-            if w.duplicate_of_produce {
-                // produced discrete items: one send per item
-                if let Some(pr) = plan.produces.iter().find(|pr| pr.ident == item.ident) {
-                    if pr.discrete && pr.count > 1 {
-                        for i in 1..=pr.count {
-                            let v = format!("{}_{i}", snake(&pr.ident));
-                            let _ = writeln!(s, "    let {sink_var} = send_to({sink_var}, {v});");
-                            live.retain(|x| x != &v);
-                        }
-                    } else {
-                        let v = snake(&pr.ident);
-                        let _ = writeln!(s, "    let {sink_var} = send_to({sink_var}, {v});");
-                        live.retain(|x| x != &v);
-                    }
-                }
+            let outs = out_names.join(", ");
+            if sig.returns.len() == 1 {
+                let _ = writeln!(s, "    let {outs} = {}({args});", plan.fn_name);
             } else {
-                let v = snake(&item.ident);
-                let _ = writeln!(s, "    let {sink_var} = send_to({sink_var}, {v});");
-                live.retain(|x| x != &v);
+                let _ = writeln!(s, "    let ({outs}) = {}({args});", plan.fn_name);
+            }
+            // route loose waste (and waste-duplicated produce) to its sink;
+            // the generated names are the signature's return names
+            let rename: std::collections::BTreeMap<&String, &String> = sig
+                .returns
+                .iter()
+                .map(|(rn, _)| rn)
+                .zip(out_names.iter())
+                .collect();
+            for w in &plan.waste {
+                let Some(sink_var) = &w.sink_var else { continue };
+                let Some(item) = &w.item else { continue };
+                let mut names: Vec<String> = Vec::new();
+                if w.duplicate_of_produce {
+                    if let Some(pr) = plan.produces.iter().find(|pr| pr.ident == item.ident) {
+                        if pr.count > 1 {
+                            for i in 1..=pr.count {
+                                names.push(format!("{}_{i}", snake(&pr.ident)));
+                            }
+                        } else {
+                            names.push(snake(&pr.ident));
+                        }
+                    }
+                } else if item.count > 1 {
+                    for i in 1..=item.count {
+                        names.push(format!("{}_{i}", snake(&item.ident)));
+                    }
+                } else {
+                    names.push(snake(&item.ident));
+                }
+                for n in names {
+                    let v = rename.get(&n).map(|v| (*v).clone()).unwrap_or(n);
+                    let _ = writeln!(s, "    let {sink_var} = send_to({sink_var}, {v});");
+                    live.retain(|x| x != &v);
+                }
             }
         }
         // adjacent time draw (F-048)
@@ -1383,6 +2010,34 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
             }
         }
     }
+    // tripwired resources the §6 account leaves RESTING at the boundary (the
+    // container remainders, the used tins) return through their `rest_*`
+    // boundary exits — an integration test cannot hold them past its end
+    let resting: Vec<(String, String, usize)> = live
+        .iter()
+        .filter_map(|v| {
+            let base = var_ty.get(v)?;
+            if let Some(b) = g.bags.iter().find(|b| &b.obj_ident == base) {
+                return Some((v.clone(), b.obj_ident.clone(), 1));
+            }
+            let e = g
+                .lexicon
+                .iter()
+                .find(|e| &e.ident == base && !e.alias_only)?;
+            match &e.role {
+                Role::Container { .. } => Some((v.clone(), base.clone(), n_consts(&e.role))),
+                Role::Consumable { tripwire: true, .. } => Some((v.clone(), base.clone(), 0)),
+                _ => None,
+            }
+        })
+        .collect();
+    for (v, base, n) in &resting {
+        let _ = writeln!(s, "    rest_{}({v});", snake(base));
+        live.retain(|x| x != v);
+        if !g.rest_exits.iter().any(|(i, _)| i == base) {
+            g.rest_exits.push((base.clone(), *n));
+        }
+    }
     let final_budget = remaining;
     let _ = writeln!(
         s,
@@ -1391,6 +2046,159 @@ fn emit_flow_body(g: &mut Generator, s: &mut String, order: &[u32]) {
     );
     live.retain(|v| v != "person");
     let _ = writeln!(s, "    let _flow_end = ({}, history);", live.join(", "));
+}
+
+/// Emits the call and both-arm handling for an R17 fallible process in a
+/// generated flow: the arm-specific products are routed to their §4 sinks
+/// INSIDE the arm (so both arms account for everything), the conserved
+/// participants continue past the match under fresh (never-shadowing) names.
+fn emit_flow_fallible_call(
+    g: &mut Generator,
+    s: &mut String,
+    plan: &ProcPlan,
+    args: &str,
+    live: &mut Vec<String>,
+    var_ty: &mut std::collections::BTreeMap<String, String>,
+    fresh: &dyn Fn(&[String], &str) -> String,
+) {
+    let (ok_name, fail_name) = bundle_names(plan);
+    let ok_fields = bundle_fields(plan, true);
+    let fail_fields = bundle_fields(plan, false);
+    let common: Vec<(String, String)> = ok_fields
+        .iter()
+        .filter(|f| fail_fields.contains(f))
+        .cloned()
+        .collect();
+    let only = |fields: &[(String, String)]| -> Vec<(String, String)> {
+        fields.iter().filter(|f| !common.contains(f)).cloned().collect()
+    };
+    let ok_only = only(&ok_fields);
+    let fail_only = only(&fail_fields);
+    // each arm-only product's §4 sink (resolved up front: hole-reporting
+    // below needs the generator mutably)
+    let route = |g: &Generator, items: &[(String, String)]| -> Vec<(String, Option<String>)> {
+        items
+            .iter()
+            .map(|(f, ty)| {
+                let base = ty.split('<').next().unwrap_or(ty).trim().to_string();
+                let sv = g
+                    .sinks
+                    .iter()
+                    .find(|sk| sk.consumes.iter().any(|(i, _)| i == &base))
+                    .map(|sk| snake(&sk.ident));
+                (f.clone(), sv)
+            })
+            .collect()
+    };
+    let ok_route = route(g, &ok_only);
+    let fail_route = route(g, &fail_only);
+    let mut sinks_used: Vec<String> = Vec::new();
+    for (_, sv) in ok_route.iter().chain(fail_route.iter()) {
+        if let Some(sv) = sv {
+            if !sinks_used.contains(sv) {
+                sinks_used.push(sv.clone());
+            }
+        }
+    }
+    let attempt = fresh(live, "attempt");
+    let _ = writeln!(s, "    let {attempt} = {}({args});", plan.fn_name);
+    let _ = writeln!(
+        s,
+        "    // Both arms are handled (R17): each arm routes its own products to their"
+    );
+    let _ = writeln!(
+        s,
+        "    // §4 destinations; everything conserved in both arms continues past the match."
+    );
+    // fresh outer names for the conserved fields (never shadow a live value)
+    let mut outer: Vec<String> = Vec::new();
+    for (f, _) in &common {
+        let mut pool = live.clone();
+        pool.extend(outer.iter().cloned());
+        outer.push(fresh(&pool, f));
+    }
+    let fmt_tuple = |v: &[String]| -> String {
+        if v.len() == 1 {
+            v[0].clone()
+        } else {
+            format!("({})", v.join(", "))
+        }
+    };
+    let tuple_inner: Vec<String> = common
+        .iter()
+        .map(|(f, _)| f.clone())
+        .chain(sinks_used.iter().cloned())
+        .collect();
+    let outer_all: Vec<String> = outer
+        .iter()
+        .cloned()
+        .chain(sinks_used.iter().cloned())
+        .collect();
+    let _ = writeln!(s, "    let {} = match {attempt} {{", fmt_tuple(&outer_all));
+    for (wrap, name, fields, route) in [
+        ("Ok", &ok_name, &ok_fields, &ok_route),
+        ("Err", &fail_name, &fail_fields, &fail_route),
+    ] {
+        let pat = fields
+            .iter()
+            .map(|(f, _)| f.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
+        let _ = writeln!(s, "        {wrap}({name} {{ {pat} }}) => {{");
+        for (f, sv) in route {
+            match sv {
+                Some(sv) => {
+                    let _ = writeln!(s, "            let {sv} = send_to({sv}, {f});");
+                }
+                None => {
+                    s.push_str(&hole_block(
+                        g,
+                        "            ",
+                        &format!("no §4 destination resolved for the {wrap} arm's {f}"),
+                        "This arm-only product matches no §4 sink by its canonical identifier, so\nthe scaffold cannot route it; it is bound loudly (the tripwire reports the\nleak at test time) until the implementer wires its destination.",
+                    ));
+                    let _ = writeln!(s, "            let unrouted_{f} = {f};");
+                    let _ = writeln!(s, "            let _ = &unrouted_{f};");
+                }
+            }
+        }
+        let _ = writeln!(s, "            {}", fmt_tuple(&tuple_inner));
+        let _ = writeln!(s, "        }}");
+    }
+    let _ = writeln!(s, "    }};");
+    for (n, (_, ty)) in outer.iter().zip(common.iter()) {
+        live.push(n.clone());
+        let base = ty.split('<').next().unwrap_or(ty).trim().to_string();
+        var_ty.insert(n.clone(), base);
+    }
+    // the stated waste leaves in both arms: route the conserved waste fields
+    let rename: std::collections::BTreeMap<&String, &String> = common
+        .iter()
+        .map(|(f, _)| f)
+        .zip(outer.iter())
+        .collect();
+    for w in &plan.waste {
+        let Some(sink_var) = &w.sink_var else { continue };
+        let Some(item) = &w.item else { continue };
+        if w.duplicate_of_produce {
+            continue;
+        }
+        let mut names: Vec<String> = Vec::new();
+        if item.count > 1 {
+            for i in 1..=item.count {
+                names.push(format!("{}_{i}", snake(&item.ident)));
+            }
+        } else {
+            names.push(snake(&item.ident));
+        }
+        for n in names {
+            let Some(v) = rename.get(&n).map(|v| (*v).clone()) else {
+                continue; // an arm-only waste was already routed in its arm
+            };
+            let _ = writeln!(s, "    let {sink_var} = send_to({sink_var}, {v});");
+            live.retain(|x| x != &v);
+        }
+    }
 }
 
 // ── entry point ──────────────────────────────────────────────────────────
@@ -1404,8 +2212,11 @@ pub fn emit_crate(g: &mut Generator, pkg_name: &str, model_core_path: &str) -> V
     let lib = emit_lib(g, &spec_name);
     let characteristics = emit_characteristics(g);
     let requirements = emit_requirements(g);
-    let resources = emit_resources(g);
+    // flows before resources: the flow emitter discovers which resources the
+    // §6 account leaves resting at flow end, and the boundary emits their
+    // `rest_*` exits (the file order below is unchanged)
     let flows = emit_flows(g, &crate_ident);
+    let resources = emit_resources(g);
     vec![
         ("Cargo.toml".into(), emit_cargo_toml(pkg_name, model_core_path)),
         ("src/lib.rs".into(), lib),
