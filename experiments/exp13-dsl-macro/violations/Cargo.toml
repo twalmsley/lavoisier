@@ -1,0 +1,22 @@
+# EXP-13 violation transcripts: each feature turns on ONE canonical violation
+# so its verbatim compiler output can be captured with
+#   cargo build -p exp13-violations --features <violation>
+# while the default build and `cargo test` stay green (common protocol).
+#
+# The requirement-bound violation (type-check time) is not here: it is a
+# pinned trybuild .stderr in each arm's tests/ui/.
+[package]
+name = "exp13-violations"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+energy-control = []
+energy-dsl = []
+overdraw-control = []
+overdraw-dsl = []
+
+[dependencies]
+model-core = { path = "../../../model/model-core" }
+exp13-control = { path = "../control" }
+exp13-dsl = { path = "../dsl" }

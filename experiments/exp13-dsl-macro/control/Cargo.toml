@@ -1,0 +1,19 @@
+# EXP-13 control arm: the CS-1 slice hand-written (lifted from
+# model/cs1-pot-of-tea), per the EXP-10 protocol update: model-core by path,
+# test-support via the [dev-dependencies] re-declaration, trybuild the only
+# external dev-dependency.
+[package]
+name = "exp13-control"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+test-support = []
+
+[dependencies]
+model-core = { path = "../../../model/model-core" }
+
+[dev-dependencies]
+model-core = { path = "../../../model/model-core", features = ["test-support"] }
+exp13-control = { path = ".", features = ["test-support"] }
+trybuild = "1"

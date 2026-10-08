@@ -1,0 +1,17 @@
+# EXP-13 experiment arm: the same CS-1 slice authored through the `model!`
+# macro front-end defined in src/macros.rs. Same protocol as the control.
+[package]
+name = "exp13-dsl"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+test-support = []
+
+[dependencies]
+model-core = { path = "../../../model/model-core" }
+
+[dev-dependencies]
+model-core = { path = "../../../model/model-core", features = ["test-support"] }
+exp13-dsl = { path = ".", features = ["test-support"] }
+trybuild = "1"

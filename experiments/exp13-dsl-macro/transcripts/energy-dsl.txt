@@ -1,0 +1,45 @@
+   Compiling exp13-violations v0.1.0 (/Users/tonywalmsley/work/systems_engineering/claude/experiments/exp13-dsl-macro/violations)
+error[E0080]: evaluation panicked: energy conservation violated in boil (R15): the embodied energy plus the kettle's waste heat must sum exactly to the energy drawn from the grid
+   --> /usr/local/Cellar/rust/1.98.1/lib/rustlib/src/rust/library/core/src/panic.rs:62:9
+    |
+ 62 |           $crate::panicking::panic_fmt($crate::const_format_args!($($t)+));
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `exp13_dsl::model::processes::boil::<1500, 550000, 500000, 60000>::{constant#0}` failed here
+    |
+   ::: dsl/src/model.rs:167:5
+    |
+167 | /     crate::model! {
+168 | |
+169 | |         /// P1 — fills the kettle with the drawn cold water. The person is
+170 | |         /// moved in and comes back with the filled kettle (R2); the water's
+...   |
+234 | |     }
+    | |_____- in this macro invocation
+    |
+    = note: this error originates in the macro `$crate::panic::panic_2021` which comes from the expansion of the macro `crate::model` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: erroneous constant encountered
+   --> dsl/src/macros.rs:206:16
+    |
+206 |               $( const { assert!($aexpr, $amsg) }; )*
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: dsl/src/model.rs:167:5
+    |
+167 | /     crate::model! {
+168 | |
+169 | |         /// P1 — fills the kettle with the drawn cold water. The person is
+170 | |         /// moved in and comes back with the filled kettle (R2); the water's
+...   |
+234 | |     }
+    | |_____- in this macro invocation
+    |
+    = note: this note originates in the macro `$crate::model` which comes from the expansion of the macro `crate::model` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: the above error was encountered while instantiating `fn boil::<1500, 550000, 500000, 60000>`
+  --> violations/src/lib.rs:57:36
+   |
+57 |             step (boiling, heat) = boil::<1500, 550_000, 500_000, 60_000>(filled, energy);
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0080`.
+error: could not compile `exp13-violations` (lib) due to 1 previous error

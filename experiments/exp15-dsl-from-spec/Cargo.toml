@@ -1,0 +1,17 @@
+# EXP-15: the spec as the DSL — a std-only generator parsing the REAL agreed
+# CS-1 SPEC.md (case-studies/cs1-pot-of-tea/SPEC.md, read-only corpus) and
+# emitting as much of the model crate as the spec mechanically determines.
+# The generated crate lands in generated/cs1-gen/ with its own path dep on
+# model-core. No external dependencies (trybuild would be permitted but is
+# not needed: the generator has no compile-fail surface of its own).
+
+[package]
+name = "exp15-dsl-from-spec"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[bin]]
+name = "specgen"
+path = "src/bin/specgen.rs"

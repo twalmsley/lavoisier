@@ -1,0 +1,113 @@
+# EXP-14: the CS-1 slice in the .lav external notation.
+# The same slice as EXP-13: the water/electricity containers, the mains/grid
+# boundary draws, fill_kettle and boil with the energy assert, one requirement
+# (boiling water, R10 incl. rule 8), and one flow. `serve` is the minimal
+# consumer of the requirement bound (cs1's pour_and_brew without the teapot).
+
+model err-moved-resource
+  doc "Case study CS-1 slice: one person fills and boils a kettle and serves the boiling water - generated from the .lav notation (EXP-14)"
+
+# --- resources (R1, R7, R9: one type per state) -----------------------------
+
+container ColdWater unit "grams"
+  doc "Cold water drawn from the mains, in grams (R7 base mass unit)."
+
+container Electricity unit "joules"
+  doc "Electrical energy drawn from the grid, in joules (R7)."
+
+container WasteHeat unit "joules"
+  doc "Waste heat, in joules (R15: waste is an ordinary conserved output)."
+
+container HotWater<MASS_G> unit "joules (embodied)"
+  doc "Boiling water served from the kettle: MASS_G grams carrying V joules of embodied energy."
+
+reusable Kettle
+  doc "The electric kettle, empty - the state it enters and leaves the flow in."
+  placeholder "kitchen setup at flow start - one kettle"
+
+container FilledKettle unit "grams of water"
+  doc "The kettle filled with V grams of cold water - a distinct processing state (R9): it cannot be poured."
+
+container BoilingKettle<WATER_G> unit "joules (embodied)"
+  doc "The kettle at the boil: WATER_G grams of boiling water carrying V joules of embodied energy - the only pourable state (REQ-001)."
+
+# --- boundary (R12, R15) -----------------------------------------------------
+
+source MainsTap draws ColdWater via draw_cold_water
+  doc "The mains tap: the unbounded boundary source cold water is drawn from."
+  placeholder "mains water - assumed unbounded"
+
+source GridSocket draws Electricity via draw_grid_energy
+  doc "The grid socket: the unbounded boundary source electrical energy is drawn from."
+  placeholder "grid electricity - assumed unbounded"
+
+sink KitchenAir accepts WasteHeat
+  doc "The kitchen air: the unbounded boundary sink every joule of waste heat is accounted to."
+  placeholder "kitchen air - assumed able to absorb all waste heat"
+
+sink Drinker accepts HotWater
+  doc "The drinker taking delivery of the served boiling water."
+  placeholder "the drinker - cup return is out of scope"
+
+# --- characteristics and requirements (R6, R10) -------------------------------
+
+characteristic Boiling on BoilingKettle
+  doc "The kettle is at the boil - boiling is a type, not a temperature reading."
+  carries WATER_G "The boiling water's mass, in grams."
+  carries EMBODIED_J = V "The embodied energy, in joules (carried in the type from boiling onward)."
+  extraction pour_away -> Kettle "The kettle is poured out and returns to its empty state."
+
+requirement REQ-001 PouredAtTheBoil "Water must be poured at the boil (only the boiling state of the kettle can be served)." requires Boiling
+  error "this kettle may not be poured: `{Self}` is not at the boil (REQ-001)"
+  label "REQ-001: water must be poured at the boil"
+  note "boiling is a process state (R9): `boil` turns a `FilledKettle` into a `BoilingKettle` - only that state can be poured"
+  example KettleAtTheBoil = BoilingKettle<1500, 500000> "The boiling kettle at the flow's quantities (R7)."
+
+# --- processes (R1, R2, R3, R15) ----------------------------------------------
+
+process fill_kettle
+  doc "Fills the kettle with the drawn cold water; the water's mass continues structurally (the shared G)."
+  in person: Person<B>
+  in kettle: Kettle
+  in water: ColdWater<G>
+  out person
+  out filled: FilledKettle<G>
+
+process boil
+  doc "Boils the kettle: the drawn energy becomes embodied energy plus the kettle's waste heat; no person - the kettle is automatic."
+  in kettle: FilledKettle<G>
+  in energy: Electricity<DRAW_J>
+  out boiling: BoilingKettle<G, EMBODIED_J>
+  out heat: WasteHeat<HEAT_J>
+  balance joules "energy conservation violated in boil (R15)": DRAW_J = EMBODIED_J + HEAT_J
+
+process serve
+  doc "Pours the boiling kettle out for the drinker; only a kettle at the boil may be served (REQ-001)."
+  in kettle: K requires REQ-001
+  out empty: Kettle via pour_away(kettle)
+  out water: HotWater<MASS_G, SERVED_J>
+  balance grams "mass conservation violated in serve (R3)": K.WATER_G = MASS_G
+  balance joules "energy conservation violated in serve (R15)": K.EMBODIED_J = SERVED_J
+
+# --- the flow (R9, R16, F-048) --------------------------------------------------
+
+flow make_tea
+  doc "One person fills and boils the kettle and serves the boiling water."
+  verifies REQ-001
+  history h
+  person p budget 300000
+  new tap MainsTap
+  new socket GridSocket
+  new air KitchenAir
+  new drinker Drinker
+  new kettle Kettle
+  take water 1500 from tap
+  take energy 550000 from socket
+  spend p 30000 on fill_kettle
+  do p, filled = fill_kettle(p, kettle, water)
+  do boiling, heat = boil(filled, water) with EMBODIED_J = 500000, HEAT_J = 50000
+  send heat to air
+  spend p 15000 on serve
+  do kettle, hot = serve(boiling) with MASS_G = 1500, SERVED_J = 500000
+  send hot to drinker
+  end p, tap, socket, air, drinker, kettle, h

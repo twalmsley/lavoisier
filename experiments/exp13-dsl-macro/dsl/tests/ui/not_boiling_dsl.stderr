@@ -1,0 +1,19 @@
+error[E0277]: this kettle may not be poured: `FilledKettle<1500>` is not at the boil (REQ-002)
+  --> tests/ui/not_boiling_dsl.rs:18:74
+   |
+18 |         step (kettle, cuppa, loss) = pour_cuppa::<1500, 490_000, 10_000, _>(filled);
+   |                                                                          ^ REQ-002: tea must be brewed with boiling water
+   |
+   = help: the trait `Boiling` is not implemented for `FilledKettle<1500>`
+   = note: boiling is a process state (R9): `boil` turns a `FilledKettle` into a `BoilingKettle` - only that state can be poured
+help: the trait `Boiling` is implemented for `BoilingKettle<G, E>`
+  --> src/model.rs
+   |
+   |         impl<const G: u64, const E: u64> Boiling for BoilingKettle<G, E> {
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `FilledKettle<1500>` to implement `Req002BoilingWater`
+note: required by a bound in `pour_cuppa`
+  --> src/model.rs
+   |
+   |         process fn pour_cuppa [const OUT_G: u64, const OUT_E: u64, const LOSS_J: u64, K: Req002BoilingWater] {
+   |                                                                                          ^^^^^^^^^^^^^^^^^^ required by this bound in `pour_cuppa`

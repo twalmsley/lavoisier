@@ -1,0 +1,35 @@
+   Compiling exp13-dsl v0.1.0 (/Users/tonywalmsley/work/systems_engineering/claude/experiments/exp13-dsl-macro/dsl)
+   Compiling exp13-violations v0.1.0 (/Users/tonywalmsley/work/systems_engineering/claude/experiments/exp13-dsl-macro/violations)
+error[E0080]: evaluation panicked: energy conservation violated in boil (R15): the embodied energy plus the kettle's waste heat must sum exactly to the energy drawn from the grid
+   --> /usr/local/Cellar/rust/1.98.1/lib/rustlib/src/rust/library/core/src/panic.rs:62:9
+    |
+ 62 |           $crate::panicking::panic_fmt($crate::const_format_args!($($t)+));
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `exp13_control::model::processes::boil::<1500, 550000, 500000, 60000>::{constant#0}` failed here
+    |
+   ::: control/src/model.rs:305:13
+    |
+305 | / ...   assert!(
+306 | | ...       EMBODIED_J + HEAT_J == DRAW_J,
+307 | | ...       "energy conservation violated in boil (R15): the embodied energy plus the kettle's waste heat must sum exactly to the e...
+308 | | ...   )
+    | |_______- in this macro invocation
+
+note: erroneous constant encountered
+   --> control/src/model.rs:304:9
+    |
+304 | / ...   const {
+305 | | ...       assert!(
+306 | | ...           EMBODIED_J + HEAT_J == DRAW_J,
+307 | | ...           "energy conservation violated in boil (R15): the embodied energy plus the kettle's waste heat must sum exactly to t...
+308 | | ...       )
+309 | | ...   };
+    | |_______^
+
+note: the above error was encountered while instantiating `fn boil::<1500, 550000, 500000, 60000>`
+  --> violations/src/lib.rs:36:31
+   |
+36 |         let (boiling, heat) = boil::<1500, 550_000, 500_000, 60_000>(filled, energy);
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0080`.
+error: could not compile `exp13-violations` (lib) due to 1 previous error

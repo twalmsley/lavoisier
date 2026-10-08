@@ -1,0 +1,28 @@
+# EXP-14: a DSL as an external notation. `lavc` is the std-only compiler
+# (diagram-gen house style: no dependencies) that parses the `.lav` notation
+# and generates a complete, buildable model crate downstream of model-core.
+# The generated crates live under generated/ (each with its own [workspace]
+# table so they stay detached from this package).
+
+[package]
+name = "exp14-dsl-external"
+version = "0.1.0"
+edition = "2024"
+description = "EXP-14: a .lav external notation and the std-only lavc compiler generating model crates"
+
+[[bin]]
+name = "lavc"
+path = "src/main.rs"
+
+[dependencies]
+# None: the compiler is std-only (R8 spirit; tools/diagram-gen house style).
+
+[dev-dependencies]
+# None needed: the two error layers are exercised by running lavc (unit
+# tests below) and cargo over the generated crates (tests/generated.rs).
+# trybuild is permitted (R4) but has nothing to test here - the compiler
+# itself has no compile-fail surface, and conservation violations in the
+# GENERATED crates are post-monomorphization (F-001/F-003), which trybuild
+# cannot see.
+
+[workspace]

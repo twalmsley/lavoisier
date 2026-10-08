@@ -1,0 +1,34 @@
+   Compiling exp13-violations v0.1.0 (/Users/tonywalmsley/work/systems_engineering/claude/experiments/exp13-dsl-macro/violations)
+error[E0080]: evaluation panicked: time budget violated in draw_time (R15): SPEND + LEFT must equal BUDGET - is more time being spent than the person has left?
+   --> /usr/local/Cellar/rust/1.98.1/lib/rustlib/src/rust/library/core/src/panic.rs:62:9
+    |
+ 62 |           $crate::panicking::panic_fmt($crate::const_format_args!($($t)+));
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `model_core::common::processes::draw_time::<30000, 0, 20000>::{constant#0}` failed here
+    |
+   ::: /Users/tonywalmsley/work/systems_engineering/claude/model/model-core/src/common.rs:246:13
+    |
+246 | / ...   assert!(
+247 | | ...       SPEND + LEFT == BUDGET,
+248 | | ...       "time budget violated in draw_time (R15): SPEND + LEFT must equal BUDGET - is more time being spent than the person has...
+249 | | ...   )
+    | |_______- in this macro invocation
+
+note: erroneous constant encountered
+   --> /Users/tonywalmsley/work/systems_engineering/claude/model/model-core/src/common.rs:245:9
+    |
+245 | / ...   const {
+246 | | ...       assert!(
+247 | | ...           SPEND + LEFT == BUDGET,
+248 | | ...           "time budget violated in draw_time (R15): SPEND + LEFT must equal BUDGET - is more time being spent than the person...
+249 | | ...       )
+250 | | ...   };
+    | |_______^
+
+note: the above error was encountered while instantiating `fn draw_time::<30000, 0, 20000>`
+  --> violations/src/lib.rs:92:37
+   |
+92 |             step (labour, person) = draw_time::<30_000, 0, 20_000>(person);
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0080`.
+error: could not compile `exp13-violations` (lib) due to 1 previous error

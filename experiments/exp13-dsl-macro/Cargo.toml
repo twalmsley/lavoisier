@@ -1,0 +1,12 @@
+# EXP-13: A DSL as a macro front-end (instructions.md, experiment plan).
+# Three members:
+#   control    - the CS-1 water/electricity/kettle/boil/requirement/flow slice,
+#                hand-written (lifted from model/cs1-pot-of-tea, the control arm)
+#   dsl        - the same slice authored through the `model!` macro front-end
+#   violations - feature-gated copies of the three canonical violations, one
+#                per arm, so verbatim error transcripts can be captured without
+#                breaking the default `cargo build` / `cargo test` (which must
+#                pass, common protocol)
+[workspace]
+resolver = "2"
+members = ["control", "dsl", "violations"]
