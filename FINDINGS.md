@@ -1823,4 +1823,9 @@ object scaffolded beside the Clean/Greased/Used state chain that fully models th
 (4) U+202F narrow no-break spaces in generated prose numbers, which defeat grep and
 exact-string editing. The generators' hardcoded `default_crates()` list is a fifth, older
 item of the same F-055-point-5 class: a new model crate is invisible to diagrams/docgen/lint
-until the list is extended by hand (one line, done for cs6 in the landing commit).
+until the list is extended by hand (one line, done for cs6 in the landing commit). A sixth,
+caught right after landing: **docgen writes but never prunes**, so deleting or renaming a
+process leaves its old document orphaned in `docs/processes/` — unindexed by the README,
+invisible to the rerun-and-diff idempotence check (a stale file is byte-identical to itself),
+and only caught by comparing the directory listing against a fresh generation (`new_loaf_tin.md`
+survived the dead object it documented by one commit).
