@@ -54,10 +54,10 @@ date: "October 2026"
 # The evidence so far
 
 - 15 controlled experiments — every design rule is backed by measured evidence
-- 22 agreed rules; 64 documented findings, including the honest limitations
-- A working library and six complete models — a workshop pilot plus five case studies,
-  from everyday (a pot of tea, a puncture repair) to industrial (a batch run, two-site fulfilment)
-- Over 200 automated checks run on every change, end to end
+- 22 agreed rules; 66 documented findings, including the honest limitations
+- A working library and seven complete models — a workshop pilot plus six case studies,
+  from everyday (a pot of tea, a batch of bread) to industrial (a batch run, two-site fulfilment)
+- Over 230 automated checks run on every change, end to end
 
 # What it costs — honestly
 
@@ -76,8 +76,8 @@ date: "October 2026"
 
 - The case-study ladder is **complete**: from a pot of tea to two-site production with procurement
 - Generated from every model, automatically: diagrams at three levels, work instructions people can follow, and analysis reports that point out gaps and weak style
-- The dedicated-notation question is **answered by evidence**: a validated pipeline — specifications machine-checked before any model exists, models started as generated scaffolds; the full notation is deliberately parked
-- Next: new systems modelled through that pipeline, and validating models against the real world
+- The pipeline — specifications machine-checked before any model exists, models started as generated scaffolds — has now been **field-tested for real**: its first run produced a working model (a batch of bread) *and* caught the generator making four silent mistakes, each now fixed and guarded by its own regression test
+- Next: more systems through that hardened pipeline, and validating models against the real world
 
 # Summary
 

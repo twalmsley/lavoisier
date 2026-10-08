@@ -18,7 +18,7 @@ date: "October 2026"
 
 - `instructions.md` — the 22 agreed rules (R1–R22), the normative spec
 - `model-core` — the library: numbers, units, resource kernel, boundary, history, requirements
-- Downstream **model crates** — per system modelled: the pilot workshop plus the five case studies (CS-1..CS-5)
+- Downstream **model crates** — per system modelled: the pilot workshop plus the six case studies (CS-1..CS-6)
 - The evidence loop: *experiment → finding (F-NNN) → rule (R-NN) → implementation*
 - One repository, one verification gate (`ci.sh`)
 
@@ -152,19 +152,19 @@ date: "October 2026"
 - Why a *full build*: the balance checks fire late in compilation — quick checks and editors cannot see them
 - Why a *plain build*: proves test fixtures cannot leak into production models
 - The last two steps gate the paperwork: stale analysis reports fail; an unbalanced spec line fails **before any code exists**
-- Over 200 checks, green end to end, on every change
+- Over 230 checks, green end to end, on every change
 
 # Evidence and limits
 
-- 15 controlled experiments; 64 findings, each citing verbatim compiler evidence
-- Five case studies — pot of tea to two-site fulfilment — ran the method end to end; CS-4's change-impact probes measured the "impact analysis for free" claim
-- Highlights: balance checks invisible to editors (F-001); the silent-drop gap (F-002); a reproducible compiler crash found and fenced (F-034); diagnostics that erase aliases (F-009)
+- 15 controlled experiments; 66 findings, each citing verbatim compiler evidence
+- Six case studies — pot of tea to two-site fulfilment, then a bread batch with rework-free fallibility (a scorched loaf is final) — ran the method end to end; CS-4's change-impact probes measured the "impact analysis for free" claim
+- Highlights: balance checks invisible to editors (F-001); the silent-drop gap (F-002); a reproducible compiler crash found and fenced (F-034); a spec-clean scaffold that emitted silently wrong code — four generator defects found and pinned at the first field test (F-066)
 - Every rule in the method cites the finding that justifies it — and the limitations are part of the record
 
 # Where to go next
 
-- Learn: tutorials 00–06 → `learn/` exercises → the case-study code (CS-1..CS-5) → the modeller's guide
+- Learn: tutorials 00–06 → `learn/` exercises → the case-study code (CS-1..CS-6) → the modeller's guide
 - Generated from every model: diagrams (`docs/diagrams/`), work instructions (`docs/processes/`), lint reports (`docs/analysis/`)
-- Specs are machine-checked (`speccheck`) and scaffold into model crates (`specgen`); the full DSL notation is validated and deliberately parked
-- Read the white paper (`docs/white-paper.md`, v0.3) for the full account
+- Specs are machine-checked (`speccheck`) and scaffold into model crates (`specgen`) — field-tested on CS-6, where 60 % of the scaffold survived verbatim into the finished model; the full DSL notation is validated and deliberately parked
+- Read the white paper (`docs/white-paper.md`, v0.4) for the full account
 - Or simply: open the repository and run `./ci.sh`

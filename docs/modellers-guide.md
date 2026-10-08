@@ -513,7 +513,7 @@ Since R22, a model does not start at the keyboard — it starts at a specificati
 already passed a machine check.
 
 **`speccheck` is the pre-code gate.** `./tools/spec.sh` (ci.sh step 8 in `--check` mode)
-validates every `case-studies/*/SPEC.md` against the template's conventions (the A1–A10
+validates every `case-studies/*/SPEC.md` against the template's conventions (the A1–A13
 amendments to `SPEC_TEMPLATE.md`): balance arithmetic, waste-destination closure (§5 ↔ §4),
 canonical-name closure, `Satisfies:`-id closure, draw/balance time agreement, flow orders,
 workspace-unique REQ ids (F-053). Errors are phrased at the document, with line references:
