@@ -53,8 +53,8 @@ date: "October 2026"
 
 # The evidence so far
 
-- 12 controlled experiments — every design rule is backed by measured evidence
-- 19 agreed rules; 57 documented findings, including the honest limitations
+- 15 controlled experiments — every design rule is backed by measured evidence
+- 22 agreed rules; 64 documented findings, including the honest limitations
 - A working library and six complete models — a workshop pilot plus five case studies,
   from everyday (a pot of tea, a puncture repair) to industrial (a batch run, two-site fulfilment)
 - Over 200 automated checks run on every change, end to end
@@ -62,7 +62,7 @@ date: "October 2026"
 # What it costs — honestly
 
 - Modelling is precise work: exact quantities, every output accounted for
-- Today it needs a Rust-literate modeller (tutorials are included; a friendlier notation is on the roadmap)
+- Today it needs a Rust-literate modeller (tutorials are included; specifications are machine-checked and models start from generated scaffolds, but finishing one still takes Rust)
 - A few checks only run on the full build, not live in the editor
 - Not yet covered: tolerances, schedules and durations, calibration against the real world
 
@@ -75,10 +75,9 @@ date: "October 2026"
 # Where this goes
 
 - The case-study ladder is **complete**: from a pot of tea to two-site production with procurement
-- Diagrams are already generated from every model, at three levels of detail
-- Next: generated work instructions people can follow
-- Analysis tools that point out gaps and weak style in a model
-- A dedicated notation (a DSL), so engineers write models without writing Rust
+- Generated from every model, automatically: diagrams at three levels, work instructions people can follow, and analysis reports that point out gaps and weak style
+- The dedicated-notation question is **answered by evidence**: a validated pipeline — specifications machine-checked before any model exists, models started as generated scaffolds; the full notation is deliberately parked
+- Next: new systems modelled through that pipeline, and validating models against the real world
 
 # Summary
 

@@ -1455,6 +1455,18 @@ callee. Multi-crate models (the R1 subsystem pattern) need the generator to reso
 dependency, or a merged-workspace mode — queue for step 9.
 
 
+
+**Gaps 1 and 7 RESOLVED, flow discovery generalized (2026-10-07, step-9 build):** the shared
+scanner now loads workspace path-dependencies transitively and resolves upstream types,
+processes and sinks (gap 7: all 24 unknown-callee WARNs died; cs4/cs5 diagrams come out whole
+with cross-crate edges, single-crate output unchanged), recovers supplier items through
+concrete `Item`s, `Cons` heads, fill machinery or full-state aliases (gap 1), and traces every
+composite flow and ≥2-process integration test rather than one magic test name. Stderr WARNs
+fell 42 → 6. Still open, by design or pending: the multi-type non-REQ bound (conservative
+omission), gap 6's convention (match on the call), a downstream-implemented trait bound seen
+from the upstream crate, the F-056 quantum clock not recognized as an actor, recursion
+internals shown as one step, and associated-const asserts restated symbolically only.
+
 ---
 
 ## F-056 — A const budget cannot descend through type-level recursion; the quantum-clock encoding
@@ -1503,17 +1515,6 @@ takings stay arithmetic-only (F-029).
 
 **Evidence:** `model/cs5-works/src/` (`Account`), `model/cs5-supply/src/` (boundary fns);
 CS-5 build report.
-
-**Gaps 1 and 7 RESOLVED, flow discovery generalized (2026-10-07, step-9 build):** the shared
-scanner now loads workspace path-dependencies transitively and resolves upstream types,
-processes and sinks (gap 7: all 24 unknown-callee WARNs died; cs4/cs5 diagrams come out whole
-with cross-crate edges, single-crate output unchanged), recovers supplier items through
-concrete `Item`s, `Cons` heads, fill machinery or full-state aliases (gap 1), and traces every
-composite flow and ≥2-process integration test rather than one magic test name. Stderr WARNs
-fell 42 → 6. Still open, by design or pending: the multi-type non-REQ bound (conservative
-omission), gap 6's convention (match on the call), a downstream-implemented trait bound seen
-from the upstream crate, the F-056 quantum clock not recognized as an actor, recursion
-internals shown as one step, and associated-const asserts restated symbolically only.
 
 ---
 

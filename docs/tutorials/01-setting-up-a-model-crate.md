@@ -99,7 +99,7 @@ cd model
 ./ci.sh
 ```
 
-Six steps, any failure fails the gate — and each exists because of a measured
+Eight steps, any failure fails the gate — and each exists because of a measured
 finding, not ceremony:
 
 | Step | What | Why |
@@ -110,6 +110,8 @@ finding, not ceremony:
 | 4 | a **plain no-features build** | the only step that proves production code can't call `test_fixture()` (F-004) |
 | 5 | `./trace.sh` | the requirements traceability report; a requirement with no verifying test fails CI |
 | 6 | a feature-placement grep | `test-support` under `[dev-dependencies]` only |
+| 7 | the model linter (`tools/lint.sh --check`) | per-crate analysis reports, diffed against the committed `docs/analysis/` — stale reports and hard-rule violations fail (R21) |
+| 8 | the specification gate (`tools/spec.sh --check`) | every case-study spec machine-validated — an unbalanced spec line fails before any code exists (R22) |
 
 The habit to build now: **run `./ci.sh` before claiming anything works**, and
 run a real `cargo build`/`cargo test` (not just your editor) before believing
@@ -127,10 +129,10 @@ cd model
 ```
 
 It takes a minute or two. You should see each step announce itself
-(`==> [1/6] cargo build --workspace …`) and the run end with exactly:
+(`==> [1/8] cargo build --workspace …`) and the run end with exactly:
 
 ```text
-CI gate passed: build, test, clippy, plain production build, traceability, feature placement.
+CI gate passed: build, test, clippy, plain production build, traceability, feature placement, model analysis, specifications.
 ```
 
 Scroll back to step 5's output: that is the traceability report — every

@@ -76,6 +76,7 @@ Ordered so that each deliverable builds on what exists; a quick review follows e
 | 12 CS-5 model | done (`model/cs5-supply` + `cs5-logistics` + `cs5-works`; ladder complete) | F-057; F-054 extended | 2026-10-07: closed |
 | 12 Post-ladder increments | done (white paper v0.2 25 pp; decks refreshed in place; guide §3.7 multi-crate; README) | — | 2026-10-07: verified |
 | 9 Process docgen (B) | done (`docgen` bin + `tools/docgen.sh`; 166 process docs across all crates; F-055 gaps 1/7 fixed in the shared scanner) | F-055 part-resolved | 2026-10-07: closed — R20 applied; cs5-works naming fixed |
+| 9–11 doc increments | done (white paper v0.3 28 pp; decks; guide §3.8 + 8-step gate; tutorial 01; README) — **programme steps 0–11 complete** | — | 2026-10-08: verified |
 | 10 DSL (C) | not started | | |
-| 11 Model analysis (D) | done (`modellint` + `tools/lint.sh`; 22 checks; ci.sh step 7 with staleness gate; 3 real R1 gaps found and fixed) | F-058, F-059 | 2026-10-08: closed — R21 applied; R20 conv. 1 clarified |
-| 10 DSL (C) | done (`tools/spec-gen`: speccheck + specgen; ci.sh step 8; A1–A10 + 5 specs migrated; kernel boundary macros + scanner + 2 new lint checks; notation deferred to the experimental track) | F-060..F-064 + 4 extensions | pending: SPEC migration diffs to review |
+| 11 Model analysis (D) | done (`modellint` + `tools/lint.sh`; 23-check catalogue (22 at step 11; W-MACRO-MODEL added and E-TAG-MACRO broadened at step 10); ci.sh step 7 with staleness gate; 3 real R1 gaps found and fixed) | F-058, F-059 | 2026-10-08: closed — R21 applied; R20 conv. 1 clarified |
+| 10 DSL (C) | done (`tools/spec-gen`: speccheck + specgen; ci.sh step 8; A1–A10 + 5 specs migrated; kernel boundary macros + scanner; W-MACRO-MODEL added, E-TAG-MACRO broadened; notation deferred to the experimental track) | F-060..F-064 + 4 extensions | 2026-10-08: closed (migrations approved) |

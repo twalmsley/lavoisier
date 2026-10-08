@@ -1,7 +1,7 @@
 # The Modeller's Guide
 
 > The practical companion to `instructions.md`. That document is the **normative
-> specification** of the modelling approach (requirements R1–R19, each backed by experiment
+> specification** of the modelling approach (requirements R1–R22, each backed by experiment
 > evidence); this one is the **how-to**: what you actually type, in what order, and what the
 > compiler says when you get it wrong. Everything here is illustrated from real code in this
 > repository — mostly the CS-1 case study (`model/cs1-pot-of-tea/`, built from
@@ -137,7 +137,7 @@ cd model
 ./ci.sh
 ```
 
-`model/ci.sh` is the whole verification story, six steps, any failure fails the gate:
+`model/ci.sh` is the whole verification story, eight steps, any failure fails the gate:
 
 1. **`cargo build --workspace`** — conservation asserts are E0080s at *monomorphization*
    (F-001): `cargo check` cannot see them, so the gate never rests on `check`.
@@ -152,6 +152,13 @@ cd model
 5. **`./trace.sh`** — the R10 traceability report; any warning (a requirement with no
    verifying test, an unknown ID, a near-miss tag) exits nonzero.
 6. **The feature-placement grep** — `test-support` under `[dev-dependencies]` only.
+7. **The model-analysis gate** (R21) — `tools/lint.sh --check` regenerates the linter's
+   per-crate reports, diffs them against the committed `docs/analysis/` (stale reports fail
+   — rerun `./tools/lint.sh` after any model change), then fails on any gate-fatal ERROR
+   finding. WARN and INFO findings never fail; see section 3.8.
+8. **The specification gate** (R22) — `tools/spec.sh --check` validates every
+   `case-studies/*/SPEC.md` against `SPEC_TEMPLATE.md`'s machine conventions; errors (and
+   anything it cannot verify) fail the gate before any code exists. See section 3.8.
 
 Run it before claiming anything works. Run `cargo build` (not just your editor) before
 believing a conservation-sensitive change compiles — see section 4.
@@ -495,9 +502,57 @@ proved:
   encoding each actor uses.
 - **Know the two cross-crate error shapes.** Change impact arrives in **per-crate waves**
   (F-001 ext.): `cargo build` stops at the first failing crate, so fix wave *n* to see wave
-  *n*+1 — `case-studies/cs4-batch-run/CHANGE-IMPACT.md` is the worked catalogue. And the
-  diagram generator currently scans per crate (F-055), so a multi-crate model's cross-crate
-  flows WARN rather than render — a known tool gap, not a model error.
+  *n*+1 — `case-studies/cs4-batch-run/CHANGE-IMPACT.md` is the worked catalogue. (The extraction
+  tools resolve across workspace path-dependencies — F-055 gap 7, fixed at step 9 — so
+  declare upstream model crates as plain `[dependencies]` path deps, the R1 layout; that is
+  how diagrams, documents and lint reports follow cross-crate flows.)
+
+### 3.8 The spec-to-model pipeline
+
+Since R22, a model does not start at the keyboard — it starts at a specification that has
+already passed a machine check.
+
+**`speccheck` is the pre-code gate.** `./tools/spec.sh` (ci.sh step 8 in `--check` mode)
+validates every `case-studies/*/SPEC.md` against the template's conventions (the A1–A10
+amendments to `SPEC_TEMPLATE.md`): balance arithmetic, waste-destination closure (§5 ↔ §4),
+canonical-name closure, `Satisfies:`-id closure, draw/balance time agreement, flow orders,
+workspace-unique REQ ids (F-053). Errors are phrased at the document, with line references:
+
+```text
+error: case-studies/…/SPEC.md:93 §5 P3: the energy balance does not balance:
+       550 000 ≠ 500 000 + 60 000 (left totals 550 000, right totals 560 000;
+       a model built from this line cannot compile — fix the specification,
+       not the model)
+```
+
+This is F-062's error class: without it, that unbalanced line surfaces days later as an
+E0080 in the implemented crate. What speccheck cannot verify is a warning that also fails
+the gate, like trace.sh's.
+
+**`specgen` scaffolds the crate.** `specgen <SPEC.md> <out-dir>` (same tool,
+`tools/spec-gen`) emits the spec-determined structure — roughly half the model (F-062):
+sealed state types, boundary impls, process signatures with conserving bodies and balance
+asserts, flow tests. Everything the spec under-determines (requirement bounds,
+characteristic consts, `Satisfies:` placement, the tests) is an enumerable **SPEC-HOLE**:
+run `cargo build --features deny-holes` and every open decision is one `compile_error!`
+with its number and summary. Fill the holes by hand; the scaffold is **one-shot** —
+promoted to hand-maintained in the same change that commits it, never regenerated (R22):
+mechanical naming drift makes a regeneration round-trip against a hand-touched crate fatal.
+
+**Boundary boilerplate has macros now.** Three kernel macros generate the standard R12/R15
+boundary shapes a scaffold or a hand-written crate needs: `model_core::boundary_source!`
+(an unbounded source: reusable boundary object + entry fn + draw process),
+`model_core::boundary_sink!` (an unbounded `Next = Self` consumer + entry fn) and
+`model_core::boundary_entry!` (a boundary entry fn for an existing resource). Like all
+kernel macros they keep your tokens literal (F-063) and are known to the extraction tools.
+Grammar and compiling examples: their rustdoc in `model/model-core/src/resource.rs`.
+
+**Read your lint report.** The model linter (R21) writes one report per crate to
+`docs/analysis/<crate>.md` (workspace summary and check catalogue:
+`docs/analysis/README.md`); regenerate with `./tools/lint.sh` after any model change, or
+ci.sh step 7 fails on staleness. ERRORs are the hard rules (sealing, F-034, macro-hidden
+tags); WARNs are the extraction conventions the generated documents depend on; INFO is
+your improvement surface — placeholder density, thin verification, wide processes.
 
 ---
 
